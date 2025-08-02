@@ -21,6 +21,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Linux-specific Rollup for CI
+        if: runner.os == 'Linux'
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu
+
       - name: Build frontend
         run: npm run build --workspace=coffee-shop-buddy
         env:
