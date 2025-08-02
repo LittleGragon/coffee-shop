@@ -31,7 +31,7 @@ jobs:
         run: npm run build --workspace=coffee-shop-buddy
         env:
           VITE_USE_MOCK_DATA: true
-          VITE_BASE_URL: /coffee-shop-buddy/
+          VITE_BASE_URL: /assets/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
