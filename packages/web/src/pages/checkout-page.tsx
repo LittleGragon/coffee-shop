@@ -1,21 +1,34 @@
+import { useState } from 'react';
 import { useCartStore } from '@/stores/cart-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();
   const navigate = useNavigate();
+  const [isPaymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePlaceOrder = (event: React.FormEvent) => {
     event.preventDefault();
-    toast.success('Your order has been placed successfully!');
-    clearCart();
-    navigate('/');
+    setPaymentDialogOpen(true);
+  };
+
+  const handlePaymentSimulation = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setPaymentDialogOpen(false);
+      toast.success('Your order has been placed successfully!');
+      clearCart();
+      navigate('/');
+    }, 3000); // Simulate a 3-second payment processing time
   };
 
   if (items.length === 0) {
@@ -81,6 +94,29 @@ export function CheckoutPage() {
           </CardFooter>
         </form>
       </Card>
+
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>WeChat Pay</DialogTitle>
+            <DialogDescription>
+              Scan the QR code with WeChat to complete your payment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-4 space-y-4">
+            <img
+              src="https://placehold.co/250x250/png?text=Scan+Me"
+              alt="WeChat Pay QR Code"
+            />
+            <p className="text-sm text-muted-foreground">
+              This is a simulation. Click the button below to proceed.
+            </p>
+          </div>
+          <Button onClick={handlePaymentSimulation} disabled={isProcessing} className="w-full">
+            {isProcessing ? 'Processing...' : 'Simulate Successful Payment'}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
