@@ -2,14 +2,9 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { fetchMenuItems } from '@/lib/api';
-
-type MenuItem = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-};
+import { useCartStore, MenuItem } from '@/stores/cart-store';
 
 type MenuCategory = 'coffee' | 'tea' | 'pastries';
 
@@ -17,6 +12,12 @@ export const MenuPage = () => {
   const [activeTab, setActiveTab] = useState<MenuCategory>('coffee');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCartStore();
+
+  const handleAddToCart = (item: MenuItem) => {
+    addToCart(item);
+    toast.success(`${item.name} has been added to your cart.`);
+  };
 
   useEffect(() => {
     const loadMenuItems = async () => {
@@ -58,7 +59,7 @@ export const MenuPage = () => {
                     <p className="text-lg font-semibold">${item.price.toFixed(2)}</p>
                   </CardContent>
                   <CardFooter className="p-4">
-                    <Button className="w-full">Add to Cart</Button>
+                    <Button className="w-full" onClick={() => handleAddToCart(item)}>Add to Cart</Button>
                   </CardFooter>
                 </Card>
               ))}

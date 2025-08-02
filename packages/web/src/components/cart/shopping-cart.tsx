@@ -2,7 +2,8 @@ import { useCartStore } from '@/stores/cart-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ShoppingCartProps {
   open: boolean;
@@ -10,7 +11,7 @@ interface ShoppingCartProps {
 }
 
 export function ShoppingCart({ open, onOpenChange }: ShoppingCartProps) {
-  const { items, removeItem, updateQuantity, clearCart } = useCartStore();
+  const { items, removeFromCart, updateQuantity, clearCart } = useCartStore();
 
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -32,7 +33,7 @@ export function ShoppingCart({ open, onOpenChange }: ShoppingCartProps) {
           ) : (
             <div className="divide-y divide-gray-200">
               {items.map(item => (
-                <div key={item.name} className="flex items-center justify-between py-4">
+                <div key={item.id} className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-4">
                     <img src={item.image} alt={item.name} className="h-16 w-16 rounded-md object-cover" />
                     <div>
@@ -45,10 +46,10 @@ export function ShoppingCart({ open, onOpenChange }: ShoppingCartProps) {
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => updateQuantity(item.name, parseInt(e.target.value))}
+                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
                       className="h-8 w-16 text-center"
                     />
-                    <Button variant="ghost" size="icon" onClick={() => removeItem(item.name)}>
+                    <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
@@ -65,9 +66,11 @@ export function ShoppingCart({ open, onOpenChange }: ShoppingCartProps) {
                 <span>Total:</span>
                 <span>${total.toFixed(2)}</span>
               </div>
-              <Button className="w-full bg-sage-green text-coffee-brown hover:bg-sage-green/90">
-                Checkout
-              </Button>
+              <Link to="/checkout" className="w-full">
+                <Button className="w-full bg-sage-green text-coffee-brown hover:bg-sage-green/90" onClick={() => onOpenChange(false)}>
+                  Checkout
+                </Button>
+              </Link>
               <Button variant="outline" className="w-full" onClick={clearCart}>
                 Clear Cart
               </Button>

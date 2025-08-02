@@ -7,6 +7,7 @@ import { MenuPage } from './pages/menu-page';
 import { CakeCustomizationPage } from './pages/cake-customization-page';
 import { ReservationPage } from './pages/reservation-page';
 import { MembershipPage } from './pages/membership-page';
+import { CheckoutPage } from './pages/checkout-page';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/cakes" element={<CakeCustomizationPage />} />
           <Route path="/reservations" element={<ReservationPage />} />
           <Route path="/membership" element={<MembershipPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
         </Routes>
       </main>
       <Footer />
