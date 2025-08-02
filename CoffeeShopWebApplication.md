@@ -49,6 +49,6 @@ Note:
 
 [X] Implement the Membership dashboard, including the balance display, top-up form, and order history list.
 
-[/] Integrate mock API calls for all data-fetching and submission actions to simulate backend interaction.
+[X] Integrate mock API calls for all data-fetching and submission actions to simulate backend interaction.
 
-[ ] Conduct a final review for responsiveness, cross-browser compatibility, and add subtle animations for a polished user experience.
+[X] Conduct a final review for responsiveness, cross-browser compatibility, and add subtle animations for a polished user experience.

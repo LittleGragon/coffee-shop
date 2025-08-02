@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,42 +6,54 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from '@/hooks/use-toast';
+import { fetchMemberData, processTopUp } from '@/lib/api';
 import { User, Wallet, ShoppingBag, CreditCard } from 'lucide-react';
 
-const mockUser = {
-  name: 'Alex Doe',
-  email: 'alex.doe@example.com',
-  memberSince: '2023-01-15',
-  balance: 75.50,
+type MemberData = {
+  name: string;
+  balance: number;
+  memberSince: string;
+  orderHistory: { id: string; date: string; items: string; total: number }[];
 };
-
-const mockOrderHistory = [
-  { id: 'ORD-001', date: '2024-07-15', total: 12.50, status: 'Completed' },
-  { id: 'ORD-002', date: '2024-07-10', total: 25.00, status: 'Completed' },
-  { id: 'ORD-003', date: '2024-06-28', total: 8.75, status: 'Completed' },
-];
 
 type MembershipTab = 'profile' | 'balance' | 'history';
 
 export function MembershipPage() {
   const [activeTab, setActiveTab] = useState<MembershipTab>('profile');
-  const { toast } = useToast();
+  const [memberData, setMemberData] = useState<MemberData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleTopUp = (amount: number) => {
-    toast({
-      title: "Top-up Successful!",
-      description: `$${amount.toFixed(2)} has been added to your balance.`,
-    });
+  const loadMemberData = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchMemberData();
+      setMemberData(data);
+    } catch (error) {
+      console.error("Failed to fetch member data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    loadMemberData();
+  }, []);
+
   const renderContent = () => {
+    if (loading) {
+      return <div className="text-center py-8">Loading your membership details...</div>;
+    }
+    if (!memberData) {
+      return <div className="text-center py-8 text-red-500">Could not load member data.</div>;
+    }
+
     switch (activeTab) {
       case 'profile':
-        return <ProfileSection />;
+        return <ProfileSection user={memberData} />;
       case 'balance':
-        return <BalanceSection onTopUp={handleTopUp} />;
+        return <BalanceSection balance={memberData.balance} onSuccessfulTopUp={loadMemberData} />;
       case 'history':
-        return <OrderHistorySection />;
+        return <OrderHistorySection history={memberData.orderHistory} />;
       default:
         return null;
     }
@@ -75,7 +87,7 @@ export function MembershipPage() {
   );
 }
 
-function ProfileSection() {
+function ProfileSection({ user }: { user: { name: string; memberSince: string } }) {
   return (
     <Card>
       <CardHeader>
@@ -85,13 +97,13 @@ function ProfileSection() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>
-          <Input id="name" defaultValue={mockUser.name} />
+          <Input id="name" defaultValue={user.name} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" defaultValue={mockUser.email} />
+          <Input id="email" type="email" defaultValue={`${user.name.toLowerCase().replace(' ', '.')}@example.com`} />
         </div>
-        <p className="text-sm text-muted-foreground">Member since: {mockUser.memberSince}</p>
+        <p className="text-sm text-muted-foreground">Member since: {user.memberSince}</p>
       </CardContent>
       <CardFooter>
         <Button className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">Save Changes</Button>
@@ -100,8 +112,40 @@ function ProfileSection() {
   );
 }
 
-function BalanceSection({ onTopUp }: { onTopUp: (amount: number) => void }) {
+function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuccessfulTopUp: () => void }) {
   const [customAmount, setCustomAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleTopUp = async (amount: number) => {
+    setIsSubmitting(true);
+    try {
+      const result = await processTopUp(amount);
+      if (result.success) {
+        toast({
+          title: "Top-up Successful!",
+          description: `$${amount.toFixed(2)} has been added. Your new balance is $${result.newBalance?.toFixed(2)}.`,
+        });
+        onSuccessfulTopUp();
+        setCustomAmount('');
+      } else {
+        toast({
+          title: "Top-up Failed",
+          description: result.message || "An error occurred.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Top-up Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <Card>
@@ -109,7 +153,7 @@ function BalanceSection({ onTopUp }: { onTopUp: (amount: number) => void }) {
           <CardTitle>Current Balance</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-5xl font-bold text-coffee-brown">${mockUser.balance.toFixed(2)}</p>
+          <p className="text-5xl font-bold text-coffee-brown">${balance.toFixed(2)}</p>
         </CardContent>
       </Card>
       <Card>
@@ -120,30 +164,25 @@ function BalanceSection({ onTopUp }: { onTopUp: (amount: number) => void }) {
         <CardContent className="space-y-4">
           <div className="flex gap-4">
             {[20, 50, 100].map(amount => (
-              <Button key={amount} variant="outline" onClick={() => onTopUp(amount)}>
+              <Button key={amount} variant="outline" onClick={() => handleTopUp(amount)} disabled={isSubmitting}>
                 ${amount}
               </Button>
             ))}
           </div>
           <div className="flex items-center gap-4">
-            <Input 
-              placeholder="Custom amount" 
-              type="number" 
+            <Input
+              placeholder="Custom amount"
+              type="number"
               value={customAmount}
               onChange={(e) => setCustomAmount(e.target.value)}
+              disabled={isSubmitting}
             />
-            <Button 
-              className="bg-sage-green text-coffee-brown hover:bg-sage-green/90" 
-              onClick={() => {
-                const amount = parseFloat(customAmount);
-                if (amount > 0) {
-                  onTopUp(amount);
-                  setCustomAmount('');
-                }
-              }}
-              disabled={!customAmount || parseFloat(customAmount) <= 0}
+            <Button
+              className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
+              onClick={() => handleTopUp(parseFloat(customAmount))}
+              disabled={isSubmitting || !customAmount || parseFloat(customAmount) <= 0}
             >
-              <CreditCard className="h-4 w-4 mr-2" /> Add
+              {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add</>}
             </Button>
           </div>
         </CardContent>
@@ -152,7 +191,7 @@ function BalanceSection({ onTopUp }: { onTopUp: (amount: number) => void }) {
   );
 }
 
-function OrderHistorySection() {
+function OrderHistorySection({ history }: { history: { id: string; date: string; items: string; total: number }[] }) {
   return (
     <Card>
       <CardHeader>
@@ -165,16 +204,16 @@ function OrderHistorySection() {
             <TableRow>
               <TableHead>Order ID</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Items</TableHead>
               <TableHead className="text-right">Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockOrderHistory.map(order => (
+            {history.map(order => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">{order.id}</TableCell>
                 <TableCell>{order.date}</TableCell>
-                <TableCell>{order.status}</TableCell>
+                <TableCell>{order.items}</TableCell>
                 <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
               </TableRow>
             ))}

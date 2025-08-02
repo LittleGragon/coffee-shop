@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { submitCakeOrder } from '@/lib/api';
 import { useCartStore } from '@/stores/cart-store';
 import { useToast } from '@/hooks/use-toast';
 // import { motion, AnimatePresence } from 'framer-motion'; // Temporarily disabled for debugging
@@ -41,9 +42,18 @@ const steps = [
   { id: 'message', title: 'Personalize It' },
 ];
 
+type Cake = {
+  size: typeof customizationOptions.sizes[0];
+  flavor: typeof customizationOptions.flavors[0];
+  frosting: typeof customizationOptions.frostings[0];
+  toppings: string[];
+  message: string;
+};
+
 export function CakeCustomizationPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [cake, setCake] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cake, setCake] = useState<Cake>({
     size: customizationOptions.sizes[0],
     flavor: customizationOptions.flavors[0],
     frosting: customizationOptions.frostings[0],
@@ -66,25 +76,54 @@ export function CakeCustomizationPage() {
     return total;
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    setIsSubmitting(true);
     const finalPrice = calculatePrice();
-    const cakeName = `Custom ${cake.size.name} Cake`;
-    addItem({
-      name: cakeName,
+    const cakeDetails = {
+      ...cake,
       price: finalPrice,
-      image: '/placeholder.svg?width=100&height=100', // Placeholder for custom cake
-    });
-    toast({
-      title: "Custom Cake Added!",
-      description: `${cakeName} has been added to your cart.`,
-    });
+    };
+
+    try {
+      const result = await submitCakeOrder(cakeDetails);
+      if (result.success) {
+        const cakeName = `Custom ${cake.size.name} Cake`;
+        addItem({
+          name: cakeName,
+          price: finalPrice,
+          image: '/placeholder.svg?width=100&height=100',
+        });
+        toast({
+          title: "Custom Cake Added!",
+          description: `${cakeName} has been added to your cart. Order ID: ${result.orderId}`,
+        });
+      } else {
+        toast({
+          title: "Order Failed",
+          description: "There was a problem submitting your cake order. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to submit cake order:", error);
+      toast({
+        title: "Order Failed",
+        description: "An unexpected error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
     switch (steps[currentStep].id) {
       case 'size':
         return (
-          <RadioGroup value={cake.size.id} onValueChange={(id) => setCake({ ...cake, size: customizationOptions.sizes.find(s => s.id === id) })}>
+          <RadioGroup value={cake.size.id} onValueChange={(id) => {
+            const newSize = customizationOptions.sizes.find(s => s.id === id);
+            if (newSize) setCake({ ...cake, size: newSize });
+          }}>
             {customizationOptions.sizes.map(s => (
               <Label key={s.id} className="flex items-center gap-4 p-4 border rounded-md cursor-pointer hover:bg-sage-green/10 has-[:checked]:bg-sage-green/20 has-[:checked]:border-sage-green">
                 <RadioGroupItem value={s.id} />
@@ -95,7 +134,10 @@ export function CakeCustomizationPage() {
         );
       case 'flavor':
         return (
-          <Select value={cake.flavor.id} onValueChange={(id) => setCake({ ...cake, flavor: customizationOptions.flavors.find(f => f.id === id) })}>
+          <Select value={cake.flavor.id} onValueChange={(id) => {
+            const newFlavor = customizationOptions.flavors.find(f => f.id === id);
+            if (newFlavor) setCake({ ...cake, flavor: newFlavor });
+          }}>
             <SelectTrigger><SelectValue placeholder="Select a flavor" /></SelectTrigger>
             <SelectContent>
               {customizationOptions.flavors.map(f => (
@@ -106,7 +148,10 @@ export function CakeCustomizationPage() {
         );
       case 'frosting':
         return (
-          <RadioGroup value={cake.frosting.id} onValueChange={(id) => setCake({ ...cake, frosting: customizationOptions.frostings.find(f => f.id === id) })}>
+          <RadioGroup value={cake.frosting.id} onValueChange={(id) => {
+            const newFrosting = customizationOptions.frostings.find(f => f.id === id);
+            if (newFrosting) setCake({ ...cake, frosting: newFrosting });
+          }}>
             <div className="grid grid-cols-3 gap-4">
             {customizationOptions.frostings.map(f => (
               <Label key={f.id} className="flex flex-col items-center gap-2 p-4 border rounded-md cursor-pointer hover:bg-sage-green/10 has-[:checked]:bg-sage-green/20 has-[:checked]:border-sage-green">
@@ -179,7 +224,9 @@ export function CakeCustomizationPage() {
             {currentStep < steps.length - 1 ? (
               <Button onClick={handleNext} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">Next</Button>
             ) : (
-              <Button onClick={handleAddToCart} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">Add to Cart</Button>
+              <Button onClick={handleAddToCart} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Add to Cart'}
+              </Button>
             )}
           </div>
         </div>

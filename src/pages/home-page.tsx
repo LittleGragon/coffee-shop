@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -31,30 +32,63 @@ const featuredProducts = [
   },
 ];
 
+const fadeIn = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 },
+};
+
 export function HomePage() {
   return (
     <div className="flex flex-col gap-16 py-12">
-      <section className="relative h-[500px] w-full">
+      <motion.section
+        className="relative h-[500px] w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
         <img
           src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=2070&auto=format&fit=crop"
           alt="Cozy coffee shop interior"
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="relative z-10 flex h-full flex-col items-center justify-center bg-black/50 text-center text-white">
-          <h1 className="text-4xl font-bold md:text-6xl">
+          <motion.h1
+            className="text-4xl font-bold md:text-6xl"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             Your Daily Dose of Bliss
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg">
+          </motion.h1>
+          <motion.p
+            className="mt-4 max-w-2xl text-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
             Discover artisanal coffee, freshly baked pastries, and custom cakes
             made with love.
-          </p>
-          <Button className="mt-8 bg-sage-green text-coffee-brown hover:bg-sage-green/90">
-            Order Now
-          </Button>
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <Button className="mt-8 bg-sage-green text-coffee-brown hover:bg-sage-green/90">
+              Order Now
+            </Button>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="container mx-auto px-4 md:px-6">
+      <motion.section
+        className="container mx-auto px-4 md:px-6"
+        initial={fadeIn.initial}
+        whileInView={fadeIn.animate}
+        transition={fadeIn.transition}
+        viewport={{ once: true }}
+      >
         <h2 className="mb-8 text-center text-3xl font-bold text-coffee-brown">
           Featured Products
         </h2>
@@ -88,9 +122,15 @@ export function HomePage() {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
-      </section>
+      </motion.section>
 
-      <section className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-6">
+      <motion.section
+        className="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-6"
+        initial={fadeIn.initial}
+        whileInView={fadeIn.animate}
+        transition={{ ...fadeIn.transition, delay: 0.2 }}
+        viewport={{ once: true }}
+      >
         <div className="rounded-lg bg-sage-green/20 p-8 text-center">
           <h3 className="text-2xl font-bold text-coffee-brown">Design Your Dream Cake</h3>
           <p className="mt-2 text-coffee-brown/80">
@@ -109,7 +149,7 @@ export function HomePage() {
             Book a Table
           </Button>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

@@ -48,7 +48,7 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
-# Optional npm cache directory
+# Optional npm cache
 .npm
 
 # Optional eslint cache
@@ -56,9 +56,7 @@ web_modules/
 
 # Microbundle cache
 .rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
+.rts2_cache/
 
 # Optional REPL history
 .node_repl_history
@@ -76,56 +74,58 @@ web_modules/
 .env.production.local
 .env.local
 
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache files
 .cache
 .parcel-cache
 
-# Next.js build output
+# Next.js build outputs
 .next
 out
 
-# Nuxt.js build output
+# Nuxt.js build outputs
 .nuxt
 dist
 
-# Docusaurus build output
+# Docusaurus build outputs
 .docusaurus
 
-# Gatsby files
+# Gatsby build outputs
 .cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
+# Add Gatsby's public directory to ignore paths since we are using the build output in Netlify
+public
 
-# vuepress build output
+# vuepress build outputs
 .vuepress/dist
 
-# vuepress v2.x temp and cache directory
-.temp
-.cache
+# SvelteKit build outputs
+.svelte-kit
 
-# Serverless directories
-.serverless/
+# Svelte build outputs
+.svelte
 
-# FuseBox cache
-.fusebox/
+# Remix build outputs
+.cache/
+build/
+public/build/
 
-# DynamoDB Local files
-.dynamodb/
+# Deno cache
+.deno
 
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# Vite
+# Vite build outputs
 dist
 dist-ssr
+*.local
+
+# Private keys
+*.key
+*.pem
+
+# Local user settings
+.vscode/
+.idea/
+
+# Mac files
+.DS_Store
+
+# Supabase
+.supabase

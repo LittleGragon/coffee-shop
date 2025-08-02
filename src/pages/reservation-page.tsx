@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { submitReservation } from '@/lib/api';
 
 const partySizeOptions = [2, 3, 4, 5, 6, 7, 8];
 const timeOptions = [
@@ -20,12 +21,13 @@ export function ReservationPage() {
   const [time, setTime] = useState<string | undefined>();
   const [partySize, setPartySize] = useState<string | undefined>();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !time || !partySize || !name || !email) {
+    if (!date || !time || !partySize || !name || !phone) {
       toast({
         title: "Incomplete Form",
         description: "Please fill out all fields to make a reservation.",
@@ -33,18 +35,46 @@ export function ReservationPage() {
       });
       return;
     }
-    
-    toast({
-      title: "Reservation Successful!",
-      description: `Thank you, ${name}! Your table for ${partySize} on ${format(date, 'PPP')} at ${time} is confirmed.`,
-    });
 
-    // Reset form
-    setDate(new Date());
-    setTime(undefined);
-    setPartySize(undefined);
-    setName('');
-    setEmail('');
+    setIsSubmitting(true);
+    const reservationDetails = {
+      date: format(date, 'yyyy-MM-dd'),
+      time,
+      partySize: Number(partySize),
+      name,
+      phone,
+    };
+
+    try {
+      const result = await submitReservation(reservationDetails);
+      if (result.success) {
+        toast({
+          title: "Reservation Successful!",
+          description: `Thank you, ${name}! Your table for ${partySize} on ${format(date, 'PPP')} at ${time} is confirmed.`,
+        });
+        // Reset form
+        setDate(new Date());
+        setTime(undefined);
+        setPartySize(undefined);
+        setName('');
+        setPhone('');
+      } else {
+        toast({
+          title: "Reservation Failed",
+          description: result.message || "Could not complete your reservation. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to submit reservation:", error);
+      toast({
+        title: "Reservation Failed",
+        description: "An unexpected error occurred. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,8 +97,8 @@ export function ReservationPage() {
                 <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john.doe@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input id="phone" placeholder="(123) 456-7890" value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -96,8 +126,8 @@ export function ReservationPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full bg-sage-green text-coffee-brown hover:bg-sage-green/90">
-                Confirm Reservation
+              <Button type="submit" className="w-full bg-sage-green text-coffee-brown hover:bg-sage-green/90" disabled={isSubmitting}>
+                {isSubmitting ? 'Confirming...' : 'Confirm Reservation'}
               </Button>
             </CardFooter>
           </form>
