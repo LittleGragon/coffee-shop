@@ -8,6 +8,7 @@
   "scripts": {
     "build": "npm-run-all -p build:*",
     "build:web": "npm run build --workspace=coffee-shop-buddy",
+    "build:github_pages": "npm run build:github_pages --workspace=coffee-shop-buddy",
     "build:api": "npm run build --workspace=api",
     "dev": "npm-run-all -p dev:*",
     "dev:web": "npm run dev --workspace=coffee-shop-buddy",

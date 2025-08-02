@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite --force",
     "build": "vite build",
+    "build:github_pages": "vite build --base=/coffee-shop-buddy",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
