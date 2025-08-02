@@ -1,6 +1,15 @@
 // /src/lib/api.ts
+import {
+  mockFetchMenuItems,
+  mockSubmitCakeOrder,
+  mockSubmitReservation,
+  mockFetchMemberData,
+  mockProcessTopUp,
+} from './mock-api';
 
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 const API_BASE_URL = '/api';
+
 // Helper function to handle fetch responses
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
@@ -15,12 +24,18 @@ const handleResponse = async (response: Response) => {
 // ============================================================================
 
 export const fetchMenuItems = async (category: 'coffee' | 'tea' | 'pastries') => {
+  if (USE_MOCK_DATA) {
+    return mockFetchMenuItems(category);
+  }
   const response = await fetch(`${API_BASE_URL}/menu-items?category=${category}`);
   const data = await handleResponse(response);
-  return data.data; // The API wraps data in a 'data' property
+  return data.data;
 };
 
 export const submitCakeOrder = async (customization: any) => {
+  if (USE_MOCK_DATA) {
+    return mockSubmitCakeOrder(customization);
+  }
   const response = await fetch(`${API_BASE_URL}/cake-orders`, {
     method: 'POST',
     headers: {
@@ -32,6 +47,9 @@ export const submitCakeOrder = async (customization: any) => {
 };
 
 export const submitReservation = async (details: any) => {
+  if (USE_MOCK_DATA) {
+    return mockSubmitReservation(details);
+  }
   const response = await fetch(`${API_BASE_URL}/reservations`, {
     method: 'POST',
     headers: {
@@ -43,12 +61,18 @@ export const submitReservation = async (details: any) => {
 };
 
 export const fetchMemberData = async () => {
+  if (USE_MOCK_DATA) {
+    return mockFetchMemberData();
+  }
   const response = await fetch(`${API_BASE_URL}/member`);
   const data = await handleResponse(response);
-  return data.data; // The API wraps data in a 'data' property
+  return data.data;
 };
 
 export const processTopUp = async (amount: number) => {
+  if (USE_MOCK_DATA) {
+    return mockProcessTopUp(amount);
+  }
   const response = await fetch(`${API_BASE_URL}/member/top-up`, {
     method: 'POST',
     headers: {
