@@ -2,20 +2,20 @@ import { NextResponse } from 'next/server';
 
 const MOCK_MENU_ITEMS = {
   coffee: [
-    { id: 'c1', name: 'Espresso', price: 3.00, image: 'https://images.unsplash.com/photo-1511920183353-34e61a95a512' },
-    { id: 'c2', name: 'Americano', price: 3.50, image: 'https://images.unsplash.com/photo-1532004253691-b223946c1de1' },
-    { id: 'c3', name: 'Latte', price: 4.50, image: 'https://images.unsplash.com/photo-1561882468-91101f2e5f87' },
-    { id: 'c4', name: 'Cappuccino', price: 4.50, image: 'https://images.unsplash.com/photo-1572442388855-458a58494c73' },
+    { id: 'c1', name: 'Espresso', price: 3.00, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Espresso' },
+    { id: 'c2', name: 'Americano', price: 3.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Americano' },
+    { id: 'c3', name: 'Latte', price: 4.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Latte' },
+    { id: 'c4', name: 'Cappuccino', price: 4.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Cappuccino' },
   ],
   tea: [
-    { id: 't1', name: 'Green Tea', price: 3.00, image: 'https://images.unsplash.com/photo-1627435601361-ec25f2b74c28' },
-    { id: 't2', name: 'Black Tea', price: 3.00, image: 'https://images.unsplash.com/photo-1627894222733-2c896f47a24f' },
-    { id: 't3', name: 'Oolong Tea', price: 3.50, image: 'https://images.unsplash.com/photo-1597318181433-3135227117c7' },
+    { id: 't1', name: 'Green Tea', price: 3.00, image: 'https://placehold.co/600x400/6b7f3a/ffffff?text=Green+Tea' },
+    { id: 't2', name: 'Black Tea', price: 3.00, image: 'https://placehold.co/600x400/3d2b1f/ffffff?text=Black+Tea' },
+    { id: 't3', name: 'Oolong Tea', price: 3.50, image: 'https://placehold.co/600x400/8a6b4c/ffffff?text=Oolong+Tea' },
   ],
   pastries: [
-    { id: 'p1', name: 'Croissant', price: 2.50, image: 'https://images.unsplash.com/photo-1530610476181-d83430b64dcd' },
-    { id: 'p2', name: 'Muffin', price: 2.75, image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b' },
-    { id: 'p3', name: 'Scone', price: 3.00, image: 'https://images.unsplash.com/photo-1606859211883-92c975b7a1a4' },
+    { id: 'p1', name: 'Croissant', price: 2.50, image: 'https://placehold.co/600x400/c4a77e/000000?text=Croissant' },
+    { id: 'p2', name: 'Muffin', price: 2.75, image: 'https://placehold.co/600x400/c4a77e/000000?text=Muffin' },
+    { id: 'p3', name: 'Scone', price: 3.00, image: 'https://placehold.co/600x400/c4a77e/000000?text=Scone' },
   ],
 };
 

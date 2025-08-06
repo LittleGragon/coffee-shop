@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { submitCakeOrder } from '@/lib/api';
 import { useCartStore } from '@/stores/cart-store';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 // import { motion, AnimatePresence } from 'framer-motion'; // Temporarily disabled for debugging
 
 const customizationOptions = {
@@ -61,8 +61,7 @@ export function CakeCustomizationPage() {
     message: '',
   });
 
-  const { addItem } = useCartStore();
-  const { toast } = useToast();
+  const { addToCart } = useCartStore();
 
   const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
@@ -86,30 +85,31 @@ export function CakeCustomizationPage() {
 
     try {
       const result = await submitCakeOrder(cakeDetails);
+
       if (result.success) {
         const cakeName = `Custom ${cake.size.name} Cake`;
-        addItem({
+        const cakeId = `custom-cake-${Date.now()}`;
+        
+        addToCart({
+          id: cakeId,
           name: cakeName,
+          category: 'Cakes',
           price: finalPrice,
-          image: '/placeholder.svg?width=100&height=100',
+          image: `https://placehold.co/100x100/d4a373/ffffff?text=Custom+Cake`,
         });
-        toast({
-          title: "Custom Cake Added!",
-          description: `${cakeName} has been added to your cart. Order ID: ${result.orderId}`,
+
+        toast.success("Custom Cake Added!", {
+          description: `${cakeName} has been added to your cart.`,
         });
       } else {
-        toast({
-          title: "Order Failed",
-          description: "There was a problem submitting your cake order. Please try again.",
-          variant: "destructive",
+        toast.error("Order Failed", {
+          description: result.message || "There was a problem submitting your cake order.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to submit cake order:", error);
-      toast({
-        title: "Order Failed",
+      toast.error("Order Failed", {
         description: "An unexpected error occurred. Please try again later.",
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

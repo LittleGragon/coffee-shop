@@ -3,24 +3,32 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { size, flavor, toppings } = body;
+    const { size, flavor, toppings, message, price } = body;
 
-    // Basic validation
-    if (!size || !flavor || !toppings) {
+    // More robust validation
+    if (
+      !size || typeof size !== 'object' ||
+      !flavor || typeof flavor !== 'object' ||
+      !Array.isArray(toppings) ||
+      typeof message !== 'string' ||
+      typeof price !== 'number'
+    ) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { message: 'Invalid cake order data. Please check your selections.' },
         { status: 400 }
       );
     }
 
-    console.log('Submitting cake order:', body);
+    console.log('Received valid cake order:', body);
 
     // In a real application, you would save this to a database
     const orderId = `cake-${Date.now()}`;
 
     return NextResponse.json({
-      message: 'Cake order submitted successfully',
-      orderId,
+      success: true,
+      message: 'Cake order submitted successfully!',
+      orderId: orderId,
+      cakeDetails: body,
     });
   } catch (error) {
     return NextResponse.json(
