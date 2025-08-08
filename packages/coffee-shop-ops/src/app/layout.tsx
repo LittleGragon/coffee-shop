@@ -1,6 +1,10 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import ThemeRegistry from './theme';
+import { AppBar, Toolbar, Typography, Container, Box, Link as MuiLink } from '@mui/material';
+import CoffeeIcon from '@mui/icons-material/Coffee';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,29 +21,35 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <header className="bg-[#6f4e37] text-white p-4 shadow-md">
-          <div className="container mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold flex items-center">
-              <span className="mr-2">☕</span>
-              Coffee Shop Buddy
-            </h1>
-            <nav>
-              <ul className="flex space-x-6">
-                <li><a href="/" className="hover:underline">Home</a></li>
-                <li><a href="/menu" className="hover:underline">Menu</a></li>
-                <li><a href="/inventory" className="hover:underline">Inventory</a></li>
-                <li><a href="/orders" className="hover:underline">Orders</a></li>
-                <li><a href="/reservations" className="hover:underline">Reservations</a></li>
-              </ul>
-            </nav>
-          </div>
-        </header>
-        <main>{children}</main>
-        <footer className="bg-gray-100 text-gray-600 p-4 mt-12">
-          <div className="container mx-auto text-center">
-            <p>© {new Date().getFullYear()} Coffee Shop Buddy - Next.js Edition</p>
-          </div>
-        </footer>
+        <ThemeRegistry>
+          <AppBar position="static" color="primary" elevation={2} square>
+            <Toolbar>
+              <CoffeeIcon sx={{ mr: 1 }} />
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                Coffee Shop Buddy
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 3 }}>
+                <MuiLink href="/" color="inherit" underline="hover" sx={{ fontWeight: 500 }}>Home</MuiLink>
+                <MuiLink href="/menu" color="inherit" underline="hover" sx={{ fontWeight: 500 }}>Menu</MuiLink>
+                <MuiLink href="/inventory" color="inherit" underline="hover" sx={{ fontWeight: 500 }}>Inventory</MuiLink>
+                <MuiLink href="/orders" color="inherit" underline="hover" sx={{ fontWeight: 500 }}>Orders</MuiLink>
+                <MuiLink href="/reservations" color="inherit" underline="hover" sx={{ fontWeight: 500 }}>Reservations</MuiLink>
+              </Box>
+            </Toolbar>
+          </AppBar>
+          <Box component="main" sx={{ minHeight: 'calc(100vh - 128px)' }}>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </Box>
+          <Box component="footer" sx={{ py: 3, px: 2, mt: 'auto', backgroundColor: 'background.paper', borderTop: 1, borderColor: 'divider' }}>
+            <Container maxWidth="lg">
+              <Typography variant="body2" color="text.secondary" align="center">
+                © 2025 Coffee Shop Buddy - Next.js Edition
+              </Typography>
+            </Container>
+          </Box>
+        </ThemeRegistry>
       </body>
     </html>
   );

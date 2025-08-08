@@ -7,7 +7,8 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    // In Next.js App Router, params should be accessed directly
+    const { id } = context.params;
     const menuItem = await menuService.getItemById(id);
     
     if (!menuItem) {
@@ -33,7 +34,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = context.params;
     const updates = await request.json();
     
     const updatedItem = await menuService.updateItem(id, updates);
@@ -61,7 +62,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = context.params;
     const success = await menuService.deleteItem(id);
     
     if (!success) {

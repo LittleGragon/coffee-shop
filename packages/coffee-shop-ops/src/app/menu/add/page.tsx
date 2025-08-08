@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MenuItem } from '@/types/models';
 import MenuItemForm from '@/app/components/MenuItemForm';
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Button, 
+  Paper, 
+  Alert
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function AddMenuItemPage() {
   const router = useRouter();
@@ -42,30 +51,34 @@ export default function AddMenuItemPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Add New Menu Item</h1>
-        <Link 
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Add New Menu Item
+        </Typography>
+        <Button
+          component={Link}
           href="/menu"
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+          startIcon={<ArrowBackIcon />}
+          variant="outlined"
         >
           Back to Menu
-        </Link>
-      </div>
+        </Button>
+      </Box>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p>{error}</p>
-        </div>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <Paper elevation={2} sx={{ p: 3 }}>
         <MenuItemForm 
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isSubmitting={isSubmitting}
         />
-      </div>
-    </div>
+      </Paper>
+    </Container>
   );
 }

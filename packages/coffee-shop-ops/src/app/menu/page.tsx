@@ -4,6 +4,36 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MenuItem } from '@/types/models';
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem as MuiMenuItem,
+  Chip,
+  CircularProgress,
+  Alert,
+  Paper,
+  InputAdornment,
+  IconButton,
+  Stack
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon
+} from '@mui/icons-material';
 
 export default function MenuPage() {
   const router = useRouter();
@@ -138,187 +168,204 @@ export default function MenuPage() {
     });
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Coffee Shop Menu</h1>
-        <div className="flex space-x-2">
-          <Link 
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold">
+          Coffee Shop Menu
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            component={Link}
             href="/menu/add"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
           >
             Add New Item
-          </Link>
-          <Link 
+          </Button>
+          <Button
+            component={Link}
             href="/"
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+            variant="outlined"
           >
             Back to Home
-          </Link>
-        </div>
-      </div>
+          </Button>
+        </Box>
+      </Box>
       
       {/* Filters */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-1">
-              Filter by Category:
-            </label>
-            <select
+      <Paper elevation={1} sx={{ p: 3, mb: 4, bgcolor: 'background.paper' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="category-filter-label">Filter by Category</InputLabel>
+            <Select
+              labelId="category-filter-label"
               id="category-filter"
-              className="w-full p-2 pl-3 pr-10 border border-gray-300 rounded-md text-gray-800 appearance-none bg-white bg-no-repeat bg-right"
-              style={{ backgroundImage: "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")", backgroundSize: "1.5em 1.5em" }}
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
+              label="Filter by Category"
             >
-              <option value="all">All Categories</option>
+              <MuiMenuItem value="all">All Categories</MuiMenuItem>
               {categories.map((category) => (
-                <option key={category} value={category}>
+                <MuiMenuItem key={category} value={category}>
                   {category}
-                </option>
+                </MuiMenuItem>
               ))}
-            </select>
-          </div>
+            </Select>
+          </FormControl>
           
-          <div>
-            <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 mb-1">
-              Search:
-            </label>
-            <input
-              id="search-input"
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md text-gray-800"
-              placeholder="Search menu items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <TextField
+            fullWidth
+            id="search-input"
+            label="Search"
+            variant="outlined"
+            placeholder="Search menu items..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
           
-          <div>
-            <label htmlFor="sort-by" className="block text-sm font-medium text-gray-700 mb-1">
-              Sort by:
-            </label>
-            <select
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="sort-by-label">Sort by</InputLabel>
+            <Select
+              labelId="sort-by-label"
               id="sort-by"
-              className="w-full p-2 pl-3 pr-10 border border-gray-300 rounded-md text-gray-800 appearance-none bg-white bg-no-repeat bg-right"
-              style={{ backgroundImage: "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E\")", backgroundSize: "1.5em 1.5em" }}
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value)}
+              label="Sort by"
             >
-              <option value="default">Default</option>
-              <option value="name-asc">Name (A-Z)</option>
-              <option value="name-desc">Name (Z-A)</option>
-              <option value="price-asc">Price (Low to High)</option>
-              <option value="price-desc">Price (High to Low)</option>
-            </select>
-          </div>
-        </div>
-      </div>
+              <MuiMenuItem value="default">Default</MuiMenuItem>
+              <MuiMenuItem value="name-asc">Name (A-Z)</MuiMenuItem>
+              <MuiMenuItem value="name-desc">Name (Z-A)</MuiMenuItem>
+              <MuiMenuItem value="price-asc">Price (Low to High)</MuiMenuItem>
+              <MuiMenuItem value="price-desc">Price (High to Low)</MuiMenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+      </Paper>
       
       {/* Loading and Error States */}
       {loading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900 mb-2"></div>
-          <p>Loading menu items...</p>
-        </div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
+          <CircularProgress size={40} sx={{ mb: 2 }} />
+          <Typography variant="body1" color="text.secondary">
+            Loading menu items...
+          </Typography>
+        </Box>
       )}
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p>{error}</p>
-        </div>
+        <Alert severity="error" sx={{ mb: 4 }}>
+          {error}
+        </Alert>
       )}
       
       {/* Menu Items */}
       {!loading && !error && (
         <>
-          <p className="mb-4 text-gray-600">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Showing {filteredAndSortedItems.length} of {menuItems.length} items
-          </p>
+          </Typography>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Box sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)'
+            },
+            gap: 3
+          }}>
             {filteredAndSortedItems.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
-              >
+              <Card key={item.id} elevation={2} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 {item.image_url && (
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <CardMedia
+                    component="img"
+                    height="180"
+                    image={item.image_url}
+                    alt={item.name}
+                    sx={{ objectFit: 'cover' }}
+                  />
                 )}
                 
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
-                    <span className="text-lg font-bold text-gray-700">
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="h6" component="h2" gutterBottom>
+                      {item.name}
+                    </Typography>
+                    <Typography variant="h6" fontWeight="bold">
                       ${parseFloat(item.price.toString()).toFixed(2)}
-                    </span>
-                  </div>
+                    </Typography>
+                  </Box>
                   
-                  <p className="text-gray-600 mb-3">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {item.description || 'No description available'}
-                  </p>
+                  </Typography>
                   
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">
-                      {item.category}
-                    </span>
+                  <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                    <Chip 
+                      label={item.category} 
+                      size="small" 
+                      color="secondary" 
+                      variant="outlined" 
+                    />
                     
-                    <span className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
-                      item.is_available 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {item.is_available ? 'Available' : 'Unavailable'}
-                    </span>
-                  </div>
+                    <Chip 
+                      label={item.is_available ? 'Available' : 'Unavailable'} 
+                      size="small" 
+                      color={item.is_available ? 'success' : 'error'} 
+                      icon={item.is_available ? <CheckCircleIcon /> : <CancelIcon />}
+                    />
+                  </Stack>
+                </CardContent>
+                
+                <CardActions sx={{ p: 2, pt: 0 }}>
+                  <Button
+                    size="small"
+                    onClick={() => handleToggleAvailability(item.id)}
+                    color={item.is_available ? 'error' : 'success'}
+                    variant="outlined"
+                    sx={{ mr: 'auto' }}
+                  >
+                    {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                  </Button>
                   
-                  {/* Action buttons */}
-                  <div className="flex justify-between mt-4">
-                    <button
-                      onClick={() => handleToggleAvailability(item.id)}
-                      className={`px-3 py-1 rounded text-sm font-medium ${
-                        item.is_available
-                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                          : 'bg-green-100 text-green-800 hover:bg-green-200'
-                      }`}
-                    >
-                      {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
-                    </button>
-                    
-                    <div className="flex space-x-2">
-                      <Link
-                        href={`/menu/edit/${item.id}`}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 rounded text-sm font-medium"
-                      >
-                        Edit
-                      </Link>
-                      
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="px-3 py-1 bg-red-100 text-red-800 hover:bg-red-200 rounded text-sm font-medium"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  <IconButton 
+                    component={Link} 
+                    href={`/menu/edit/${item.id}`} 
+                    color="primary" 
+                    size="small"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  
+                  <IconButton 
+                    onClick={() => handleDeleteItem(item.id)} 
+                    color="error" 
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
             ))}
-          </div>
+          </Box>
           
           {filteredAndSortedItems.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">No menu items found matching your criteria.</p>
-            </div>
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Typography variant="body1" color="text.secondary">
+                No menu items found matching your criteria.
+              </Typography>
+            </Box>
           )}
         </>
       )}
-    </div>
+    </Container>
   );
 }

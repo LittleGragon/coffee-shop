@@ -2,6 +2,21 @@
 
 import { useState, FormEvent, useRef } from 'react';
 import { MenuItem } from '@/types/models';
+import { 
+  TextField, 
+  Button, 
+  FormControlLabel, 
+  Switch, 
+  Typography, 
+  Box, 
+  Paper, 
+  InputAdornment,
+  FormHelperText,
+  Divider,
+  Link as MuiLink
+} from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ImageIcon from '@mui/icons-material/Image';
 
 interface MenuItemFormProps {
   initialData?: Partial<MenuItem>;
@@ -34,7 +49,7 @@ export default function MenuItemForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     
     if (type === 'checkbox') {
@@ -163,226 +178,242 @@ export default function MenuItemForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Name *
-        </label>
-        <input
-          type="text"
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
+        {/* Name Field */}
+        <TextField
+          fullWidth
           id="name"
           name="name"
+          label="Name"
           value={formData.name}
           onChange={handleChange}
-          className={`mt-1 block w-full rounded-md border ${
-            errors.name ? 'border-red-300' : 'border-gray-300'
-          } shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500 text-gray-900`}
+          error={!!errors.name}
+          helperText={errors.name}
+          required
+          variant="outlined"
         />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-        )}
-      </div>
 
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-          Price ($) *
-        </label>
-        <input
-          type="number"
+        {/* Price Field */}
+        <TextField
+          fullWidth
           id="price"
           name="price"
+          label="Price"
+          type="number"
           value={formData.price}
           onChange={handleChange}
-          step="0.01"
-          min="0"
-          className={`mt-1 block w-full rounded-md border ${
-            errors.price ? 'border-red-300' : 'border-gray-300'
-          } shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500 text-gray-900`}
+          error={!!errors.price}
+          helperText={errors.price}
+          required
+          InputProps={{
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          }}
+          inputProps={{
+            step: "0.01",
+            min: "0"
+          }}
+          variant="outlined"
         />
-        {errors.price && (
-          <p className="mt-1 text-sm text-red-600">{errors.price}</p>
-        )}
-      </div>
+      </Box>
 
-      <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-          Category *
-        </label>
-        <input
-          type="text"
+      {/* Category Field */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
           id="category"
           name="category"
+          label="Category"
           value={formData.category}
           onChange={handleChange}
-          className={`mt-1 block w-full rounded-md border ${
-            errors.category ? 'border-red-300' : 'border-gray-300'
-          } shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500 text-gray-900`}
+          error={!!errors.category}
+          helperText={errors.category}
+          required
+          variant="outlined"
         />
-        {errors.category && (
-          <p className="mt-1 text-sm text-red-600">{errors.category}</p>
-        )}
-      </div>
+      </Box>
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description
-        </label>
-        <textarea
+      {/* Description Field */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
           id="description"
           name="description"
+          label="Description"
           value={formData.description || ''}
           onChange={handleChange}
+          multiline
           rows={3}
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500 text-gray-900"
+          variant="outlined"
         />
-      </div>
+      </Box>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      {/* Image Upload Section */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
           Image
-        </label>
+        </Typography>
         
-        {/* Image Upload */}
-        <div 
-          className={`mt-1 flex justify-center rounded-md border-2 border-dashed p-6 ${
-            isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
-          }`}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 3,
+            border: isDragging ? '2px dashed #1976d2' : '2px dashed #ccc',
+            bgcolor: isDragging ? 'rgba(25, 118, 210, 0.04)' : 'transparent',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
         >
-          <div className="space-y-2 text-center">
-            <div className="flex flex-col items-center">
-              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="flex text-sm text-gray-600">
-                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500">
-                  <span>Choose a file</span>
-                  <input 
-                    id="file-upload" 
-                    name="file-upload" 
-                    type="file" 
-                    className="sr-only" 
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    ref={fileInputRef}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-            </div>
-            
-            {selectedFile && (
-              <div className="mt-2">
-                <p className="text-sm text-gray-500">Selected: {selectedFile.name}</p>
-                <div className="mt-2 flex justify-center">
-                  <img 
-                    src={URL.createObjectURL(selectedFile)} 
-                    alt="Preview" 
-                    className="max-h-64 w-auto object-contain rounded-md"
-                  />
-                </div>
-                <div className="mt-2 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={isUploading}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                  >
-                    {isUploading ? 'Uploading...' : 'Upload Image'}
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {uploadError && (
-              <p className="mt-2 text-sm text-red-600">{uploadError}</p>
-            )}
-          </div>
-        </div>
-        
-        {/* Image URL Field */}
-        <div className="mt-4">
-          <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-            Image URL
-          </label>
           <input
-            type="text"
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+          />
+          
+          <CloudUploadIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+          <Typography variant="body1" gutterBottom>
+            Drag and drop an image here, or click to select a file
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            PNG, JPG, GIF up to 10MB
+          </Typography>
+        </Paper>
+        
+        {uploadError && (
+          <FormHelperText error sx={{ mt: 1 }}>
+            {uploadError}
+          </FormHelperText>
+        )}
+
+        {/* Selected File Preview */}
+        {selectedFile && (
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Selected: {selectedFile.name}
+            </Typography>
+            
+            <Box sx={{ mt: 1, mb: 2, display: 'flex', justifyContent: 'center' }}>
+              <img
+                src={URL.createObjectURL(selectedFile)}
+                alt="Preview"
+                style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px' }}
+              />
+            </Box>
+            
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleUpload}
+              disabled={isUploading}
+              startIcon={<CloudUploadIcon />}
+              size="small"
+            >
+              {isUploading ? 'Uploading...' : 'Upload Image'}
+            </Button>
+          </Box>
+        )}
+
+        {/* Image URL Field */}
+        <Box sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
             id="image_url"
             name="image_url"
+            label="Image URL"
             value={formData.image_url || ''}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:border-blue-500 focus:ring-blue-500 text-gray-900"
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <ImageIcon />
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-        
+        </Box>
+
         {/* Image Preview */}
         {formData.image_url && (
-          <div className="mt-2">
-            <p className="text-sm font-medium text-gray-700 mb-1">Image Preview:</p>
-            <div className="relative w-full overflow-hidden rounded-md border border-gray-300">
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Image Preview:
+            </Typography>
+            
+            <Paper variant="outlined" sx={{ p: 1, textAlign: 'center' }}>
               {imagePreviewError ? (
-                <div className="flex h-64 w-full items-center justify-center bg-gray-100 p-4 text-center">
-                  <p className="text-red-500">{imagePreviewError}</p>
-                </div>
+                <Box sx={{ p: 3, bgcolor: 'error.light', color: 'error.contrastText' }}>
+                  <Typography variant="body2" color="inherit">
+                    {imagePreviewError}
+                  </Typography>
+                </Box>
               ) : (
-                <div className="flex flex-col items-center">
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <img
                     src={formData.image_url}
                     alt="Menu item preview"
-                    className="max-h-96 object-contain"
+                    style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
                     onError={handleImageError}
                   />
-                  <div className="mt-2 mb-2 flex items-center justify-center">
-                    <a 
+                  <Box sx={{ mt: 1, mb: 1 }}>
+                    <MuiLink 
                       href={formData.image_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm"
+                      underline="hover"
                     >
                       View full size
-                    </a>
-                  </div>
-                </div>
+                    </MuiLink>
+                  </Box>
+                </Box>
               )}
-            </div>
-          </div>
+            </Paper>
+          </Box>
         )}
-      </div>
+      </Box>
 
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="is_available"
-          name="is_available"
-          checked={formData.is_available}
-          onChange={(e) => setFormData(prev => ({ ...prev, is_available: e.target.checked }))}
-          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+      {/* Availability Toggle */}
+      <Box sx={{ mb: 3 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={formData.is_available}
+              onChange={(e) => setFormData(prev => ({ ...prev, is_available: e.target.checked }))}
+              name="is_available"
+              color="primary"
+            />
+          }
+          label="Available"
         />
-        <label htmlFor="is_available" className="ml-2 block text-sm text-gray-700">
-          Available
-        </label>
-      </div>
+      </Box>
 
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
+      <Divider sx={{ my: 3 }} />
+
+      {/* Form Actions */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+        <Button
+          variant="outlined"
           onClick={onCancel}
-          className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           disabled={isSubmitting}
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          variant="contained"
+          color="primary"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Saving...' : initialData.id ? 'Update Item' : 'Create Item'}
-        </button>
-      </div>
-    </form>
+        </Button>
+      </Box>
+    </Box>
   );
 }

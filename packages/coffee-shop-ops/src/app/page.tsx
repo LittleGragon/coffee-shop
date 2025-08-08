@@ -1,79 +1,143 @@
+'use client';
+
 import Link from 'next/link';
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Grid, 
+  Card, 
+  CardContent, 
+  CardActionArea
+} from '@mui/material';
+import TestErrorBoundary from './components/TestErrorBoundary';
+import {
+  MenuBook as MenuIcon,
+  Inventory as InventoryIcon,
+  ShoppingCart as OrdersIcon,
+  EventSeat as ReservationsIcon
+} from '@mui/icons-material';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Coffee Shop Buddy - Next.js Edition
-        </p>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Box sx={{ textAlign: 'center', mb: 8 }}>
+        <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
+          Welcome to Coffee Shop Buddy
+        </Typography>
+        <Typography variant="h5" color="text.secondary">
+          Manage your coffee shop operations with ease
+        </Typography>
+      </Box>
 
-      <div className="relative flex place-items-center">
-        <h1 className="text-4xl font-bold">Welcome to Coffee Shop Buddy</h1>
-      </div>
+      <Grid container spacing={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card 
+            elevation={2} 
+            sx={{ 
+              height: '100%', 
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 6
+              }
+            }}
+          >
+            <CardActionArea component={Link} href="/menu" sx={{ height: '100%' }}>
+              <CardContent sx={{ textAlign: 'center', p: 4 }}>
+                <MenuIcon sx={{ fontSize: 60, mb: 2, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Menu
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Browse our delicious coffee and food offerings.
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <Link
-          href="/menu"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Menu{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              →
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Browse our delicious coffee and food offerings.
-          </p>
-        </Link>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card 
+            elevation={2} 
+            sx={{ 
+              height: '100%', 
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 6
+              }
+            }}
+          >
+            <CardActionArea component={Link} href="/inventory" sx={{ height: '100%' }}>
+              <CardContent sx={{ textAlign: 'center', p: 4 }}>
+                <InventoryIcon sx={{ fontSize: 60, mb: 2, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Inventory
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage your inventory and track stock levels.
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
 
-        <Link
-          href="/inventory"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Inventory{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              →
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Manage your inventory and track stock levels.
-          </p>
-        </Link>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card 
+            elevation={2} 
+            sx={{ 
+              height: '100%', 
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 6
+              }
+            }}
+          >
+            <CardActionArea component={Link} href="/orders" sx={{ height: '100%' }}>
+              <CardContent sx={{ textAlign: 'center', p: 4 }}>
+                <OrdersIcon sx={{ fontSize: 60, mb: 2, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Orders
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  View and manage customer orders.
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
 
-        <Link
-          href="/orders"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Orders{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              →
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            View and manage customer orders.
-          </p>
-        </Link>
-
-        <Link
-          href="/reservations"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Reservations{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              →
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Manage table reservations and bookings.
-          </p>
-        </Link>
-      </div>
-    </main>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card 
+            elevation={2} 
+            sx={{ 
+              height: '100%', 
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: 6
+              }
+            }}
+          >
+            <CardActionArea component={Link} href="/reservations" sx={{ height: '100%' }}>
+              <CardContent sx={{ textAlign: 'center', p: 4 }}>
+                <ReservationsIcon sx={{ fontSize: 60, mb: 2, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Reservations
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Manage table reservations and bookings.
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
+      </Grid>
+      
+      {/* Test Error Boundary - Remove in production */}
+      <TestErrorBoundary />
+    </Container>
   );
 }

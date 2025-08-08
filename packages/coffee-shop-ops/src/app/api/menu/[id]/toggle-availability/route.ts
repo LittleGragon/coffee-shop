@@ -7,7 +7,7 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
-    const id = context.params.id;
+    const { id } = context.params;
     const updatedItem = await menuService.toggleItemAvailability(id);
     
     if (!updatedItem) {
