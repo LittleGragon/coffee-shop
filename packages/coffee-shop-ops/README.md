@@ -1,4 +1,4 @@
-# Coffee Shop Buddy - Next.js Edition
+# Coffee Shop Buddy - Operations Dashboard
 
 This is a refactored version of the Coffee Shop Buddy application using Next.js. The application provides a modern, efficient backend for managing a coffee shop's operations, including menu management, inventory tracking, order processing, and reservation handling.
 
@@ -64,7 +64,7 @@ This is a refactored version of the Coffee Shop Buddy application using Next.js.
 ### Installation
 
 1. Clone the repository
-2. Navigate to the project directory: `cd packages/coffee-shop-nextjs`
+2. Navigate to the project directory: `cd packages/coffee-shop-ops`
 3. Install dependencies: `npm install`
 4. Create a `.env` file with your database connection string:
    ```
@@ -85,7 +85,7 @@ The application expects a PostgreSQL database with the following tables:
 - `users`
 - `transactions`
 
-Refer to the schema in `packages/coffee-ops/src/db/schema.sql` for the complete database structure.
+Refer to the schema in `packages/coffee-shop-ops/src/db/schema.sql` for the complete database structure.
 
 ## Improvements from Original Implementation
 

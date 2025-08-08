@@ -1,5 +1,5 @@
 {
-  "name": "coffee-shop-op",
+  "name": "coffee-shop-ops",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,12 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "echo \"No tests specified yet\" && exit 0",
     "db:test": "node scripts/test-db.js",
     "db:seed": "node scripts/seed-db.js"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
-    "next": "15.4.6",
+    "next": "^15.4.6",
     "pg": "^8.16.3",
     "react": "19.1.0",
     "react-dom": "19.1.0"

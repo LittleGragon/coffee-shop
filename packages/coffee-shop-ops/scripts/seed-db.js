@@ -17,10 +17,10 @@ async function seedDatabase() {
   try {
     console.log('Starting database seeding...');
     
-    // Read the schema SQL file from the original coffee-ops project
+    // Read the schema SQL file from the coffee-shop-ops project
     // You may need to adjust this path if the structure is different
-    const schemaPath = path.join(__dirname, '../../coffee-ops/src/db/schema.sql');
-    const seedPath = path.join(__dirname, '../../coffee-ops/src/db/seed.sql');
+    const schemaPath = path.join(__dirname, '../src/db/schema.sql');
+    const seedPath = path.join(__dirname, '../src/db/seed.sql');
     
     let schemaSql;
     let seedSql;
