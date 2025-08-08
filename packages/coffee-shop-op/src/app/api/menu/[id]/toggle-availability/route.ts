@@ -1,0 +1,28 @@
+import { NextRequest, NextResponse } from 'next/server';
+import menuService from '@/services/menuService';
+
+// PATCH /api/menu/[id]/toggle-availability - Toggle menu item availability
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = params.id;
+    const updatedItem = await menuService.toggleItemAvailability(id);
+    
+    if (!updatedItem) {
+      return NextResponse.json(
+        { error: `Menu item with ID ${id} not found` },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json(updatedItem);
+  } catch (error) {
+    console.error(`Error toggling availability for menu item ${params.id}:`, error);
+    return NextResponse.json(
+      { error: 'Failed to toggle menu item availability' },
+      { status: 500 }
+    );
+  }
+}
