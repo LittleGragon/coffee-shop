@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
 
-// PATCH /api/menu/[id]/toggle-availability - Toggle menu item availability
-export async function PATCH(
+// PUT /api/menu/[id]/toggle-availability - Toggle menu item availability
+export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     const updatedItem = await menuService.toggleItemAvailability(id);
     
     if (!updatedItem) {
@@ -19,7 +19,7 @@ export async function PATCH(
     
     return NextResponse.json(updatedItem);
   } catch (error) {
-    console.error(`Error toggling availability for menu item ${params.id}:`, error);
+    console.error(`Error toggling menu item availability:`, error);
     return NextResponse.json(
       { error: 'Failed to toggle menu item availability' },
       { status: 500 }

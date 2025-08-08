@@ -9,14 +9,17 @@
     "lint": "next lint",
     "test": "echo \"No tests specified yet\" && exit 0",
     "db:test": "node scripts/test-db.js",
-    "db:seed": "node scripts/seed-db.js"
+    "db:seed": "node scripts/seed-db.js",
+    "setup:uploads": "node scripts/ensure-uploads-dir.js",
+    "predev": "npm run setup:uploads"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
     "next": "^15.4.6",
     "pg": "^8.16.3",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -24,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",

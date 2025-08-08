@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MenuItem } from '@/types/models';
 
 export default function MenuPage() {
+  const router = useRouter();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,54 @@ export default function MenuPage() {
     fetchMenuData();
   }, []);
   
+  // Handle delete menu item
+  const handleDeleteItem = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this menu item?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/menu/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete menu item');
+      }
+      
+      // Remove the deleted item from the state
+      setMenuItems(prevItems => prevItems.filter(item => item.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error deleting menu item:', err);
+    }
+  };
+  
+  // Handle toggle availability
+  const handleToggleAvailability = async (id: string) => {
+    try {
+      const response = await fetch(`/api/menu/${id}/toggle-availability`, {
+        method: 'PUT',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to toggle menu item availability');
+      }
+      
+      const updatedItem = await response.json();
+      
+      // Update the item in the state
+      setMenuItems(prevItems => 
+        prevItems.map(item => 
+          item.id === id ? updatedItem : item
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error toggling menu item availability:', err);
+    }
+  };
+  
   // Filter and sort menu items
   const filteredAndSortedItems = menuItems
     .filter(item => {
@@ -91,12 +141,20 @@ export default function MenuPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Coffee Shop Menu</h1>
-        <Link 
-          href="/"
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
-        >
-          Back to Home
-        </Link>
+        <div className="flex space-x-2">
+          <Link 
+            href="/menu/add"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+          >
+            Add New Item
+          </Link>
+          <Link 
+            href="/"
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+          >
+            Back to Home
+          </Link>
+        </div>
       </div>
       
       {/* Filters */}
@@ -206,7 +264,7 @@ export default function MenuPage() {
                     {item.description || 'No description available'}
                   </p>
                   
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">
                       {item.category}
                     </span>
@@ -218,6 +276,36 @@ export default function MenuPage() {
                     }`}>
                       {item.is_available ? 'Available' : 'Unavailable'}
                     </span>
+                  </div>
+                  
+                  {/* Action buttons */}
+                  <div className="flex justify-between mt-4">
+                    <button
+                      onClick={() => handleToggleAvailability(item.id)}
+                      className={`px-3 py-1 rounded text-sm font-medium ${
+                        item.is_available
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
+                      }`}
+                    >
+                      {item.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                    </button>
+                    
+                    <div className="flex space-x-2">
+                      <Link
+                        href={`/menu/edit/${item.id}`}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 rounded text-sm font-medium"
+                      >
+                        Edit
+                      </Link>
+                      
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="px-3 py-1 bg-red-100 text-red-800 hover:bg-red-200 rounded text-sm font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
