@@ -24,7 +24,9 @@ export const MenuPage = () => {
       setLoading(true);
       try {
         const items = await fetchMenuItems(activeTab);
-        setMenuItems(items);
+        // Filter out unavailable items
+        const availableItems = items.filter(item => item.is_available !== false);
+        setMenuItems(availableItems);
       } catch (error) {
         console.error(`Failed to fetch ${activeTab} menu items:`, error);
       } finally {
@@ -57,9 +59,14 @@ export const MenuPage = () => {
                   <CardContent className="p-4">
                     <CardTitle className="text-xl mb-2">{item.name}</CardTitle>
                     <p className="text-lg font-semibold">${item.price.toFixed(2)}</p>
+                    {item.description && (
+                      <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                    )}
                   </CardContent>
                   <CardFooter className="p-4">
-                    <Button className="w-full" onClick={() => handleAddToCart(item)}>Add to Cart</Button>
+                    <Button className="w-full" onClick={() => handleAddToCart(item)}>
+                      Add to Cart
+                    </Button>
                   </CardFooter>
                 </Card>
               ))}

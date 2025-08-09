@@ -1,38 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { executeQuery } from '@/lib/db';
+import { MenuItem } from '@/types/models';
 
-const MOCK_MENU_ITEMS = {
-  coffee: [
-    { id: 'c1', name: 'Espresso', price: 3.00, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Espresso' },
-    { id: 'c2', name: 'Americano', price: 3.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Americano' },
-    { id: 'c3', name: 'Latte', price: 4.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Latte' },
-    { id: 'c4', name: 'Cappuccino', price: 4.50, image: 'https://placehold.co/600x400/5a3a2a/ffffff?text=Cappuccino' },
-  ],
-  tea: [
-    { id: 't1', name: 'Green Tea', price: 3.00, image: 'https://placehold.co/600x400/6b7f3a/ffffff?text=Green+Tea' },
-    { id: 't2', name: 'Black Tea', price: 3.00, image: 'https://placehold.co/600x400/3d2b1f/ffffff?text=Black+Tea' },
-    { id: 't3', name: 'Oolong Tea', price: 3.50, image: 'https://placehold.co/600x400/8a6b4c/ffffff?text=Oolong+Tea' },
-  ],
-  pastries: [
-    { id: 'p1', name: 'Croissant', price: 2.50, image: 'https://placehold.co/600x400/c4a77e/000000?text=Croissant' },
-    { id: 'p2', name: 'Muffin', price: 2.75, image: 'https://placehold.co/600x400/c4a77e/000000?text=Muffin' },
-    { id: 'p3', name: 'Scone', price: 3.00, image: 'https://placehold.co/600x400/c4a77e/000000?text=Scone' },
-  ],
-};
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const available = searchParams.get('available');
 
-type MenuCategory = keyof typeof MOCK_MENU_ITEMS;
+    let query = 'SELECT * FROM menu_items';
+    const params: any[] = [];
+    const conditions: string[] = [];
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const category = searchParams.get('category') as MenuCategory | null;
+    if (category) {
+      conditions.push('category = $1');
+      params.push(category);
+    }
 
-  if (!category || !MOCK_MENU_ITEMS[category]) {
+    if (available === 'true') {
+      const paramIndex = params.length + 1;
+      conditions.push(`is_available = $${paramIndex}`);
+      params.push(true);
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    query += ' ORDER BY category, name';
+
+    const menuItems = await executeQuery<MenuItem>(query, params);
+
+    // If category is specified, return data in the expected format for backward compatibility
+    if (category) {
+      return NextResponse.json({ data: menuItems });
+    }
+
+    // Otherwise return all items grouped by category
+    const groupedItems = menuItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {} as Record<string, MenuItem[]>);
+
+    return NextResponse.json({ data: groupedItems });
+  } catch (error) {
+    console.error('Error fetching menu items:', error);
     return NextResponse.json(
-      { error: 'Invalid or missing category' },
-      { status: 400 }
+      { error: 'Failed to fetch menu items' },
+      { status: 500 }
     );
   }
-
-  const data = MOCK_MENU_ITEMS[category];
-
-  return NextResponse.json({ data });
 }

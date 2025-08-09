@@ -9,6 +9,7 @@ export interface MenuItem {
   price: number;
   description?: string;
   image: string;
+  is_available?: boolean;
 }
 
 // Define the shape of an item in the cart, which includes quantity

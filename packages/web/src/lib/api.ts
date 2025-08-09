@@ -27,9 +27,30 @@ export const fetchMenuItems = async (category: 'coffee' | 'tea' | 'pastries') =>
   if (USE_MOCK_DATA) {
     return mockFetchMenuItems(category);
   }
-  const response = await fetch(`${API_BASE_URL}/menu-items?category=${category}`);
+  
+  // Map frontend categories to API categories
+  const categoryMap = {
+    'coffee': 'Coffee',
+    'tea': 'Tea', 
+    'pastries': 'Pastry'
+  };
+  
+  const apiCategory = categoryMap[category];
+  const response = await fetch(`${API_BASE_URL}/menu-items?category=${apiCategory}`);
   const data = await handleResponse(response);
-  return data.data;
+  
+  // Transform API data to match frontend expectations
+  const transformedData = data.data.map((item: any) => ({
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    price: parseFloat(item.price),
+    description: item.description,
+    image: item.image_url || '/api/placeholder/300/200', // Fallback image
+    is_available: item.is_available
+  }));
+  
+  return transformedData;
 };
 
 export const submitCakeOrder = async (customization: any) => {
