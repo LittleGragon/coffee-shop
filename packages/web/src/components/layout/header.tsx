@@ -1,4 +1,4 @@
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCartStore } from '@/stores/cart-store';
@@ -6,6 +6,13 @@ import { ShoppingCart as ShoppingCartSidebar } from '@/components/cart/shopping-
 import { Logo } from './logo';
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const navLinks = [
   { href: '/menu', label: 'Menu' },
@@ -14,10 +21,15 @@ const navLinks = [
   { href: '/membership', label: 'Membership' },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onAuthClick?: () => void;
+}
+
+export function Header({ onAuthClick }: HeaderProps) {
   const [isCartOpen, setCartOpen] = useState(false);
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { items } = useCartStore();
+  const { user, logout, isAuthenticated } = useAuth();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -64,23 +76,47 @@ export function Header() {
                 <Logo />
               </Link>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative"
-              onClick={() => setCartOpen(true)}
-            >
-              <ShoppingCart className="h-6 w-6" />
-              {totalItems > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full p-2 text-xs"
-                >
-                  {totalItems}
-                </Badge>
+            <div className="flex items-center space-x-2">
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">{user?.name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={onAuthClick}>
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
               )}
-              <span className="sr-only">Open Cart</span>
-            </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => setCartOpen(true)}
+              >
+                <ShoppingCart className="h-6 w-6" />
+                {totalItems > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full p-2 text-xs"
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+                <span className="sr-only">Open Cart</span>
+              </Button>
+            </div>
           </div>
         </div>
         {isMenuOpen && (

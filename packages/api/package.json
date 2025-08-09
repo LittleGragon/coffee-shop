@@ -11,8 +11,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcryptjs": "^3.0.2",
     "coffee-shop-ops": "0.1.0",
     "dotenv": "^16.6.1",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.4.5",
     "pg": "^8.16.3",
     "react": "19.1.0",
