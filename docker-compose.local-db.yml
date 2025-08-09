@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # API Backend Service (Development) - using local PostgreSQL
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-api-dev
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://littlegragon@host.docker.internal:5432/coffee_shop_buddy
+    volumes:
+      - ./packages/api:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Web Frontend Service (Development)
+  web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-web-dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:3001/api
+    volumes:
+      - ./packages/web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Coffee Shop Operations Service (Development)
+  coffee-shop-ops:
+    build:
+      context: ./packages/coffee-shop-ops
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-ops-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://littlegragon@host.docker.internal:5432/coffee_shop_buddy
+    volumes:
+      - ./packages/coffee-shop-ops:/app
+      - /app/node_modules
+      - /app/.next
+      - uploads_dev_data:/app/public/uploads
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+networks:
+  coffee-shop-network:
+    driver: bridge
+
+volumes:
+  uploads_dev_data:

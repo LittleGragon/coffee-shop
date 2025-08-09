@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coffee-shop-web
+  namespace: coffee-shop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coffee-shop-web
+  template:
+    metadata:
+      labels:
+        app: coffee-shop-web
+    spec:
+      containers:
+      - name: web
+        image: coffee-shop-web:latest
+        ports:
+        - containerPort: 5173
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: VITE_API_BASE_URL
+          value: "http://api.coffee-shop.local/api"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5173
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5173
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coffee-shop-web-service
+  namespace: coffee-shop
+spec:
+  selector:
+    app: coffee-shop-web
+  ports:
+  - port: 5173
+    targetPort: 5173
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coffee-shop-web-ingress
+  namespace: coffee-shop
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: coffee-shop.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: coffee-shop-web-service
+            port:
+              number: 5173

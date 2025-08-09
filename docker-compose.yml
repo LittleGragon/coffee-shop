@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: coffee-shop-postgres
+    environment:
+      POSTGRES_DB: coffee_shop_buddy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - coffee-shop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Backend Service
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile
+    container_name: coffee-shop-api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Web Frontend Service
+  web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile
+    container_name: coffee-shop-web
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=http://localhost:3001/api
+    depends_on:
+      - api
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Coffee Shop Operations Service
+  coffee-shop-ops:
+    build:
+      context: ./packages/coffee-shop-ops
+      dockerfile: Dockerfile
+    container_name: coffee-shop-ops
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+    volumes:
+      - uploads_data:/app/public/uploads
+
+networks:
+  coffee-shop-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads_data:

@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database - using a different approach
+  postgres:
+    image: postgres:15-alpine
+    container_name: coffee-shop-postgres-dev
+    environment:
+      POSTGRES_DB: coffee_shop_buddy
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - coffee-shop-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    pull_policy: missing
+
+  # API Backend Service (Development)
+  api:
+    build:
+      context: ./packages/api
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-api-dev
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
+    volumes:
+      - ./packages/api:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Web Frontend Service (Development)
+  web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-web-dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:3001/api
+    volumes:
+      - ./packages/web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+  # Coffee Shop Operations Service (Development)
+  coffee-shop-ops:
+    build:
+      context: ./packages/coffee-shop-ops
+      dockerfile: Dockerfile.dev
+    container_name: coffee-shop-ops-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
+    volumes:
+      - ./packages/coffee-shop-ops:/app
+      - /app/node_modules
+      - /app/.next
+      - uploads_dev_data:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - coffee-shop-network
+    restart: unless-stopped
+
+networks:
+  coffee-shop-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+  uploads_dev_data:

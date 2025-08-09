@@ -1,0 +1,23 @@
+# Coffee Shop Ops Development Dockerfile
+FROM node:20-alpine
+
+# Use USTC mirror for Alpine packages
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+
+WORKDIR /app
+
+    # Install dependencies
+    COPY package.json package-lock.json* ./
+    RUN npm install
+
+# Copy source code
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p public/uploads
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev"]

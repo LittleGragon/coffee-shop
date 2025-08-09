@@ -1,85 +1,255 @@
-# Coffee Shop Buddy (Monorepo)
+# Coffee Shop Buddy
 
-This is a full-stack application for a modern coffee shop, built with a React frontend and a Next.js backend, all managed within a single monorepo. It features online ordering, custom cake building, table reservations, and a membership system.
+A comprehensive coffee shop management system with multiple services including customer frontend, API backend, and operations management interface.
 
-## Project Structure
+## 🏗️ Architecture
 
-This project is a monorepo managed with npm workspaces.
+This project consists of three main services:
 
-*   `packages/web`: A React application built with Vite that serves as the customer-facing frontend.
-*   `packages/api`: A Next.js application that provides the backend API.
+- **Web Frontend** (`packages/web`): Customer-facing React application with Vite
+- **API Backend** (`packages/api`): Next.js API service for data operations
+- **Coffee Shop Ops** (`packages/coffee-shop-ops`): Management interface with Next.js and Material UI
 
-## Features
+## 🚀 Quick Start
 
-*   **Online Ordering**: Browse the menu (coffee, tea, pastries) and add items to a shopping cart.
-*   **Custom Cake Builder**: A multi-step form to design a custom cake with various sizes, flavors, frostings, and toppings.
-*   **Table Reservations**: A simple form to book a table in-store.
-*   **Membership Hub**: A dashboard for members to view their profile, check their balance, top-up their account, and see their order history.
-*   **Modern UI**: A clean and warm design built with shadcn/ui and styled with Tailwind CSS.
-*   **Interactive & Animated**: Subtle animations using Framer Motion enhance the user experience.
+### One-Command Startup (Development)
 
-## Tech Stack
+```bash
+# Make scripts executable
+chmod +x scripts/*.sh
 
-### Frontend (`packages/web`)
+# Start all services in development mode
+./scripts/start-all.sh
+```
 
-*   **Framework**: React
-*   **Build Tool**: Vite
-*   **Language**: TypeScript
-*   **Styling**: Tailwind CSS
-*   **UI Components**: shadcn/ui
-*   **Animations**: Framer Motion
+This will start:
+- 🌐 Web Frontend: http://localhost:5173
+- 🔧 API Backend: http://localhost:3001
+- ⚙️ Coffee Shop Ops: http://localhost:3000
+- 🗄️ PostgreSQL: localhost:5432
 
-### Backend (`packages/api`)
+### One-Command Startup (Production)
 
-*   **Framework**: Next.js
-*   **Language**: TypeScript
-*   **Testing**: Jest
+```bash
+# Start all services in production mode
+./scripts/start-production.sh
+```
 
-## Getting Started
+### Stop All Services
+
+```bash
+# Stop all running services
+./scripts/stop-all.sh
+```
+
+## 🐳 Docker Deployment
+
+### 🇨🇳 中国用户加速配置 (For Users in China)
+
+为了加速 Docker 镜像拉取，建议先配置 USTC 镜像源：
+
+```bash
+# 一键配置 USTC 镜像源
+./scripts/configure-docker-mirror.sh
+```
+
+详细配置说明请参考：[Docker 镜像源配置指南](DOCKER_MIRROR_SETUP.md)
+
+### Development Mode
+```bash
+# Start with hot reloading
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+### Production Mode
+```bash
+# Start optimized production build
+docker-compose up --build
+```
+
+### Clean Up
+```bash
+# Stop and remove all containers, networks, and volumes
+docker-compose down -v
+```
+
+## ☸️ Kubernetes Deployment
 
 ### Prerequisites
+- kubectl installed and configured
+- Kubernetes cluster running
+- NGINX Ingress Controller (for ingress)
 
-*   Node.js (v18 or later)
-*   npm (v7 or later for workspace support)
-
-### Installation & Setup
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/coffee-shop-buddy.git
-    cd coffee-shop-buddy
-    ```
-
-2.  **Install dependencies from the root directory:**
-    This command will install dependencies for all workspaces (`web` and `api`).
-    ```bash
-    npm install
-    ```
-
-### Running the Development Servers
-
-To start the local development servers for both the frontend and backend, run the following command from the root directory:
-
+### Deploy to Kubernetes
 ```bash
-npm run dev
+# Deploy all services to Kubernetes
+./scripts/deploy-k8s.sh
 ```
 
-*   The frontend will be available at `http://localhost:5173`.
-*   The backend API will be available at `http://localhost:3000`.
-
-### Building for Production
-
-To create a production-ready build for both applications, run:
-
-```bash
-npm run build
+### Access Services
+Add these entries to your `/etc/hosts` file:
+```
+127.0.0.1 coffee-shop.local
+127.0.0.1 api.coffee-shop.local
+127.0.0.1 ops.coffee-shop.local
 ```
 
-The optimized files will be located in the `packages/web/dist` and `packages/api/.next` directories.
+Then access:
+- Web Frontend: http://coffee-shop.local
+- API Backend: http://api.coffee-shop.local
+- Coffee Shop Ops: http://ops.coffee-shop.local
 
-### Running Tests
+### Kubernetes Management
+```bash
+# View all pods
+kubectl get pods -n coffee-shop
 
-To run the unit tests for the backend API, use the following command:
+# View services
+kubectl get services -n coffee-shop
+
+# View logs
+kubectl logs -f deployment/coffee-shop-api -n coffee-shop
+
+# Delete deployment
+kubectl delete namespace coffee-shop
+```
+
+## 🛠️ Manual Development Setup
+
+### Prerequisites
+- Node.js 20+
+- PostgreSQL
+- npm or yarn
+
+### Setup Each Service
+
+#### 1. Database Setup
+```bash
+# Start PostgreSQL (using Docker)
+docker run --name coffee-shop-postgres \
+  -e POSTGRES_DB=coffee_shop_buddy \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -p 5432:5432 \
+  -d postgres:15-alpine
+```
+
+#### 2. API Backend
+```bash
+cd packages/api
+npm install
+npm run dev  # Runs on http://localhost:3001
+```
+
+#### 3. Web Frontend
+```bash
+cd packages/web
+npm install
+npm run dev  # Runs on http://localhost:5173
+```
+
+#### 4. Coffee Shop Operations
+```bash
+cd packages/coffee-shop-ops
+npm install
+npm run dev  # Runs on http://localhost:3000
+```
+
+## 📁 Project Structure
+
+```
+coffee-shop-buddy/
+├── packages/
+│   ├── web/                    # Customer frontend (React + Vite)
+│   ├── api/                    # API backend (Next.js)
+│   └── coffee-shop-ops/        # Operations management (Next.js + MUI)
+├── k8s/                        # Kubernetes configurations
+├── scripts/                    # Deployment scripts
+├── docker-compose.yml          # Production Docker Compose
+├── docker-compose.dev.yml      # Development Docker Compose
+└── README.md
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+#### Web Frontend (`packages/web/.env.development`)
+```env
+VITE_API_BASE_URL=http://localhost:3001/api
+VITE_USE_MOCK_DATA=false
+```
+
+#### API Backend
+```env
+NODE_ENV=development
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/coffee_shop_buddy
+```
+
+#### Coffee Shop Ops
+```env
+NODE_ENV=development
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/coffee_shop_buddy
+```
+
+## 🧪 Testing
 
 ```bash
-npm run test
+# Run tests for API service
+cd packages/api
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## 📊 Monitoring
+
+### Docker Compose Logs
+```bash
+# View all service logs
+docker-compose logs -f
+
+# View specific service logs
+docker-compose logs -f web
+docker-compose logs -f api
+docker-compose logs -f coffee-shop-ops
+```
+
+### Kubernetes Logs
+```bash
+# View pod logs
+kubectl logs -f deployment/coffee-shop-web -n coffee-shop
+kubectl logs -f deployment/coffee-shop-api -n coffee-shop
+kubectl logs -f deployment/coffee-shop-ops -n coffee-shop
+```
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**: Make sure ports 3000, 3001, 5173, and 5432 are available
+2. **Database connection**: Ensure PostgreSQL is running and accessible
+3. **Docker issues**: Try `docker system prune` to clean up Docker resources
+4. **Permission issues**: Make sure scripts are executable with `chmod +x scripts/*.sh`
+
+### Health Checks
+
+```bash
+# Check if services are responding
+curl http://localhost:5173        # Web Frontend
+curl http://localhost:3001/api/member  # API Backend
+curl http://localhost:3000        # Coffee Shop Ops
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.

@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  namespace: coffee-shop
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coffee-shop-ops
+  namespace: coffee-shop
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coffee-shop-ops
+  template:
+    metadata:
+      labels:
+        app: coffee-shop-ops
+    spec:
+      containers:
+      - name: coffee-shop-ops
+        image: coffee-shop-ops:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DATABASE_URL
+          value: "postgres://postgres:postgres@postgres-service:5432/coffee_shop_buddy"
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: /app/public/uploads
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: uploads-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coffee-shop-ops-service
+  namespace: coffee-shop
+spec:
+  selector:
+    app: coffee-shop-ops
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coffee-shop-ops-ingress
+  namespace: coffee-shop
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: ops.coffee-shop.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: coffee-shop-ops-service
+            port:
+              number: 3000

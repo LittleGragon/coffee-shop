@@ -7,8 +7,8 @@ import {
   mockProcessTopUp,
 } from './mock-api';
 
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
-const API_BASE_URL = '/api';
+const USE_MOCK_DATA = (import.meta as any).env?.VITE_USE_MOCK_DATA === 'true';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 // Helper function to handle fetch responses
 const handleResponse = async (response: Response) => {
