@@ -8,27 +8,64 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { placeOrder } from '@/lib/api';
 
 export function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();
   const navigate = useNavigate();
   const [isPaymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
 
   const handlePlaceOrder = (event: React.FormEvent) => {
     event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    setCustomerName(formData.get('name') as string);
+    setPickupTime(formData.get('pickup-time') as string);
     setPaymentDialogOpen(true);
   };
 
-  const handlePaymentSimulation = () => {
+  const handlePaymentSimulation = async () => {
     setIsProcessing(true);
-    setTimeout(() => {
+    
+    try {
+      // Prepare order data
+      const orderData = {
+        customer_name: customerName,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        order_type: 'takeout',
+        notes: `Pickup time: ${pickupTime}`,
+        payment_method: 'wechat_pay'
+      };
+
+      // Place the order
+      const result = await placeOrder(orderData);
+      
+      if (result.success) {
+        setIsProcessing(false);
+        setPaymentDialogOpen(false);
+        toast.success('Your order has been placed successfully!', {
+          description: `Order #${result.order.id.substring(0, 8)} - Total: $${result.order.total_amount.toFixed(2)}`
+        });
+        clearCart();
+        navigate('/membership'); // Navigate to membership to see order history
+      } else {
+        throw new Error(result.message || 'Failed to place order');
+      }
+    } catch (error) {
       setIsProcessing(false);
-      setPaymentDialogOpen(false);
-      toast.success('Your order has been placed successfully!');
-      clearCart();
-      navigate('/');
-    }, 3000); // Simulate a 3-second payment processing time
+      console.error('Order placement failed:', error);
+      toast.error('Order Failed', {
+        description: (error as Error).message || 'There was a problem placing your order.'
+      });
+    }
   };
 
   if (items.length === 0) {
@@ -82,11 +119,11 @@ export function CheckoutPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="Enter your full name" required />
+              <Input id="name" name="name" placeholder="Enter your full name" required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pickup-time">Preferred Pickup Time</Label>
-              <Input id="pickup-time" type="time" required />
+              <Input id="pickup-time" name="pickup-time" type="time" required />
             </div>
           </CardContent>
           <CardFooter>
@@ -111,9 +148,13 @@ export function CheckoutPage() {
             <p className="text-sm text-muted-foreground">
               This is a simulation. Click the button below to proceed.
             </p>
+            <div className="text-center">
+              <p className="font-semibold">Order Total: ${totalPrice().toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">Customer: {customerName}</p>
+            </div>
           </div>
           <Button onClick={handlePaymentSimulation} disabled={isProcessing} className="w-full">
-            {isProcessing ? 'Processing...' : 'Simulate Successful Payment'}
+            {isProcessing ? 'Processing Payment...' : 'Simulate Successful Payment'}
           </Button>
         </DialogContent>
       </Dialog>

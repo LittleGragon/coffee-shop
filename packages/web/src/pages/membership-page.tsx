@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from '@/hooks/use-toast';
-import { fetchMemberData, processTopUp } from '@/lib/api';
+import { fetchMemberData, processTopUp, fetchMemberOrders } from '@/lib/api';
 import { User, Wallet, ShoppingBag, CreditCard } from 'lucide-react';
 
 type MemberData = {
@@ -114,6 +114,7 @@ function ProfileSection({ user }: { user: { name: string; memberSince: string } 
 
 function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuccessfulTopUp: () => void }) {
   const [customAmount, setCustomAmount] = useState('');
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -164,26 +165,55 @@ function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuc
         <CardContent className="space-y-4">
           <div className="flex gap-4">
             {[20, 50, 100].map(amount => (
-              <Button key={amount} variant="outline" onClick={() => handleTopUp(amount)} disabled={isSubmitting}>
+              <Button 
+                key={amount} 
+                variant={selectedAmount === amount ? "default" : "outline"}
+                onClick={() => {
+                  setSelectedAmount(amount);
+                  setCustomAmount('');
+                }} 
+                disabled={isSubmitting}
+              >
                 ${amount}
               </Button>
             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <Input
-              placeholder="Custom amount"
-              type="number"
-              value={customAmount}
-              onChange={(e) => setCustomAmount(e.target.value)}
-              disabled={isSubmitting}
-            />
-            <Button
-              className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
-              onClick={() => handleTopUp(parseFloat(customAmount))}
-              disabled={isSubmitting || !customAmount || parseFloat(customAmount) <= 0}
-            >
-              {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add</>}
-            </Button>
+          {selectedAmount && (
+            <div className="flex justify-center">
+              <Button
+                className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
+                onClick={() => {
+                  handleTopUp(selectedAmount);
+                  setSelectedAmount(null);
+                }}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add ${selectedAmount}</>}
+              </Button>
+            </div>
+          )}
+          <Separator className="my-4" />
+          <div className="space-y-2">
+            <Label>Or enter a custom amount:</Label>
+            <div className="flex items-center gap-4">
+              <Input
+                placeholder="Custom amount"
+                type="number"
+                value={customAmount}
+                onChange={(e) => {
+                  setCustomAmount(e.target.value);
+                  setSelectedAmount(null);
+                }}
+                disabled={isSubmitting}
+              />
+              <Button
+                className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
+                onClick={() => handleTopUp(parseFloat(customAmount))}
+                disabled={isSubmitting || !customAmount || parseFloat(customAmount) <= 0}
+              >
+                {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add</>}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

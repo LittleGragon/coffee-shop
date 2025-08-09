@@ -31,7 +31,7 @@ export function Header() {
         <div className="container flex h-14 items-center">
           <div className="mr-4 hidden md:flex">
             <div className="mr-6 flex items-center space-x-2">
-              <Link to="/">
+              <Link to="/" className="flex items-center gap-2">
                 <Logo />
               </Link>
             </div>
@@ -60,7 +60,7 @@ export function Header() {
               </Button>
             </div>
             <div className="flex-1 md:flex-grow-0 md:hidden">
-              <Link to="/">
+              <Link to="/" className="flex items-center gap-2">
                 <Logo />
               </Link>
             </div>

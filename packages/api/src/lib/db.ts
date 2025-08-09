@@ -21,6 +21,21 @@ export async function executeQuery<T>(text: string, params: any[] = []): Promise
   }
 }
 
+// Alias for compatibility with existing code
+export async function query(text: string, params: any[] = []) {
+  const client = await pool.connect();
+  try {
+    await client.query('SET search_path TO public');
+    const result = await client.query(text, params);
+    return result;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 // Test the database connection
 export async function testConnection(): Promise<boolean> {
   try {

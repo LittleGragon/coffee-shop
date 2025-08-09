@@ -76,3 +76,19 @@ export interface Member {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface MemberTransaction {
+  id: string;
+  member_id: string;
+  transaction_type: 'topup' | 'purchase' | 'refund';
+  amount: number;
+  description: string;
+  balance_after: number;
+  created_at: Date;
+}
+
+export interface MemberOrder extends Order {
+  member_id?: string;
+  points_earned?: number;
+  points_used?: number;
+}
