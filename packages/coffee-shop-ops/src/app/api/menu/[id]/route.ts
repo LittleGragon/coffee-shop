@@ -20,7 +20,7 @@ export async function GET(
     
     return NextResponse.json(menuItem);
   } catch (error) {
-    console.error(`Error fetching menu item:`, error);
+    // console.error(`Error fetching menu item:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch menu item' },
       { status: 500 }
@@ -48,7 +48,7 @@ export async function PUT(
     
     return NextResponse.json(updatedItem);
   } catch (error) {
-    console.error(`Error updating menu item:`, error);
+    // console.error(`Error updating menu item:`, error);
     return NextResponse.json(
       { error: 'Failed to update menu item' },
       { status: 500 }
@@ -74,7 +74,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
   } catch (error) {
-    console.error(`Error deleting menu item:`, error);
+    // console.error(`Error deleting menu item:`, error);
     return NextResponse.json(
       { error: 'Failed to delete menu item' },
       { status: 500 }

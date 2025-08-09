@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(orders);
   } catch (error) {
-    console.error('Error fetching member orders:', error);
+    // console.error('Error fetching member orders:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error.message 

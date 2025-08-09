@@ -49,8 +49,7 @@ export class MenuService {
     const { name, price, category, description, image_url, is_available } = item;
     
     const items = await executeQuery<MenuItem>(
-      `INSERT INTO menu_items (name, price, category, description, image_url, is_available) 
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      'INSERT INTO menu_items (name, price, category, description, image_url, is_available) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
       [name, price, category, description || null, image_url || null, is_available !== undefined ? is_available : true]
     );
     
@@ -90,12 +89,7 @@ export class MenuService {
     // Add the id as the last parameter for the WHERE clause
     values.push(id);
     
-    const query = `
-      UPDATE menu_items 
-      SET ${fields.join(', ')} 
-      WHERE id = $${paramCounter} 
-      RETURNING *
-    `;
+    const query = `UPDATE menu_items SET ${fields.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
     
     const items = await executeQuery<MenuItem>(query, values);
     return items.length > 0 ? items[0] : null;

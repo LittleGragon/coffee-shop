@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const categories = await menuService.getAllCategories();
     return NextResponse.json(categories);
   } catch (error) {
-    console.error('Error fetching menu categories:', error);
+    // console.error('Error fetching menu categories:', error);
     return NextResponse.json(
       { error: 'Failed to fetch menu categories' },
       { status: 500 }

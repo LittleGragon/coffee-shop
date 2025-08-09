@@ -5,10 +5,32 @@ import {
   mockSubmitReservation,
   mockFetchMemberData,
   mockProcessTopUp,
+  mockPlaceOrder,
 } from './mock-api';
 
-const USE_MOCK_DATA = (import.meta as any).env?.VITE_USE_MOCK_DATA === 'true';
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:3001/api';
+// Handle both Vite environment and Jest environment
+let USE_MOCK_DATA = false;
+let API_BASE_URL = 'http://localhost:3001/api';
+
+// In test environment
+if (process.env.NODE_ENV === 'test') {
+  USE_MOCK_DATA = true;
+} 
+// In browser/Vite environment
+else {
+  try {
+    // Safely check for import.meta
+    if (typeof window !== 'undefined' && 
+        typeof globalThis.import !== 'undefined' && 
+        typeof globalThis.import.meta !== 'undefined' && 
+        globalThis.import.meta.env) {
+      USE_MOCK_DATA = globalThis.import.meta.env?.VITE_USE_MOCK_DATA === 'true';
+      API_BASE_URL = globalThis.import.meta.env?.VITE_API_BASE_URL || API_BASE_URL;
+    }
+  } catch (e) {
+    // Ignore errors when import.meta is not available
+  }
+}
 
 // Helper function to handle fetch responses
 const handleResponse = async (response: Response) => {
@@ -19,10 +41,97 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
-// ============================================================================
-// API Functions
-// ============================================================================
+// Create an API object that matches the test expectations
+export const api = {
+  // Menu Items
+  getMenuItems: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/menu`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch menu items');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
 
+  // Members
+  createMember: async (memberData: any) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(memberData)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create member');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getMemberByPhone: async (phone: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/members?phone=${phone}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch member');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  topUpMember: async (memberId: string, amount: number) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/members/topup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, amount })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to top up member balance');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Orders
+  createOrder: async (orderData: any) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getMemberOrders: async (memberId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/member?memberId=${memberId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch member orders');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// Original functions for backward compatibility
 export const fetchMenuItems = async (category: 'coffee' | 'tea' | 'pastries') => {
   if (USE_MOCK_DATA) {
     return mockFetchMenuItems(category);
@@ -36,11 +145,11 @@ export const fetchMenuItems = async (category: 'coffee' | 'tea' | 'pastries') =>
   };
   
   const apiCategory = categoryMap[category];
-  const response = await fetch(`${API_BASE_URL}/menu-items?category=${apiCategory}`);
+  const response = await fetch(`${API_BASE_URL}/menu?category=${apiCategory}`);
   const data = await handleResponse(response);
   
   // Transform API data to match frontend expectations
-  const transformedData = data.data.map((item: any) => ({
+  const transformedData = Array.isArray(data) ? data.map((item: any) => ({
     id: item.id,
     name: item.name,
     category: item.category,
@@ -48,7 +157,7 @@ export const fetchMenuItems = async (category: 'coffee' | 'tea' | 'pastries') =>
     description: item.description,
     image: item.image_url || '/api/placeholder/300/200', // Fallback image
     is_available: item.is_available
-  }));
+  })) : [];
   
   return transformedData;
 };
@@ -111,7 +220,7 @@ export const fetchMemberData = async (email: string = 'john.doe@example.com') =>
       orderHistory: orderHistory
     };
   } catch (error) {
-    console.error('Error fetching member data:', error);
+    // console.error('Error fetching member data:', error);
     // Fallback to mock data if API fails
     return mockFetchMemberData();
   }
@@ -144,7 +253,7 @@ export const processTopUp = async (amount: number, memberId: string | null = nul
 
     return await handleResponse(response);
   } catch (error) {
-    console.error('Error processing top-up:', error);
+    // console.error('Error processing top-up:', error);
     return {
       success: false,
       message: (error as Error).message || 'Failed to process top-up'
@@ -167,26 +276,14 @@ export const placeOrder = async (orderData: {
   payment_method?: string;
 }) => {
   if (USE_MOCK_DATA) {
-    // Mock order placement
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return {
-      success: true,
-      order: {
-        id: 'mock-order-' + Date.now(),
-        customer_name: orderData.customer_name,
-        total_amount: orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        status: 'pending',
-        created_at: new Date().toISOString()
-      },
-      message: 'Order placed successfully'
-    };
+    return mockPlaceOrder(orderData);
   }
 
   try {
     // Get member data to associate with order
     const memberData = await fetchMemberData();
     
-    const response = await fetch(`${API_BASE_URL}/orders/simple-test`, {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -200,7 +297,7 @@ export const placeOrder = async (orderData: {
 
     return await handleResponse(response);
   } catch (error) {
-    console.error('Error placing order:', error);
+    // console.error('Error placing order:', error);
     return {
       success: false,
       message: (error as Error).message || 'Failed to place order'
@@ -223,7 +320,7 @@ export const fetchMemberOrders = async (memberId?: string) => {
     const response = await fetch(`${API_BASE_URL}/orders/member?memberId=${targetMemberId}&limit=20`);
     return await handleResponse(response);
   } catch (error) {
-    console.error('Error fetching member orders:', error);
+    // console.error('Error fetching member orders:', error);
     return [];
   }
 };

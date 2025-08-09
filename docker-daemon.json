@@ -1,7 +1,5 @@
 {
-  "registry-mirrors": [
-    "https://docker.mirrors.ustc.edu.cn"
-  ],
+  "registry-mirrors": [],
   "insecure-registries": [],
   "debug": false,
   "experimental": false,

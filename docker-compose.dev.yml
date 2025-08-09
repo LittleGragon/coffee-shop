@@ -26,8 +26,8 @@ services:
   # API Backend Service (Development)
   api:
     build:
-      context: ./packages/api
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: packages/api/Dockerfile.dev
     container_name: coffee-shop-api-dev
     ports:
       - "3001:3001"
@@ -35,9 +35,10 @@ services:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
     volumes:
-      - ./packages/api:/app
-      - /app/node_modules
-      - /app/.next
+      - ./packages/api:/app/packages/api
+      - ./packages/coffee-shop-ops:/app/packages/coffee-shop-ops
+      - /app/packages/api/node_modules
+      - /app/packages/api/.next
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,8 +49,8 @@ services:
   # Web Frontend Service (Development)
   web:
     build:
-      context: ./packages/web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: packages/web/Dockerfile.dev
     container_name: coffee-shop-web-dev
     ports:
       - "5173:5173"
@@ -57,8 +58,8 @@ services:
       - NODE_ENV=development
       - VITE_API_BASE_URL=http://localhost:3001/api
     volumes:
-      - ./packages/web:/app
-      - /app/node_modules
+      - ./packages/web:/app/packages/web
+      - /app/packages/web/node_modules
     depends_on:
       - api
     networks:
@@ -68,8 +69,8 @@ services:
   # Coffee Shop Operations Service (Development)
   coffee-shop-ops:
     build:
-      context: ./packages/coffee-shop-ops
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: packages/coffee-shop-ops/Dockerfile.dev
     container_name: coffee-shop-ops-dev
     ports:
       - "3000:3000"
@@ -77,10 +78,10 @@ services:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/coffee_shop_buddy
     volumes:
-      - ./packages/coffee-shop-ops:/app
-      - /app/node_modules
-      - /app/.next
-      - uploads_dev_data:/app/public/uploads
+      - ./packages/coffee-shop-ops:/app/packages/coffee-shop-ops
+      - /app/packages/coffee-shop-ops/node_modules
+      - /app/packages/coffee-shop-ops/.next
+      - uploads_dev_data:/app/packages/coffee-shop-ops/public/uploads
     depends_on:
       postgres:
         condition: service_healthy

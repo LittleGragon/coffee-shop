@@ -3,18 +3,12 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { size, flavor, toppings, message, price } = body;
+    const { size, flavor, toppings, message } = body;
 
-    // More robust validation
-    if (
-      !size || typeof size !== 'object' ||
-      !flavor || typeof flavor !== 'object' ||
-      !Array.isArray(toppings) ||
-      typeof message !== 'string' ||
-      typeof price !== 'number'
-    ) {
+    // Validate required fields
+    if (!size || !flavor || !Array.isArray(toppings) || !message) {
       return NextResponse.json(
-        { message: 'Invalid cake order data. Please check your selections.' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -25,10 +19,8 @@ export async function POST(request: Request) {
     const orderId = `cake-${Date.now()}`;
 
     return NextResponse.json({
-      success: true,
-      message: 'Cake order submitted successfully!',
+      message: 'Cake order submitted successfully',
       orderId: orderId,
-      cakeDetails: body,
     });
   } catch (error) {
     return NextResponse.json(

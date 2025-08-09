@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       fileName: fileName
     });
   } catch (error) {
-    console.error('Error uploading image:', error);
+    // console.error('Error uploading image:', error);
     return NextResponse.json(
       { error: 'Failed to upload image' },
       { status: 500 }

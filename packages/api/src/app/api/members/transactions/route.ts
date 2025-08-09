@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transactions);
   } catch (error) {
-    console.error('Error fetching member transactions:', error);
+    // console.error('Error fetching member transactions:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

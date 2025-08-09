@@ -18,22 +18,29 @@ export async function executeQuery<T>(text: string, params: any[] = []): Promise
     const result = await client.query(text, params);
     return result.rows as T[];
   } catch (error) {
-    console.error('Database query error:', error);
+    // console.error('Database query error:', error);
     throw error;
   } finally {
-    client.release();
+    if (client) {
+      client.release();
+    }
   }
 }
 
 // Test the database connection
 export async function testConnection(): Promise<boolean> {
+  let client;
   try {
-    const result = await executeQuery<{ now: Date }>('SELECT NOW()');
-    console.log('Database connected successfully:', result[0].now);
+    client = await pool.connect();
+    await client.query('SELECT NOW()');
     return true;
   } catch (error) {
-    console.error('Database connection error:', error);
+    // console.error('Database connection error:', error);
     return false;
+  } finally {
+    if (client) {
+      client.release();
+    }
   }
 }
 

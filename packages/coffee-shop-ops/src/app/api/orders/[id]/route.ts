@@ -25,7 +25,7 @@ export async function GET(
       items: orderItems
     });
   } catch (error) {
-    console.error(`Error fetching order ${params.id}:`, error);
+    // console.error(`Error fetching order ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch order' },
       { status: 500 }
@@ -69,7 +69,7 @@ export async function PATCH(
     
     return NextResponse.json(updatedOrder);
   } catch (error) {
-    console.error(`Error updating order ${params.id}:`, error);
+    // console.error(`Error updating order ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to update order' },
       { status: 500 }

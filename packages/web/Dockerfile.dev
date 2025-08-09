@@ -1,17 +1,20 @@
 # Web Frontend Development Dockerfile
 FROM node:20-alpine
 
-# Use USTC mirror for Alpine packages
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-
 WORKDIR /app
 
-    # Install dependencies
-    COPY package.json package-lock.json* ./
-    RUN npm install
+# Copy root package.json and workspace files
+COPY package.json ./
+COPY packages/web/package.json ./packages/web/
+
+# Install dependencies
+RUN npm install
 
 # Copy source code
-COPY . .
+COPY packages/web ./packages/web
+
+# Set working directory to the Web package
+WORKDIR /app/packages/web
 
 # Expose port
 EXPOSE 5173

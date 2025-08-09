@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(members);
   } catch (error) {
-    console.error('Error fetching members:', error);
+    // console.error('Error fetching members:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       updated_at: member.updated_at
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating member:', error);
+    // console.error('Error creating member:', error);
     if (error.code === '23505') { // Unique constraint violation
       return NextResponse.json({ error: 'Email already exists' }, { status: 409 });
     }
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
       updated_at: member.updated_at
     });
   } catch (error) {
-    console.error('Error updating member:', error);
+    // console.error('Error updating member:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

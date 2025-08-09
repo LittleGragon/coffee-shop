@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const reservations = await reservationService.getAllReservations({ status, date });
     return NextResponse.json(reservations);
   } catch (error) {
-    console.error('Error fetching reservations:', error);
+    // console.error('Error fetching reservations:', error);
     return NextResponse.json(
       { error: 'Failed to fetch reservations' },
       { status: 500 }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(newReservation, { status: 201 });
   } catch (error) {
-    console.error('Error creating reservation:', error);
+    // console.error('Error creating reservation:', error);
     return NextResponse.json(
       { error: 'Failed to create reservation' },
       { status: 500 }

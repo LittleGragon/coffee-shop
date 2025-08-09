@@ -14,7 +14,7 @@ export async function executeQuery<T>(text: string, params: any[] = []): Promise
     const result = await client.query(text, params);
     return result.rows as T[];
   } catch (error) {
-    console.error('Database query error:', error);
+    // console.error('Database query error:', error);
     throw error;
   } finally {
     client.release();
@@ -29,7 +29,7 @@ export async function query(text: string, params: any[] = []) {
     const result = await client.query(text, params);
     return result;
   } catch (error) {
-    console.error('Database query error:', error);
+    // console.error('Database query error:', error);
     throw error;
   } finally {
     client.release();
@@ -43,7 +43,7 @@ export async function testConnection(): Promise<boolean> {
     console.log('Database connected successfully:', result[0].now);
     return true;
   } catch (error) {
-    console.error('Database connection error:', error);
+    // console.error('Database connection error:', error);
     return false;
   }
 }

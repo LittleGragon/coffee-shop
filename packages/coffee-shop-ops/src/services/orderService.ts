@@ -90,7 +90,7 @@ export class OrderService {
       return order;
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('Error creating order:', error);
+      // console.error('Error creating order:', error);
       throw error;
     } finally {
       client.release();

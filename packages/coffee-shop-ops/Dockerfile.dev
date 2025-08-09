@@ -1,17 +1,20 @@
 # Coffee Shop Ops Development Dockerfile
 FROM node:20-alpine
 
-# Use USTC mirror for Alpine packages
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-
 WORKDIR /app
 
-    # Install dependencies
-    COPY package.json package-lock.json* ./
-    RUN npm install
+# Copy root package.json and workspace files
+COPY package.json ./
+COPY packages/coffee-shop-ops/package.json ./packages/coffee-shop-ops/
+
+# Install dependencies
+RUN npm install
 
 # Copy source code
-COPY . .
+COPY packages/coffee-shop-ops ./packages/coffee-shop-ops
+
+# Set working directory to the Coffee Shop Ops package
+WORKDIR /app/packages/coffee-shop-ops
 
 # Create uploads directory
 RUN mkdir -p public/uploads

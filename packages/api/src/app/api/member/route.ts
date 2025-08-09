@@ -16,5 +16,6 @@ const MOCK_MEMBER_DATA = {
 
 export async function GET() {
   // In a real application, you would fetch this from the database based on the authenticated user
-  return NextResponse.json({ data: MOCK_MEMBER_DATA });
+  const { name, email, membershipLevel, points, balance, orderHistory } = MOCK_MEMBER_DATA;
+  return NextResponse.json({ name, email, membershipLevel, points, balance, orderHistory });
 }

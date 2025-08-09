@@ -19,7 +19,7 @@ export async function PUT(
     
     return NextResponse.json(updatedItem);
   } catch (error) {
-    console.error(`Error toggling menu item availability:`, error);
+    // console.error(`Error toggling menu item availability:`, error);
     return NextResponse.json(
       { error: 'Failed to toggle menu item availability' },
       { status: 500 }

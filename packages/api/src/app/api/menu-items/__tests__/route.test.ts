@@ -1,54 +1,60 @@
 import { GET } from '../route';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Mock NextResponse
-jest.mock('next/server', () => ({
-  NextResponse: {
-    json: jest.fn((data, options) => ({
-      ...options,
-      json: () => Promise.resolve(data),
-    })),
-  },
-}));
+// Mock NextResponse.redirect
+jest.mock('next/server', () => {
+  const originalModule = jest.requireActual('next/server');
+  return {
+    ...originalModule,
+    NextResponse: {
+      ...originalModule.NextResponse,
+      redirect: jest.fn().mockImplementation((url) => {
+        return {
+          status: 307,
+          headers: {
+            get: () => url,
+          },
+          url,
+        };
+      }),
+    },
+  };
+});
 
 describe('GET /api/menu-items', () => {
   beforeEach(() => {
-    // Clear mock history before each test
-    (NextResponse.json as jest.Mock).mockClear();
+    jest.clearAllMocks();
   });
 
-  it('should return menu items for a valid category', async () => {
-    const request = {
-      url: 'http://localhost/api/menu-items?category=coffee',
-    } as Request;
+  it('should redirect to /api/menu with no query parameters', async () => {
+    const request = new NextRequest('http://localhost/api/menu-items');
     const response = await GET(request);
-    const json = await response.json();
 
-    expect(NextResponse.json).toHaveBeenCalledWith({
-      data: expect.any(Array),
-    });
-    expect(json.data.length).toBeGreaterThan(0);
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost/api/menu');
   });
 
-  it('should return a 400 error for an invalid category', async () => {
-    const request = {
-      url: 'http://localhost/api/menu-items?category=invalid',
-    } as Request;
-    await GET(request);
+  it('should redirect to /api/menu with category parameter', async () => {
+    const request = new NextRequest('http://localhost/api/menu-items?category=Coffee');
+    const response = await GET(request);
 
-    expect(NextResponse.json).toHaveBeenCalledWith(
-      { error: 'Invalid or missing category' },
-      { status: 400 }
-    );
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost/api/menu?category=Coffee');
   });
 
-  it('should return a 400 error for a missing category', async () => {
-    const request = { url: 'http://localhost/api/menu-items' } as Request;
-    await GET(request);
+  it('should redirect to /api/menu with available parameter', async () => {
+    const request = new NextRequest('http://localhost/api/menu-items?available=true');
+    const response = await GET(request);
 
-    expect(NextResponse.json).toHaveBeenCalledWith(
-      { error: 'Invalid or missing category' },
-      { status: 400 }
-    );
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost/api/menu?available=true');
+  });
+
+  it('should redirect to /api/menu with multiple parameters', async () => {
+    const request = new NextRequest('http://localhost/api/menu-items?category=Coffee&available=true');
+    const response = await GET(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('http://localhost/api/menu?category=Coffee&available=true');
   });
 });

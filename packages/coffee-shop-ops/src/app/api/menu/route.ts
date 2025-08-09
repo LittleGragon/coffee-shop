@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const menuItems = await menuService.getAllItems({ category, isAvailable });
     return NextResponse.json(menuItems);
   } catch (error) {
-    console.error('Error fetching menu items:', error);
+    // console.error('Error fetching menu items:', error);
     return NextResponse.json(
       { error: 'Failed to fetch menu items' },
       { status: 500 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const newItem = await menuService.addItem(body);
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    console.error('Error creating menu item:', error);
+    // console.error('Error creating menu item:', error);
     return NextResponse.json(
       { error: 'Failed to create menu item' },
       { status: 500 }

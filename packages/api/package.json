@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3001",
+    "dev": "next dev --port 3001",
+    "dev:turbo": "next dev --turbopack --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest"
   },
   "dependencies": {
+    "coffee-shop-ops": "0.1.0",
     "dotenv": "^16.6.1",
     "next": "15.4.5",
     "pg": "^8.16.3",
@@ -24,10 +26,12 @@
     "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/supertest": "^6.0.2",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "supertest": "^7.0.0",
     "typescript": "^5"
   }
 }

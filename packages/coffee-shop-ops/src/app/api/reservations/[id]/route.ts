@@ -19,7 +19,7 @@ export async function GET(
     
     return NextResponse.json(reservation);
   } catch (error) {
-    console.error(`Error fetching reservation ${params.id}:`, error);
+    // console.error(`Error fetching reservation ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch reservation' },
       { status: 500 }
@@ -83,7 +83,7 @@ export async function PUT(
     
     return NextResponse.json(updatedReservation);
   } catch (error) {
-    console.error(`Error updating reservation ${params.id}:`, error);
+    // console.error(`Error updating reservation ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to update reservation' },
       { status: 500 }
@@ -127,7 +127,7 @@ export async function PATCH(
     
     return NextResponse.json(updatedReservation);
   } catch (error) {
-    console.error(`Error updating reservation status ${params.id}:`, error);
+    // console.error(`Error updating reservation status ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to update reservation status' },
       { status: 500 }
@@ -153,7 +153,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true, message: 'Reservation deleted successfully' });
   } catch (error) {
-    console.error(`Error deleting reservation ${params.id}:`, error);
+    // console.error(`Error deleting reservation ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to delete reservation' },
       { status: 500 }

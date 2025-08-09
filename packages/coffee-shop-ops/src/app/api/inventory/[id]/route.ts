@@ -19,7 +19,7 @@ export async function GET(
     
     return NextResponse.json(inventoryItem);
   } catch (error) {
-    console.error(`Error fetching inventory item ${params.id}:`, error);
+    // console.error(`Error fetching inventory item ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch inventory item' },
       { status: 500 }
@@ -47,7 +47,7 @@ export async function PUT(
     
     return NextResponse.json(updatedItem);
   } catch (error) {
-    console.error(`Error updating inventory item ${params.id}:`, error);
+    // console.error(`Error updating inventory item ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to update inventory item' },
       { status: 500 }
@@ -73,7 +73,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true, message: 'Inventory item deleted successfully' });
   } catch (error) {
-    console.error(`Error deleting inventory item ${params.id}:`, error);
+    // console.error(`Error deleting inventory item ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to delete inventory item' },
       { status: 500 }

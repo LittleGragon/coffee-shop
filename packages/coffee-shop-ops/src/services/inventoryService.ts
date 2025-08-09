@@ -1,5 +1,6 @@
-import { executeQuery } from '@/lib/db';
-import { InventoryItem, InventoryTransaction } from '@/types/models';
+import { executeQuery } from '../lib/db';
+import pool from '../lib/db';
+import { InventoryItem, InventoryTransaction } from '../types/models';
 
 export class InventoryService {
   /**
@@ -51,10 +52,7 @@ export class InventoryService {
     } = item;
     
     const items = await executeQuery<InventoryItem>(
-      `INSERT INTO inventory_items 
-        (name, sku, category, current_stock, minimum_stock, unit, cost_per_unit, supplier, last_restock_date, expiry_date) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-       RETURNING *`,
+      'INSERT INTO inventory_items (name, sku, category, current_stock, minimum_stock, unit, cost_per_unit, supplier, last_restock_date, expiry_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
       [
         name, sku, category, current_stock, minimum_stock, unit, 
         cost_per_unit, supplier || null, last_restock_date || null, expiry_date || null
@@ -97,12 +95,7 @@ export class InventoryService {
     // Add the id as the last parameter for the WHERE clause
     values.push(id);
     
-    const query = `
-      UPDATE inventory_items 
-      SET ${fields.join(', ')} 
-      WHERE id = $${paramCounter} 
-      RETURNING *
-    `;
+    const query = `UPDATE inventory_items SET ${fields.join(', ')} WHERE id = $${paramCounter} RETURNING *`;
     
     const items = await executeQuery<InventoryItem>(query, values);
     return items.length > 0 ? items[0] : null;
@@ -126,17 +119,15 @@ export class InventoryService {
     } = transaction;
     
     // Start a transaction
-    const client = await global.pool.connect();
+    let client;
     
     try {
+      client = await pool.connect();
       await client.query('BEGIN');
       
       // Insert the transaction record
       const transactionResult = await client.query(
-        `INSERT INTO inventory_transactions 
-          (inventory_item_id, type, quantity, unit_cost, total_cost, reason, reference_id, created_by) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-         RETURNING *`,
+        `INSERT INTO inventory_transactions (inventory_item_id, type, quantity, unit_cost, total_cost, reason, reference_id, created_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
         [
           inventory_item_id, type, quantity, unit_cost || null, 
           total_cost || null, reason || null, reference_id || null, created_by
@@ -146,19 +137,12 @@ export class InventoryService {
       // Update the inventory item's current stock
       if (type === 'restock') {
         await client.query(
-          `UPDATE inventory_items 
-           SET current_stock = current_stock + $1, 
-               last_restock_date = NOW(),
-               updated_at = NOW()
-           WHERE id = $2`,
+          `UPDATE inventory_items SET current_stock = current_stock + $1, last_restock_date = NOW(), updated_at = NOW() WHERE id = $2`,
           [quantity, inventory_item_id]
         );
       } else if (type === 'usage' || type === 'waste' || type === 'adjustment') {
         await client.query(
-          `UPDATE inventory_items 
-           SET current_stock = current_stock - $1,
-               updated_at = NOW()
-           WHERE id = $2`,
+          `UPDATE inventory_items SET current_stock = current_stock - $1, updated_at = NOW() WHERE id = $2`,
           [quantity, inventory_item_id]
         );
       }
@@ -166,11 +150,15 @@ export class InventoryService {
       await client.query('COMMIT');
       return transactionResult.rows[0] as InventoryTransaction;
     } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('Error recording inventory transaction:', error);
+      if (client) {
+        await client.query('ROLLBACK');
+      }
+      // console.error('Error recording inventory transaction:', error);
       throw error;
     } finally {
-      client.release();
+      if (client) {
+        client.release();
+      }
     }
   }
   

@@ -21,7 +21,7 @@ export async function GET(
     const transactions = await inventoryService.getItemTransactions(id);
     return NextResponse.json(transactions);
   } catch (error) {
-    console.error(`Error fetching transactions for inventory item ${params.id}:`, error);
+    // console.error(`Error fetching transactions for inventory item ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch inventory transactions' },
       { status: 500 }
@@ -73,7 +73,7 @@ export async function POST(
     const newTransaction = await inventoryService.recordTransaction(transaction);
     return NextResponse.json(newTransaction, { status: 201 });
   } catch (error) {
-    console.error(`Error recording transaction for inventory item ${params.id}:`, error);
+    // console.error(`Error recording transaction for inventory item ${params.id}:`, error);
     return NextResponse.json(
       { error: 'Failed to record inventory transaction' },
       { status: 500 }
