@@ -17,12 +17,16 @@ import {
   IconButton,
   Alert,
   Chip,
-  Stack
+  Stack,
+  CircularProgress,
+  Tooltip,
+  DialogContentText
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
-  Category as CategoryIcon
+  Category as CategoryIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
 
 interface CategoryManagerProps {
@@ -42,6 +46,10 @@ export default function CategoryManager({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
@@ -83,6 +91,46 @@ export default function CategoryManager({
     setError(null);
     setSuccess(null);
     onClose();
+  };
+
+  const handleDeleteCategory = async (categoryName: string) => {
+    setCategoryToDelete(categoryName);
+    setDeleteDialogOpen(true);
+    setDeleteError(null);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+    
+    setDeleteLoading(true);
+    setDeleteError(null);
+    
+    try {
+      const response = await fetch(`/api/categories?name=${encodeURIComponent(categoryToDelete)}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete category');
+      }
+      
+      setSuccess(`Category "${categoryToDelete}" deleted successfully!`);
+      setCategoryToDelete(null);
+      setDeleteDialogOpen(false);
+      onCategoriesUpdate();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const cancelDeleteCategory = () => {
+    setCategoryToDelete(null);
+    setDeleteDialogOpen(false);
+    setDeleteError(null);
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
@@ -168,21 +216,46 @@ export default function CategoryManager({
               </Typography>
             </Box>
           ) : (
-            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-              {categories.map((category) => (
-                <Chip
+            <List sx={{ 
+              bgcolor: 'background.paper', 
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              maxHeight: '300px',
+              overflow: 'auto'
+            }}>
+              {categories.map((category, index) => (
+                <ListItem
                   key={category}
-                  label={category}
-                  variant="outlined"
-                  color="primary"
-                  sx={{ mb: 1 }}
-                />
+                  divider={index < categories.length - 1}
+                  secondaryAction={
+                    <Tooltip title="Delete category">
+                      <IconButton 
+                        edge="end" 
+                        aria-label="delete" 
+                        onClick={() => handleDeleteCategory(category)}
+                        color="error"
+                        size="small"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                >
+                  <ListItemText 
+                    primary={category} 
+                    primaryTypographyProps={{
+                      variant: 'body1',
+                      fontWeight: 'medium'
+                    }}
+                  />
+                </ListItem>
               ))}
-            </Stack>
+            </List>
           )}
           
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
-            Note: Categories are automatically created when you add menu items. To remove a category, you need to delete or change the category of all menu items in that category.
+            Note: You can only delete categories that are not being used by any menu items. To delete a category in use, first change or delete all menu items in that category.
           </Typography>
         </Box>
       </DialogContent>
@@ -192,6 +265,43 @@ export default function CategoryManager({
           Close
         </Button>
       </DialogActions>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDeleteCategory}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningIcon color="warning" />
+          Confirm Category Deletion
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete the category <strong>{categoryToDelete}</strong>? This action cannot be undone.
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDeleteCategory} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDeleteCategory} 
+            color="error" 
+            variant="contained" 
+            disabled={deleteLoading}
+            startIcon={deleteLoading ? <CircularProgress size={20} color="inherit" /> : <DeleteIcon />}
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }
