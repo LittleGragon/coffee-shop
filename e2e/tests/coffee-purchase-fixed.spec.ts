@@ -6,13 +6,13 @@ test.describe('Coffee Purchase and Checkout Flow - Fixed', () => {
   
   test.describe('Complete Coffee Purchase Journey', () => {
     test('should complete coffee purchase with correct API format', async ({ request }) => {
-      // Step 1: Browse available coffee menu
-      const coffeeMenuRes = await request.get(`${API_BASE}/api/menu?category=Coffee&available=true`);
+      // Step 1: Browse available coffee menu - use "Hot Beverages" instead of "Coffee"
+      const coffeeMenuRes = await request.get(`${API_BASE}/api/menu?category=Hot%20Beverages&available=true`);
       expect(coffeeMenuRes.ok()).toBeTruthy();
       const coffeeItems = await coffeeMenuRes.json();
       expect(coffeeItems.length).toBeGreaterThan(0);
       
-      const selectedCoffee = coffeeItems[0];
+      const selectedCoffee = coffeeItems[0] as any;
       console.log(`Selected coffee: ${selectedCoffee.name} - $${selectedCoffee.price}`);
       
       // Step 2: Register member using correct endpoint
@@ -98,11 +98,12 @@ test.describe('Coffee Purchase and Checkout Flow - Fixed', () => {
     });
 
     test('should handle guest checkout with minimal data', async ({ request }) => {
-      // Get coffee menu
-      const menuRes = await request.get(`${API_BASE}/api/menu?category=Coffee&available=true`);
+      // Get coffee menu - use "Hot Beverages" instead of "Coffee"
+      const menuRes = await request.get(`${API_BASE}/api/menu?category=Hot%20Beverages&available=true`);
       expect(menuRes.ok()).toBeTruthy();
       const coffeeItems = await menuRes.json();
-      const selectedCoffee = coffeeItems[0];
+      expect(coffeeItems.length).toBeGreaterThan(0);
+      const selectedCoffee = coffeeItems[0] as any;
       
       // Create guest order with required fields
       const guestOrderData = {
@@ -136,8 +137,8 @@ test.describe('Coffee Purchase and Checkout Flow - Fixed', () => {
     });
 
     test('should handle multiple coffee items correctly', async ({ request }) => {
-      // Get multiple coffee options
-      const menuRes = await request.get(`${API_BASE}/api/menu?category=Coffee&available=true`);
+      // Get multiple coffee options - use "Hot Beverages" instead of "Coffee"
+      const menuRes = await request.get(`${API_BASE}/api/menu?category=Hot%20Beverages&available=true`);
       const coffeeItems = await menuRes.json();
       
       if (coffeeItems.length < 2) {

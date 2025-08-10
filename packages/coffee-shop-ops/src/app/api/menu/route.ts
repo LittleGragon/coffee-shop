@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const newItem = await menuService.addItem(body);
     return NextResponse.json(newItem, { status: 201, headers: corsHeaders });
   } catch (error) {
-    // console.error('Error creating menu item:', error);
+    console.error('Error creating menu item:', error);
     return NextResponse.json(
       { error: 'Failed to create menu item' },
       { status: 500, headers: corsHeaders }

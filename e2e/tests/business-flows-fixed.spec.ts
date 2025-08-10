@@ -7,7 +7,7 @@ test.describe('Coffee Shop Business Flows - Fixed', () => {
   test.describe('Menu Management Flow', () => {
     test('should manage menu items lifecycle', async ({ request }) => {
       // Get menu items (known to work)
-      const menuRes = await request.get(`${API_BASE}/api/menu?category=Coffee`);
+      const menuRes = await request.get(`${API_BASE}/api/menu?category=Hot%20Beverages`);
       expect(menuRes.ok()).toBeTruthy();
       const menuItems = await menuRes.json();
       expect(Array.isArray(menuItems)).toBe(true);
@@ -16,7 +16,7 @@ test.describe('Coffee Shop Business Flows - Fixed', () => {
       const newItem = {
         name: 'Test Latte Fixed',
         price: 4.50,
-        category: 'Coffee',
+        category: 'Hot Beverages',
         description: 'Test coffee item',
         is_available: true
       };
@@ -248,7 +248,7 @@ test.describe('Coffee Shop Business Flows - Fixed', () => {
       // 1. Customer browses menu
       const menuRes = await request.get(`${API_BASE}/api/menu?available=true`);
       expect(menuRes.ok()).toBeTruthy();
-      const menu = await menuRes.json();
+      const menu = await menuRes.json() as any[];
       expect(menu.length).toBeGreaterThan(0);
       
       // 2. Customer registers (if endpoint works)

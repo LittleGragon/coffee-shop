@@ -18,7 +18,7 @@ export async function executeQuery<T>(text: string, params: any[] = []): Promise
     const result = await client.query(text, params);
     return result.rows as T[];
   } catch (error) {
-    // console.error('Database query error:', error);
+    console.error('Database query error:', error);
     throw error;
   } finally {
     if (client) {

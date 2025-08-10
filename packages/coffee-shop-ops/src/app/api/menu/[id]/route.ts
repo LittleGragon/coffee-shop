@@ -21,15 +21,14 @@ export async function POST(
 
 async function handleDelete(params: { id: string }) {
   try {
-    if (!params || !params.id) {
+    const id = params.id;
+    if (!id) {
       console.error('Missing ID parameter');
       return NextResponse.json(
         { error: 'Missing ID parameter' },
         { status: 400 }
       );
     }
-    
-    const id = params.id;
     console.log(`Attempting to delete menu item with ID: ${id}`);
     
     const success = await menuService.deleteItem(id);
@@ -59,15 +58,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    if (!params || !params.id) {
+    const id = params.id;
+    if (!id) {
       console.error('Missing ID parameter');
       return NextResponse.json(
         { error: 'Missing ID parameter' },
         { status: 400 }
       );
     }
-    
-    const id = params.id;
     console.log(`Fetching menu item with ID: ${id}`);
     
     const menuItem = await menuService.getItemById(id);
@@ -96,15 +94,14 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    if (!params || !params.id) {
+    const id = params.id;
+    if (!id) {
       console.error('Missing ID parameter');
       return NextResponse.json(
         { error: 'Missing ID parameter' },
         { status: 400 }
       );
     }
-    
-    const id = params.id;
     console.log(`Updating menu item with ID: ${id}`);
     
     const updates = await request.json();
@@ -135,15 +132,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    if (!params || !params.id) {
+    const id = params.id;
+    if (!id) {
       console.error('Missing ID parameter');
       return NextResponse.json(
         { error: 'Missing ID parameter' },
         { status: 400 }
       );
     }
-    
-    const id = params.id;
     console.log(`Attempting to delete menu item with ID: ${id}`);
     
     const success = await menuService.deleteItem(id);
