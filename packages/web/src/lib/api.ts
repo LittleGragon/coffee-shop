@@ -10,7 +10,7 @@ import {
 
 // Handle both Vite environment and Jest environment
 let USE_MOCK_DATA = false;
-let API_BASE_URL = 'http://localhost:3001/api';
+let API_BASE_URL = 'http://localhost:3000/api';
 
 // In test environment
 if (process.env.NODE_ENV === 'test') {
@@ -49,6 +49,19 @@ export const api = {
       const response = await fetch(`${API_BASE_URL}/menu`);
       if (!response.ok) {
         throw new Error('Failed to fetch menu items');
+      }
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Categories
+  getCategories: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/categories`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
       }
       return await response.json();
     } catch (error) {
@@ -128,6 +141,21 @@ export const api = {
     } catch (error) {
       throw error;
     }
+  }
+};
+
+// Fetch categories from database
+export const fetchCategories = async () => {
+  if (USE_MOCK_DATA) {
+    return ['Coffee', 'Tea', 'Pastries'];
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/categories`);
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return ['Coffee', 'Tea', 'Pastries']; // Fallback
   }
 };
 
@@ -283,21 +311,72 @@ export const placeOrder = async (orderData: {
     // Get member data to associate with order
     const memberData = await fetchMemberData();
     
+    // Calculate total amount
+    const totalAmount = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Validate order items before transformation
+    for (const item of orderData.items) {
+      if (!item.id || !item.quantity || !item.price) {
+        throw new Error(`Invalid item data: ${JSON.stringify(item)}`);
+      }
+    }
+    
+    // Transform data to match API expectations
+    const apiOrderData = {
+      user_id: (memberData as any).id || null, // Allow null for guest orders
+      total_amount: totalAmount,
+      status: 'pending',
+      order_type: orderData.order_type || 'takeout',
+      customization: JSON.stringify({
+        customer_name: orderData.customer_name,
+        notes: orderData.notes,
+        payment_method: orderData.payment_method || 'wechat_pay'
+      })
+    };
+    
+    const apiOrderItems = orderData.items.map(item => {
+      const quantity = parseInt(item.quantity.toString());
+      const priceAtTime = parseFloat(item.price.toString());
+      
+      // Validate transformed values - don't parse UUID as integer
+      if (!item.id || isNaN(quantity) || isNaN(priceAtTime)) {
+        throw new Error(`Invalid item transformation: id=${item.id}, quantity=${item.quantity}, price=${item.price}`);
+      }
+      
+      return {
+        menu_item_id: item.id, // Keep as UUID string
+        quantity: quantity,
+        price_at_time: priceAtTime
+      };
+    });
+    
+    const payload = {
+      orderData: apiOrderData,
+      orderItems: apiOrderItems
+    };
+    
+    console.log('Sending order payload:', JSON.stringify(payload, null, 2));
+    
     const response = await fetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        ...orderData,
-        member_id: (memberData as any).id,
-        customer_email: (memberData as any).email
-      }),
+      body: JSON.stringify(payload),
     });
 
-    return await handleResponse(response);
+    const result = await handleResponse(response);
+    
+    return {
+      success: true,
+      order: {
+        id: result.id,
+        total_amount: totalAmount
+      },
+      message: 'Order placed successfully'
+    };
   } catch (error) {
-    // console.error('Error placing order:', error);
+    console.error('Error placing order:', error);
     return {
       success: false,
       message: (error as Error).message || 'Failed to place order'

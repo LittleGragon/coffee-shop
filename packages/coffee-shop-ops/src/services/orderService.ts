@@ -1,6 +1,11 @@
 import { executeQuery } from '@/lib/db';
 import { Order, OrderItem } from '@/types/models';
 
+// Extend global type to include pool
+declare global {
+  var pool: any;
+}
+
 export class OrderService {
   /**
    * Get all orders with optional filtering
@@ -59,41 +64,32 @@ export class OrderService {
     orderData: Omit<Order, 'id' | 'created_at'>,
     orderItems: Array<Omit<OrderItem, 'id' | 'order_id'>>
   ): Promise<Order> {
-    // Start a transaction
-    const client = await global.pool.connect();
-    
     try {
-      await client.query('BEGIN');
-      
-      // Insert the order
+      // Insert the order first
       const { user_id, total_amount, status, order_type, customization } = orderData;
       
-      const orderResult = await client.query(
+      const orders = await executeQuery<Order>(
         `INSERT INTO orders (user_id, total_amount, status, order_type, customization) 
          VALUES ($1, $2, $3, $4, $5) 
          RETURNING *`,
-        [user_id || null, total_amount, status || 'pending', order_type || 'standard', customization || null]
+        [user_id || null, total_amount, status || 'pending', order_type || 'takeout', customization || null]
       );
       
-      const order = orderResult.rows[0] as Order;
+      const order = orders[0];
       
       // Insert order items
       for (const item of orderItems) {
-        await client.query(
+        await executeQuery(
           `INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_time) 
            VALUES ($1, $2, $3, $4)`,
           [order.id, item.menu_item_id, item.quantity, item.price_at_time]
         );
       }
       
-      await client.query('COMMIT');
       return order;
     } catch (error) {
-      await client.query('ROLLBACK');
-      // console.error('Error creating order:', error);
-      throw error;
-    } finally {
-      client.release();
+      console.error('Error creating order:', error);
+      throw new Error(`Failed to create order: ${(error as Error).message}`);
     }
   }
   

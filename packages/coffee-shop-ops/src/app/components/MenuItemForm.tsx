@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useRef } from 'react';
+import { useState, FormEvent, useRef, useEffect } from 'react';
 import { MenuItem } from '@/types/models';
 import { 
   TextField, 
@@ -13,10 +13,19 @@ import {
   InputAdornment,
   FormHelperText,
   Divider,
-  Link as MuiLink
+  Link as MuiLink,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem as MuiMenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ImageIcon from '@mui/icons-material/Image';
+import AddIcon from '@mui/icons-material/Add';
 
 interface MenuItemFormProps {
   initialData?: Partial<MenuItem>;
@@ -48,6 +57,29 @@ export default function MenuItemForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Category management state
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCategoryDialogOpen, setNewCategoryDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const categoriesData = await response.json();
+          setCategories(categoriesData);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -65,6 +97,51 @@ export default function MenuItemForm({
         setImagePreviewError(null);
       }
     }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    if (value === 'ADD_NEW') {
+      setNewCategoryDialogOpen(true);
+    } else {
+      setFormData(prev => ({ ...prev, category: value }));
+    }
+  };
+
+  const handleAddNewCategory = async () => {
+    if (!newCategoryName.trim()) {
+      setCategoryError('Category name is required');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newCategoryName.trim() }),
+      });
+
+      if (response.ok) {
+        const newCategory = newCategoryName.trim();
+        setCategories(prev => [...prev, newCategory].sort());
+        setFormData(prev => ({ ...prev, category: newCategory }));
+        setNewCategoryName('');
+        setNewCategoryDialogOpen(false);
+        setCategoryError(null);
+      } else {
+        const data = await response.json();
+        setCategoryError(data.error || 'Failed to add category');
+      }
+    } catch (error) {
+      setCategoryError('Failed to add category');
+    }
+  };
+
+  const handleCancelNewCategory = () => {
+    setNewCategoryName('');
+    setNewCategoryDialogOpen(false);
+    setCategoryError(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -219,18 +296,30 @@ export default function MenuItemForm({
 
       {/* Category Field */}
       <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          id="category"
-          name="category"
-          label="Category"
-          value={formData.category}
-          onChange={handleChange}
-          error={!!errors.category}
-          helperText={errors.category}
-          required
-          variant="outlined"
-        />
+        <FormControl fullWidth variant="outlined" error={!!errors.category} required>
+          <InputLabel id="category-label">Category</InputLabel>
+          <Select
+            labelId="category-label"
+            id="category"
+            name="category"
+            value={formData.category || ''}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            label="Category"
+          >
+            {categories.map((category) => (
+              <MuiMenuItem key={category} value={category}>
+                {category}
+              </MuiMenuItem>
+            ))}
+            <MuiMenuItem value="ADD_NEW" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+              <AddIcon sx={{ mr: 1, fontSize: 20 }} />
+              Add New Category...
+            </MuiMenuItem>
+          </Select>
+          {errors.category && (
+            <FormHelperText>{errors.category}</FormHelperText>
+          )}
+        </FormControl>
       </Box>
 
       {/* Description Field */}
@@ -414,6 +503,35 @@ export default function MenuItemForm({
           {isSubmitting ? 'Saving...' : initialData.id ? 'Update Item' : 'Create Item'}
         </Button>
       </Box>
+
+      {/* New Category Dialog */}
+      <Dialog open={newCategoryDialogOpen} onClose={handleCancelNewCategory} maxWidth="sm" fullWidth>
+        <DialogTitle>Add New Category</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Category Name"
+            fullWidth
+            variant="outlined"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            error={!!categoryError}
+            helperText={categoryError}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAddNewCategory();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelNewCategory}>Cancel</Button>
+          <Button onClick={handleAddNewCategory} variant="contained">
+            Add Category
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

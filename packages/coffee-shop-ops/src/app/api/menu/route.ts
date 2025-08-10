@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+// Handle preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
 // GET /api/menu - Get all menu items
 export async function GET(request: NextRequest) {
   try {
@@ -12,12 +24,12 @@ export async function GET(request: NextRequest) {
       : undefined;
     
     const menuItems = await menuService.getAllItems({ category, isAvailable });
-    return NextResponse.json(menuItems);
+    return NextResponse.json(menuItems, { headers: corsHeaders });
   } catch (error) {
     // console.error('Error fetching menu items:', error);
     return NextResponse.json(
       { error: 'Failed to fetch menu items' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -31,17 +43,17 @@ export async function POST(request: NextRequest) {
     if (!body.name || !body.price || !body.category) {
       return NextResponse.json(
         { error: 'Name, price, and category are required' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
     
     const newItem = await menuService.addItem(body);
-    return NextResponse.json(newItem, { status: 201 });
+    return NextResponse.json(newItem, { status: 201, headers: corsHeaders });
   } catch (error) {
     // console.error('Error creating menu item:', error);
     return NextResponse.json(
       { error: 'Failed to create menu item' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
