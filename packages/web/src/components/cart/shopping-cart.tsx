@@ -1,9 +1,17 @@
-import { useCartStore } from '@/stores/cart-store';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { Trash2 } from 'lucide-react';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+// Material UI imports
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
+import { useCartStore } from '@/stores/cart-store';
 
 interface ShoppingCartProps {
   open: boolean;
@@ -15,69 +23,191 @@ export function ShoppingCart({ open, onOpenChange }: ShoppingCartProps) {
 
   const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
+  const handleQuantityChange = (id: string, value: string) => {
+    const quantity = parseInt(value);
+    if (!Number.isNaN(quantity) && quantity > 0) {
+      updateQuantity(id, quantity);
+    }
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg bg-cream">
-        <SheetHeader className="px-6">
-          <SheetTitle className="text-coffee-brown">Shopping Cart</SheetTitle>
-        </SheetHeader>
-        
-        <div className="flex-1 overflow-y-auto px-6">
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={handleClose}
+      PaperProps={{
+        sx: {
+          width: { xs: '100%', sm: 400 },
+          maxWidth: '100%',
+          bgcolor: '#f8f5f0', // cream color
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            p: 2,
+            borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          <Typography variant="h6" color="primary">
+            Shopping Cart
+          </Typography>
+          <IconButton onClick={handleClose} edge="end">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        {/* Cart Items */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: 'auto',
+            p: 2,
+          }}
+        >
           {items.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-4">
-              <p className="text-coffee-brown/80">Your cart is empty.</p>
-              <Button onClick={() => onOpenChange(false)} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                gap: 2,
+              }}
+            >
+              <RemoveShoppingCartIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+              <Typography color="text.secondary">Your cart is empty.</Typography>
+              <Button
+                variant="contained"
+                onClick={handleClose}
+                sx={{
+                  bgcolor: '#8a9a5b', // sage green
+                  color: '#5d4037', // coffee brown
+                  '&:hover': {
+                    bgcolor: 'rgba(138, 154, 91, 0.9)',
+                  },
+                }}
+              >
                 Continue Shopping
               </Button>
-            </div>
+            </Box>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {items.map(item => (
-                <div key={item.id} className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-4">
-                    <img src={item.image} alt={item.name} className="h-16 w-16 rounded-md object-cover" />
-                    <div>
-                      <h4 className="font-semibold text-coffee-brown">{item.name}</h4>
-                      <p className="text-sm text-coffee-brown/80">${item.price.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                      className="h-8 w-16 text-center"
-                    />
-                    <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
+            <Box>
+              {items.map((item, index) => (
+                <Box key={item.id}>
+                  {index > 0 && <Divider sx={{ my: 2 }} />}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt={item.name}
+                        sx={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 1,
+                          objectFit: 'cover',
+                        }}
+                      />
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ color: '#5d4037' }}>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'rgba(93, 64, 55, 0.8)' }}>
+                          ${item.price.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <TextField
+                        type="number"
+                        size="small"
+                        inputProps={{ min: 1, style: { textAlign: 'center' } }}
+                        value={item.quantity}
+                        onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                        sx={{ width: 60 }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => removeFromCart(item.id)}
+                        color="error"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </Box>
               ))}
-            </div>
+            </Box>
           )}
-        </div>
-        
+        </Box>
+
+        {/* Footer with total and checkout button */}
         {items.length > 0 && (
-          <SheetFooter className="bg-cream p-6">
-            <div className="w-full space-y-4">
-              <div className="flex justify-between font-bold text-lg text-coffee-brown">
-                <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-              <Link to="/checkout" className="w-full">
-                <Button className="w-full bg-sage-green text-coffee-brown hover:bg-sage-green/90" onClick={() => onOpenChange(false)}>
-                  Checkout
-                </Button>
-              </Link>
-              <Button variant="outline" className="w-full" onClick={clearCart}>
-                Clear Cart
-              </Button>
-            </div>
-          </SheetFooter>
+          <Box
+            sx={{
+              p: 2,
+              borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+              bgcolor: '#f8f5f0', // cream color
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6" sx={{ color: '#5d4037' }}>
+                Total:
+              </Typography>
+              <Typography variant="h6" sx={{ color: '#5d4037' }}>
+                ${total.toFixed(2)}
+              </Typography>
+            </Box>
+
+            <Button
+              component={Link}
+              to="/checkout"
+              variant="contained"
+              fullWidth
+              startIcon={<ShoppingCartCheckoutIcon />}
+              onClick={handleClose}
+              sx={{
+                mb: 1,
+                bgcolor: '#8a9a5b', // sage green
+                color: '#5d4037', // coffee brown
+                '&:hover': {
+                  bgcolor: 'rgba(138, 154, 91, 0.9)',
+                },
+              }}
+            >
+              Checkout
+            </Button>
+
+            <Button
+              variant="outlined"
+              fullWidth
+              startIcon={<RemoveShoppingCartIcon />}
+              onClick={clearCart}
+              sx={{
+                borderColor: 'rgba(93, 64, 55, 0.5)',
+                color: '#5d4037',
+                '&:hover': {
+                  borderColor: '#5d4037',
+                  bgcolor: 'rgba(93, 64, 55, 0.04)',
+                },
+              }}
+            >
+              Clear Cart
+            </Button>
+          </Box>
         )}
-      </SheetContent>
-    </Sheet>
+      </Box>
+    </Drawer>
   );
 }

@@ -1,13 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from '@/hooks/use-toast';
-import { fetchMemberData, processTopUp, fetchMemberOrders } from '@/lib/api';
-import { User, Wallet, ShoppingBag, CreditCard } from 'lucide-react';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+// Icons
+import PersonIcon from '@mui/icons-material/Person';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+// Material UI imports
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import CircularProgress from '@mui/material/CircularProgress';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { fetchMemberData, processTopUp } from '@/lib/api';
 
 type MemberData = {
   name: string;
@@ -23,28 +48,37 @@ export function MembershipPage() {
   const [memberData, setMemberData] = useState<MemberData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadMemberData = async () => {
+  const loadMemberData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchMemberData();
       setMemberData(data);
-    } catch (error) {
-      console.error("Failed to fetch member data:", error);
+    } catch (_error) {
+      // Error would be logged to a proper logging service in production
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadMemberData();
-  }, []);
+  }, [loadMemberData]);
 
   const renderContent = () => {
     if (loading) {
-      return <div className="text-center py-8">Loading your membership details...</div>;
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+          <CircularProgress />
+          <Typography sx={{ ml: 2 }}>Loading your membership details...</Typography>
+        </Box>
+      );
     }
     if (!memberData) {
-      return <div className="text-center py-8 text-red-500">Could not load member data.</div>;
+      return (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography color="error">Could not load member data.</Typography>
+        </Box>
+      );
     }
 
     switch (activeTab) {
@@ -60,87 +94,123 @@ export function MembershipPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-coffee-brown">Membership</h1>
-        <p className="text-lg text-coffee-brown/80 mt-2">Your personal coffee hub.</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <aside className="md:col-span-1">
-          <nav className="flex flex-col space-y-2 sticky top-24">
-            <Button variant={activeTab === 'profile' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('profile')} className="justify-start gap-2">
-              <User className="h-4 w-4" /> Profile
-            </Button>
-            <Button variant={activeTab === 'balance' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('balance')} className="justify-start gap-2">
-              <Wallet className="h-4 w-4" /> Balance & Top-up
-            </Button>
-            <Button variant={activeTab === 'history' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('history')} className="justify-start gap-2">
-              <ShoppingBag className="h-4 w-4" /> Order History
-            </Button>
-          </nav>
-        </aside>
-        <main className="md:col-span-3">
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography variant="h3" component="h1" color="primary" gutterBottom fontWeight="bold">
+          Membership
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Your personal coffee hub.
+        </Typography>
+      </Box>
+
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={3}>
+          <Paper elevation={2} sx={{ position: 'sticky', top: 24 }}>
+            <List component="nav">
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={activeTab === 'profile'}
+                  onClick={() => setActiveTab('profile')}
+                >
+                  <ListItemIcon>
+                    <PersonIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Profile" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={activeTab === 'balance'}
+                  onClick={() => setActiveTab('balance')}
+                >
+                  <ListItemIcon>
+                    <AccountBalanceWalletIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Balance & Top-up" />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={activeTab === 'history'}
+                  onClick={() => setActiveTab('history')}
+                >
+                  <ListItemIcon>
+                    <ShoppingBagIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Order History" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={9}>
           {renderContent()}
-        </main>
-      </div>
-    </div>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
 function ProfileSection({ user }: { user: { name: string; memberSince: string } }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
-        <CardDescription>Manage your account details.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" defaultValue={user.name} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" defaultValue={`${user.name.toLowerCase().replace(' ', '.')}@example.com`} />
-        </div>
-        <p className="text-sm text-muted-foreground">Member since: {user.memberSince}</p>
+    <Card elevation={3}>
+      <CardHeader title="Personal Information" subheader="Manage your account details" />
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <TextField label="Full Name" defaultValue={user.name} fullWidth />
+
+        <TextField
+          label="Email"
+          type="email"
+          defaultValue={`${user.name.toLowerCase().replace(' ', '.')}@example.com`}
+          fullWidth
+        />
+
+        <Typography variant="body2" color="text.secondary">
+          Member since: {user.memberSince}
+        </Typography>
       </CardContent>
-      <CardFooter>
-        <Button className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">Save Changes</Button>
-      </CardFooter>
+      <CardActions sx={{ p: 2, pt: 0 }}>
+        <Button variant="contained" color="secondary">
+          Save Changes
+        </Button>
+      </CardActions>
     </Card>
   );
 }
 
-function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuccessfulTopUp: () => void }) {
+function BalanceSection({
+  balance,
+  onSuccessfulTopUp,
+}: {
+  balance: number;
+  onSuccessfulTopUp: () => void;
+}) {
   const [customAmount, setCustomAmount] = useState('');
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   const handleTopUp = async (amount: number) => {
     setIsSubmitting(true);
     try {
       const result = await processTopUp(amount);
       if (result.success) {
-        toast({
-          title: "Top-up Successful!",
+        toast.success('Top-up Successful!', {
           description: `$${amount.toFixed(2)} has been added. Your new balance is $${result.newBalance?.toFixed(2)}.`,
         });
         onSuccessfulTopUp();
         setCustomAmount('');
       } else {
-        toast({
-          title: "Top-up Failed",
-          description: result.message || "An error occurred.",
-          variant: "destructive",
+        toast.error('Top-up Failed', {
+          description: result.message || 'An error occurred.',
         });
       }
-    } catch (error) {
-      toast({
-        title: "Top-up Failed",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
+    } catch (_error) {
+      toast.error('Top-up Failed', {
+        description: 'An unexpected error occurred.',
       });
     } finally {
       setIsSubmitting(false);
@@ -148,55 +218,64 @@ function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuc
   };
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Balance</CardTitle>
-        </CardHeader>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Card elevation={3}>
+        <CardHeader title="Current Balance" />
         <CardContent>
-          <p className="text-5xl font-bold text-coffee-brown">${balance.toFixed(2)}</p>
+          <Typography variant="h3" color="primary" fontWeight="bold">
+            ${balance.toFixed(2)}
+          </Typography>
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Top-up Your Balance</CardTitle>
-          <CardDescription>Add funds to your account for faster checkout.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            {[20, 50, 100].map(amount => (
-              <Button 
-                key={amount} 
-                variant={selectedAmount === amount ? "default" : "outline"}
+
+      <Card elevation={3}>
+        <CardHeader
+          title="Top-up Your Balance"
+          subheader="Add funds to your account for faster checkout"
+        />
+        <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <ButtonGroup variant="outlined" fullWidth>
+            {[20, 50, 100].map((amount) => (
+              <Button
+                key={amount}
+                variant={selectedAmount === amount ? 'contained' : 'outlined'}
                 onClick={() => {
                   setSelectedAmount(amount);
                   setCustomAmount('');
-                }} 
+                }}
                 disabled={isSubmitting}
+                color="secondary"
               >
                 ${amount}
               </Button>
             ))}
-          </div>
+          </ButtonGroup>
+
           {selectedAmount && (
-            <div className="flex justify-center">
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
               <Button
-                className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
+                variant="contained"
+                color="secondary"
                 onClick={() => {
                   handleTopUp(selectedAmount);
                   setSelectedAmount(null);
                 }}
                 disabled={isSubmitting}
+                startIcon={<CreditCardIcon />}
               >
-                {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add ${selectedAmount}</>}
+                {isSubmitting ? 'Adding...' : `Add $${selectedAmount}`}
               </Button>
-            </div>
+            </Box>
           )}
-          <Separator className="my-4" />
-          <div className="space-y-2">
-            <Label>Or enter a custom amount:</Label>
-            <div className="flex items-center gap-4">
-              <Input
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Or enter a custom amount:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TextField
                 placeholder="Custom amount"
                 type="number"
                 value={customAmount}
@@ -205,50 +284,61 @@ function BalanceSection({ balance, onSuccessfulTopUp }: { balance: number; onSuc
                   setSelectedAmount(null);
                 }}
                 disabled={isSubmitting}
+                fullWidth
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                }}
               />
               <Button
-                className="bg-sage-green text-coffee-brown hover:bg-sage-green/90"
+                variant="contained"
+                color="secondary"
                 onClick={() => handleTopUp(parseFloat(customAmount))}
                 disabled={isSubmitting || !customAmount || parseFloat(customAmount) <= 0}
+                startIcon={<CreditCardIcon />}
               >
-                {isSubmitting ? 'Adding...' : <><CreditCard className="h-4 w-4 mr-2" /> Add</>}
+                {isSubmitting ? 'Adding...' : 'Add'}
               </Button>
-            </div>
-          </div>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
-    </div>
+    </Box>
   );
 }
 
-function OrderHistorySection({ history }: { history: { id: string; date: string; items: string; total: number }[] }) {
+function OrderHistorySection({
+  history,
+}: {
+  history: { id: string; date: string; items: string; total: number }[];
+}) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Order History</CardTitle>
-        <CardDescription>Review your past purchases.</CardDescription>
-      </CardHeader>
+    <Card elevation={3}>
+      <CardHeader title="Order History" subheader="Review your past purchases" />
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Items</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {history.map(order => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
-                <TableCell>{order.date}</TableCell>
-                <TableCell>{order.items}</TableCell>
-                <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+        <TableContainer component={Paper} elevation={0}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order ID</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Items</TableCell>
+                <TableCell align="right">Total</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {history.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell component="th" scope="row" sx={{ fontWeight: 'medium' }}>
+                    {order.id}
+                  </TableCell>
+                  <TableCell>{order.date}</TableCell>
+                  <TableCell>{order.items}</TableCell>
+                  <TableCell align="right">${order.total.toFixed(2)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
     </Card>
   );

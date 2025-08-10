@@ -1,24 +1,35 @@
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useCartStore } from '@/stores/cart-store';
-import { ShoppingCart as ShoppingCartSidebar } from '@/components/cart/shopping-cart';
-import { Logo } from './logo';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import MenuIcon from '@mui/icons-material/Menu';
+import PersonIcon from '@mui/icons-material/Person';
+// Material UI imports
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useTheme } from '@mui/material/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Link as RouterLink } from 'react-router-dom';
+import { AuthModal } from '@/components/AuthModal';
+import { useAuthStore } from '@/stores/auth-store';
+import { useCartStore } from '@/stores/cart-store';
+import { useWishlistStore } from '@/stores/wishlist-store';
 
-const navLinks = [
-  { href: '/menu', label: 'Menu' },
-  { href: '/cakes', label: 'Cakes' },
-  { href: '/reservations', label: 'Reservations' },
-  { href: '/membership', label: 'Membership' },
+// Navigation items
+const pages = [
+  { label: 'Menu', path: '/menu' },
+  { label: 'About', path: '/about' },
+  { label: 'Locations', path: '/locations' },
+  { label: 'Contact', path: '/contact' },
 ];
 
 interface HeaderProps {
@@ -26,117 +37,218 @@ interface HeaderProps {
 }
 
 export function Header({ onAuthClick }: HeaderProps) {
-  const [isCartOpen, setCartOpen] = useState(false);
-  const [isMenuOpen, setMenuOpen] = useState(false);
-  const { items } = useCartStore();
-  const { user, logout, isAuthenticated } = useAuth();
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `transition-colors hover:text-foreground/80 ${
-      isActive ? 'text-foreground' : 'text-foreground/60'
-    }`;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const { items: cartItems } = useCartStore();
+  const { items: wishlistItems } = useWishlistStore();
+
+  // Calculate cart item count for badge (will be used in a future feature)
+  const _cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const wishlistItemCount = wishlistItems.length;
+
+  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  // Handle authentication click based on user state (used in button onClick)
+  const _handleAuthClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (isAuthenticated) {
+      handleOpenUserMenu(event);
+    } else {
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    handleCloseUserMenu();
+  };
 
   return (
-    <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 hidden md:flex">
-            <div className="mr-6 flex items-center space-x-2">
-              <Link to="/" className="flex items-center gap-2">
-                <Logo />
-              </Link>
-            </div>
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.label}
-                  to={link.href}
-                  className={navLinkClass}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
+    <AppBar position="static" color="primary">
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          {/* Logo for desktop */}
+          <LocalCafeIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <Typography
+            variant="h6"
+            noWrap
+            component={RouterLink}
+            to="/"
+            sx={{
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Coffee Shop Buddy
+          </Typography>
 
-          <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-            <div className="md:hidden">
+          {/* Mobile menu */}
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="menu"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: 'block', md: 'none' },
+              }}
+            >
+              {pages.map((page) => (
+                <MenuItem
+                  key={page.label}
+                  onClick={handleCloseNavMenu}
+                  component={RouterLink}
+                  to={page.path}
+                >
+                  <Typography textAlign="center">{page.label}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+
+          {/* Logo for mobile */}
+          <LocalCafeIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <Typography
+            variant="h6"
+            noWrap
+            component={RouterLink}
+            to="/"
+            sx={{
+              mr: 2,
+              display: { xs: 'flex', md: 'none' },
+              flexGrow: 1,
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Coffee Shop
+          </Typography>
+
+          {/* Desktop menu */}
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+            {pages.map((page) => (
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setMenuOpen(!isMenuOpen)}
+                key={page.label}
+                component={RouterLink}
+                to={page.path}
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                <span className="sr-only">Toggle Menu</span>
+                {page.label}
               </Button>
-            </div>
-            <div className="flex-1 md:flex-grow-0 md:hidden">
-              <Link to="/" className="flex items-center gap-2">
-                <Logo />
-              </Link>
-            </div>
-            <div className="flex items-center space-x-2">
+            ))}
+          </Box>
+
+          {/* Right side icons */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* Wishlist */}
+            <Tooltip title="Wishlist">
+              <IconButton component={RouterLink} to="/wishlist" color="inherit" sx={{ ml: 1 }}>
+                <Badge badgeContent={wishlistItemCount} color="secondary">
+                  <FavoriteIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+
+            {/* User menu */}
+            <Box sx={{ ml: 1 }}>
               {isAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                      <User className="h-4 w-4" />
-                      <span className="hidden sm:inline">{user?.name}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <>
+                  <Tooltip title="Account settings">
+                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                      <Avatar alt={user?.name || 'User'} src={user?.avatar}>
+                        {user?.name?.charAt(0) || <PersonIcon />}
+                      </Avatar>
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    sx={{ mt: '45px' }}
+                    id="menu-appbar"
+                    anchorEl={anchorElUser}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    open={Boolean(anchorElUser)}
+                    onClose={handleCloseUserMenu}
+                  >
+                    <MenuItem component={RouterLink} to="/membership" onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center">My Account</Typography>
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>
+                      <Typography textAlign="center">Logout</Typography>
+                    </MenuItem>
+                  </Menu>
+                </>
               ) : (
-                <Button variant="ghost" size="sm" onClick={onAuthClick}>
-                  <User className="h-4 w-4 mr-2" />
-                  Login
+                <Button
+                  color="inherit"
+                  onClick={onAuthClick || (() => setIsAuthModalOpen(true))}
+                  startIcon={<PersonIcon />}
+                >
+                  {isMobile ? '' : 'Login'}
                 </Button>
               )}
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                onClick={() => setCartOpen(true)}
-              >
-                <ShoppingCart className="h-6 w-6" />
-                {totalItems > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full p-2 text-xs"
-                  >
-                    {totalItems}
-                  </Badge>
-                )}
-                <span className="sr-only">Open Cart</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <nav className="flex flex-col items-start space-y-4 p-4">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.label}
-                  to={link.href}
-                  className={navLinkClass}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-        )}
-      </header>
-      <ShoppingCartSidebar open={isCartOpen} onOpenChange={setCartOpen} />
-    </>
+            </Box>
+          </Box>
+        </Toolbar>
+      </Container>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLogin={(user, token) => {
+          // Handle login in the auth store
+          useAuthStore.getState().login(user, token);
+        }}
+      />
+    </AppBar>
   );
 }

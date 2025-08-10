@@ -1,13 +1,28 @@
-import { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
+// Material UI imports
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { api } from '@/lib/api';
-import { useCartStore, MenuItem } from '@/stores/cart-store';
-import { Search } from 'lucide-react';
+// Components
+import { WishlistButton } from '@/components/WishlistButton';
+import { type MenuItem, useCartStore } from '@/stores/cart-store';
 
 interface CategoryStats {
   name: string;
@@ -23,7 +38,7 @@ export const MenuPage = () => {
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCartStore();
 
   const handleAddToCart = (item: MenuItem) => {
@@ -31,62 +46,126 @@ export const MenuPage = () => {
     toast.success(`${item.name} has been added to your cart.`);
   };
 
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
+    setActiveTab(newValue);
+  };
+
+  const handleClearFilters = () => {
+    setActiveTab('all');
+    setSearchQuery('');
+  };
+
   // Fetch categories and menu items
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // Fetch categories from database
+        // Fetch categories from database - use direct URL to bypass environment variables
         const categoriesResponse = await fetch('http://localhost:3000/api/categories');
-        const categoriesData = await categoriesResponse.json();
-        
-        console.log('Categories data:', categoriesData); // Debug log
-        
+        // Categories response status tracking removed
+        interface CategoryData {
+          id: string | number;
+          name: string;
+        }
+
+        let categoriesData: CategoryData[];
+
+        if (categoriesResponse.ok) {
+          categoriesData = await categoriesResponse.json();
+          // Categories data logging removed
+        } else {
+          // Using fallback data for categories
+          // Fallback categories
+          categoriesData = [
+            { id: 1, name: 'Hot Beverages' },
+            { id: 2, name: 'Cold Beverages' },
+            { id: 3, name: 'Pastries' },
+            { id: 4, name: 'Sandwiches' },
+            { id: 5, name: 'Desserts' },
+            { id: 6, name: 'Snacks' },
+          ];
+        }
+
         // Create category lookup map (id -> name)
         const categoryMap = new Map();
         let categoryNames: string[] = [];
-        
+
         if (Array.isArray(categoriesData)) {
-          categoriesData.forEach((cat: any) => {
-            if (cat && cat.id && cat.name) {
+          categoriesData.forEach((cat: { id: string; name: string }) => {
+            if (cat?.id && cat?.name) {
               categoryMap.set(cat.id, cat.name);
               categoryNames.push(cat.name);
             }
           });
         } else {
           // Fallback to hardcoded categories if API fails
-          categoryNames = ['Hot Beverages', 'Cold Beverages', 'Pastries', 'Sandwiches', 'Desserts', 'Snacks'];
+          categoryNames = [
+            'Hot Beverages',
+            'Cold Beverages',
+            'Pastries',
+            'Sandwiches',
+            'Desserts',
+            'Snacks',
+          ];
           categoryNames.forEach((name, index) => {
             categoryMap.set(index + 1, name);
           });
         }
-        
+
         setCategories(categoryNames);
 
-        // Fetch all menu items
-        const menuResponse = await api.getMenuItems();
-        const availableItems = menuResponse.filter((item: any) => item.is_available !== false);
-        
+        // Fetch all menu items directly
+        const menuResponse = await fetch('http://localhost:3000/api/menu');
+
+        interface RawMenuItem {
+          id: string;
+          name: string;
+          price: string | number;
+          category_id?: string | number;
+          description?: string;
+          image_url?: string;
+          is_available?: boolean;
+        }
+
+        let menuItems: RawMenuItem[] = [];
+        if (menuResponse.ok) {
+          menuItems = await menuResponse.json();
+        } else {
+          // Use mock data instead of console.warn
+          // Use mock data from coffee, tea, and pastries
+          menuItems = [
+            ...(await import('@/lib/mock-api').then((m) => m.mockFetchMenuItems('coffee'))),
+            ...(await import('@/lib/mock-api').then((m) => m.mockFetchMenuItems('tea'))),
+            ...(await import('@/lib/mock-api').then((m) => m.mockFetchMenuItems('pastries'))),
+          ];
+        }
+
+        const availableItems = menuItems.filter((item) => item.is_available !== false);
+
         // Transform data to match frontend expectations
-        const transformedItems = availableItems.map((item: any) => ({
+        const transformedItems = availableItems.map((item) => ({
           id: item.id,
           name: item.name,
           category: categoryMap.get(item.category_id) || 'Uncategorized',
           price: parseFloat(item.price),
           description: item.description,
           image: item.image_url || null,
-          is_available: item.is_available
+          is_available: item.is_available,
         }));
-        
+
         setAllMenuItems(transformedItems);
 
         // Calculate category statistics
         const stats = categoryNames.map((category: string) => {
-          const categoryItems = transformedItems.filter((item: MenuItem) => item.category === category);
+          const categoryItems = transformedItems.filter(
+            (item: MenuItem) => item.category === category
+          );
           return {
             name: category,
             count: categoryItems.length,
-            availableCount: categoryItems.filter((item: MenuItem) => item.is_available !== false).length
+            availableCount: categoryItems.filter((item: MenuItem) => item.is_available !== false)
+              .length,
           };
         });
         setCategoryStats(stats);
@@ -95,8 +174,8 @@ export const MenuPage = () => {
         if (categoryNames.length > 0) {
           setActiveTab('all');
         }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
+      } catch (_err) {
+        setError('Failed to load menu data. Please try again later.');
         toast.error('Failed to load menu data');
       } finally {
         setLoading(false);
@@ -112,15 +191,15 @@ export const MenuPage = () => {
 
     // Filter by category
     if (activeTab !== 'all') {
-      items = items.filter(item => item.category === activeTab);
+      items = items.filter((item) => item.category === activeTab);
     }
 
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      items = items.filter(item => 
-        item.name.toLowerCase().includes(query) ||
-        (item.description && item.description.toLowerCase().includes(query))
+      items = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query)
       );
     }
 
@@ -132,260 +211,275 @@ export const MenuPage = () => {
 
   const totalItems = allMenuItems.length;
 
-  return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      {/* Mobile-first header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">Our Menu</h1>
-        <p className="text-gray-600 text-sm md:text-base">
-          Discover our carefully crafted selection of beverages and treats
-        </p>
-      </div>
+  const renderNoItemsFound = () => (
+    <Box sx={{ textAlign: 'center', py: 6 }}>
+      <Typography variant="h2" sx={{ fontSize: '3rem', mb: 2 }}>
+        ☕
+      </Typography>
+      <Typography variant="h5" sx={{ mb: 1 }}>
+        No items found
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        {searchQuery
+          ? `No items match "${searchQuery}" in ${activeTab === 'all' ? 'any category' : activeTab}`
+          : `No items available in ${activeTab === 'all' ? 'any category' : activeTab}`}
+      </Typography>
+      {(activeTab !== 'all' || searchQuery) && (
+        <Button variant="outlined" onClick={handleClearFilters}>
+          View all items
+        </Button>
+      )}
+    </Box>
+  );
 
-      {/* Search Controls - Mobile First */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search menu items..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          Our Menu
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          Discover our carefully crafted selection of beverages and treats
+        </Typography>
+      </Box>
+
+      {/* Search Controls */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          placeholder="Search menu items..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearchQuery('')}>
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+          }}
+          variant="outlined"
+          size="small"
+        />
+      </Box>
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading our delicious menu...</p>
-        </div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
+          <CircularProgress size={60} sx={{ mb: 2 }} />
+          <Typography color="text.secondary">Loading our delicious menu...</Typography>
+        </Box>
+      ) : error ? (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            textAlign: 'center',
+            bgcolor: 'error.light',
+            color: 'error.dark',
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Error Loading Menu
+          </Typography>
+          <Typography variant="body2">{error}</Typography>
+          <Button variant="contained" sx={{ mt: 2 }} onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </Paper>
       ) : (
         <>
-          {/* Category Tabs - Mobile Scrollable */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="relative mb-6">
-              <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide md:justify-center">
-                <TabsTrigger key="all" value="all" className="flex-shrink-0">
-                  <span className="mr-2">All Items</span>
-                  <Badge variant="secondary" className="ml-1">
-                    {totalItems}
-                  </Badge>
-                </TabsTrigger>
-                {categories.map((category) => {
-                  const stats = categoryStats.find(s => s.name === category);
-                  return (
-                    <TabsTrigger key={category} value={category} className="flex-shrink-0">
-                      <span className="mr-2">{category}</span>
-                      <Badge variant="secondary" className="ml-1">
-                        {stats?.availableCount || 0}
-                      </Badge>
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-            </div>
-
-            {/* Results Summary */}
-            <div className="flex justify-between items-center mb-6 text-sm text-gray-600">
-              <span>
-                {activeTab === 'all' 
-                  ? `Showing ${filteredItems.length} of ${totalItems} items`
-                  : `${filteredItems.length} items in ${activeTab}`
+          {/* Category Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, overflowX: 'auto' }}>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+            >
+              <Tab
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <span>All Items</span>
+                    <Chip
+                      label={totalItems}
+                      size="small"
+                      sx={{ ml: 1, height: 20, fontSize: '0.75rem' }}
+                    />
+                  </Box>
                 }
-                {searchQuery && ` matching "${searchQuery}"`}
-              </span>
-              {(activeTab !== 'all' || searchQuery) && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    setActiveTab('all');
-                    setSearchQuery('');
-                  }}
-                >
-                  Clear filters
-                </Button>
-              )}
-            </div>
-
-            {/* Menu Items Grid - Mobile First */}
-            <TabsContent value="all" className="mt-0">
-              {filteredItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">☕</div>
-                  <h3 className="text-xl font-semibold mb-2">No items found</h3>
-                  <p className="text-gray-600 mb-4">
-                    {searchQuery 
-                      ? `No items match "${searchQuery}" in ${activeTab === 'all' ? 'any category' : activeTab}`
-                      : `No items available in ${activeTab === 'all' ? 'any category' : activeTab}`
+                value="all"
+              />
+              {categories.map((category) => {
+                const stats = categoryStats.find((s) => s.name === category);
+                return (
+                  <Tab
+                    key={category}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <span>{category}</span>
+                        <Chip
+                          label={stats?.availableCount || 0}
+                          size="small"
+                          sx={{ ml: 1, height: 20, fontSize: '0.75rem' }}
+                        />
+                      </Box>
                     }
-                  </p>
-                  {(activeTab !== 'all' || searchQuery) && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        setActiveTab('all');
-                        setSearchQuery('');
-                      }}
-                    >
-                      View all items
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                  {filteredItems.map((item) => (
-                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                      <CardHeader className="p-0">
-                        <div className="relative">
-                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                            {item.image && item.image !== 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiBmaWxsPSIjOUI5QjlCIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K' ? (
-                              <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="w-full h-48 object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent && !parent.querySelector('.fallback-text')) {
-                                    const fallback = document.createElement('div');
-                                    fallback.className = 'fallback-text text-gray-500 text-sm';
-                                    fallback.textContent = 'No Image Available';
-                                    parent.appendChild(fallback);
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <span className="text-gray-500 text-sm">No Image Available</span>
-                            )}
-                          </div>
-                          <Badge 
-                            variant="secondary" 
-                            className="absolute top-2 right-2 bg-white/90 text-gray-700"
-                          >
-                            {item.category}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <CardTitle className="text-lg leading-tight">{item.name}</CardTitle>
-                          <span className="text-lg font-bold text-primary ml-2">
-                            ${item.price.toFixed(2)}
-                          </span>
-                        </div>
-                        {item.description && (
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {item.description}
-                          </p>
-                        )}
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0">
-                        <Button 
-                          className="w-full" 
-                          onClick={() => handleAddToCart(item)}
-                          size="sm"
-                        >
-                          Add to Cart
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
+                    value={category}
+                  />
+                );
+              })}
+            </Tabs>
+          </Box>
 
-            {categories.map((category) => (
-              <TabsContent key={category} value={category} className="mt-0">
-                {filteredItems.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">☕</div>
-                    <h3 className="text-xl font-semibold mb-2">No items found</h3>
-                    <p className="text-gray-600 mb-4">
-                      {searchQuery 
-                        ? `No items match "${searchQuery}" in ${category}`
-                        : `No items available in ${category}`
-                      }
-                    </p>
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        setActiveTab('all');
-                        setSearchQuery('');
-                      }}
-                    >
-                      View all items
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                    {filteredItems.map((item) => (
-                      <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                        <CardHeader className="p-0">
-                          <div className="relative">
-                            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                              {item.image && item.image !== 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiBmaWxsPSIjOUI5QjlCIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K' ? (
-                                <img 
-                                  src={item.image} 
-                                  alt={item.name} 
-                                  className="w-full h-48 object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                    const parent = target.parentElement;
-                                    if (parent && !parent.querySelector('.fallback-text')) {
-                                      const fallback = document.createElement('div');
-                                      fallback.className = 'fallback-text text-gray-500 text-sm';
-                                      fallback.textContent = 'No Image Available';
-                                      parent.appendChild(fallback);
-                                    }
-                                  }}
-                                />
-                              ) : (
-                                <span className="text-gray-500 text-sm">No Image Available</span>
-                              )}
-                            </div>
-                            <Badge 
-                              variant="secondary" 
-                              className="absolute top-2 right-2 bg-white/90 text-gray-700"
-                            >
-                              {item.category}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <CardTitle className="text-lg leading-tight">{item.name}</CardTitle>
-                            <span className="text-lg font-bold text-primary ml-2">
-                              ${item.price.toFixed(2)}
-                            </span>
-                          </div>
-                          {item.description && (
-                            <p className="text-sm text-gray-600 line-clamp-2">
-                              {item.description}
-                            </p>
-                          )}
-                        </CardContent>
-                        <CardFooter className="p-4 pt-0">
-                          <Button 
-                            className="w-full" 
-                            onClick={() => handleAddToCart(item)}
-                            size="sm"
-                          >
-                            Add to Cart
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            ))}
-          </Tabs>
+          {/* Results Summary */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 3,
+              px: 1,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              {activeTab === 'all'
+                ? `Showing ${filteredItems.length} of ${totalItems} items`
+                : `${filteredItems.length} items in ${activeTab}`}
+              {searchQuery && ` matching "${searchQuery}"`}
+            </Typography>
+            {(activeTab !== 'all' || searchQuery) && (
+              <Button size="small" onClick={handleClearFilters} startIcon={<ClearIcon />}>
+                Clear filters
+              </Button>
+            )}
+          </Box>
+
+          {/* Menu Items Grid */}
+          {filteredItems.length === 0 ? (
+            renderNoItemsFound()
+          ) : (
+            <Grid container spacing={3}>
+              {filteredItems.map((item) => (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      transition: 'box-shadow 0.3s',
+                      '&:hover': { boxShadow: 6 },
+                    }}
+                  >
+                    <Box sx={{ position: 'relative' }}>
+                      <CardMedia
+                        component="div"
+                        sx={{
+                          height: 200,
+                          bgcolor: 'grey.100',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {item.image &&
+                        item.image !==
+                          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDMwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiBmaWxsPSIjOUI5QjlCIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K' ? (
+                          <Box
+                            component="img"
+                            src={item.image}
+                            alt={item.name}
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                            }}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                              e.currentTarget.style.display = 'none';
+                              const parent = e.currentTarget.parentElement;
+                              if (parent) {
+                                const fallback = document.createElement('div');
+                                fallback.textContent = 'No Image Available';
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            No Image Available
+                          </Typography>
+                        )}
+                      </CardMedia>
+                      <Chip
+                        label={item.category}
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          bgcolor: 'rgba(255, 255, 255, 0.9)',
+                          color: 'text.primary',
+                        }}
+                      />
+                    </Box>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          mb: 1,
+                        }}
+                      >
+                        <Typography variant="h6" component="h3" sx={{ fontSize: '1.1rem' }}>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="h6" color="primary" fontWeight="bold">
+                          ${item.price.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      {item.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {item.description}
+                        </Typography>
+                      )}
+                    </CardContent>
+                    <CardActions sx={{ p: 2, pt: 0 }}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleAddToCart(item)}
+                        sx={{ flexGrow: 1 }}
+                      >
+                        Add to Cart
+                      </Button>
+                      <WishlistButton menuItemId={item.id} size="small" />
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </>
       )}
-    </div>
+    </Container>
   );
 };

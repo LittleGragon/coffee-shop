@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MenuItem } from '@/types/models';
+import { WishlistCount } from '@/services/wishlistService';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -62,7 +63,8 @@ import {
   Home as HomeIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  Favorite as FavoriteIcon
 } from '@mui/icons-material';
 import CategoryManager from '@/app/components/CategoryManager';
 
@@ -82,6 +84,7 @@ export default function MenuPage() {
   const [categoryStats, setCategoryStats] = useState<CategoryStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [wishlistCounts, setWishlistCounts] = useState<Record<string, number>>({});
   
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -115,6 +118,17 @@ export default function MenuPage() {
       }
       const categoriesData = await categoriesResponse.json();
       setCategories(categoriesData);
+      
+      // Fetch wishlist counts
+      const wishlistResponse = await fetch('/api/wishlist');
+      if (wishlistResponse.ok) {
+        const wishlistData: WishlistCount[] = await wishlistResponse.json();
+        const countsMap: Record<string, number> = {};
+        wishlistData.forEach(item => {
+          countsMap[item.menu_item_id] = item.count;
+        });
+        setWishlistCounts(countsMap);
+      }
       
       // Calculate category statistics
       const stats = categoriesData.map((category: string) => {
@@ -607,6 +621,15 @@ export default function MenuPage() {
                     color={item.is_available ? 'success' : 'error'} 
                     icon={item.is_available ? <CheckCircleIcon /> : <CancelIcon />}
                   />
+                  
+                  {wishlistCounts[item.id] > 0 && (
+                    <Chip
+                      icon={<FavoriteIcon />}
+                      label={`${wishlistCounts[item.id]} likes`}
+                      size="small"
+                      color="primary"
+                    />
+                  )}
                 </Stack>
               </CardContent>
               

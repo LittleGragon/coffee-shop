@@ -1,9 +1,7 @@
-// Mock for import.meta in Jest tests
-const importMeta = {
+// Mock for import.meta
+module.exports = {
   env: {
     VITE_USE_MOCK_DATA: 'true',
-    VITE_API_BASE_URL: 'http://localhost:3001/api'
-  }
+    VITE_API_BASE_URL: '/api',
+  },
 };
-
-export default importMeta;

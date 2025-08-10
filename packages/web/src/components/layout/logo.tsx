@@ -1,26 +1,40 @@
-import { Coffee } from 'lucide-react';
+import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
 
 export function Logo({ withLink = false }: { withLink?: boolean }) {
   const logoContent = (
     <>
-      <Coffee className="h-8 w-8 text-[#4A2C2A]" />
-      <span className="text-xl font-semibold text-[#4A2C2A]">
+      <LocalCafeIcon sx={{ fontSize: 32, color: '#4A2C2A' }} />
+      <Typography
+        variant="h6"
+        component="span"
+        sx={{
+          fontWeight: 600,
+          color: '#4A2C2A',
+          ml: 1,
+        }}
+      >
         Coffee Bliss
-      </span>
+      </Typography>
     </>
   );
 
   if (withLink) {
     return (
-      <a href="/" className="flex items-center gap-2">
+      <Link
+        href="/"
+        underline="none"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {logoContent}
-      </a>
+      </Link>
     );
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      {logoContent}
-    </div>
-  );
+  return <Box sx={{ display: 'flex', alignItems: 'center' }}>{logoContent}</Box>;
 }

@@ -19,6 +19,8 @@ const config = {
     '^@/(.*)$': '<rootDir>/src/$1',
     // Mock import.meta for Vite
     '^import.meta$': '<rootDir>/src/__mocks__/import-meta.js',
+    // Mock CSS files
+    '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.js',
   },
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': ['babel-jest', { configFile: './babel.config.js' }]

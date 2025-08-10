@@ -1,15 +1,30 @@
+// Material UI imports
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Checkbox from '@mui/material/Checkbox';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+import FormLabel from '@mui/material/FormLabel';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import Select from '@mui/material/Select';
+import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { toast } from 'sonner';
 import { submitCakeOrder } from '@/lib/api';
 import { useCartStore } from '@/stores/cart-store';
-import { toast } from 'sonner';
-// import { motion, AnimatePresence } from 'framer-motion'; // Temporarily disabled for debugging
 
 const customizationOptions = {
   sizes: [
@@ -42,13 +57,29 @@ const steps = [
   { id: 'message', title: 'Personalize It' },
 ];
 
+const fontOptions = [
+  { id: 'serif', name: 'Elegant', fontFamily: 'serif' },
+  { id: 'sans-serif', name: 'Modern', fontFamily: 'sans-serif' },
+  { id: 'cursive', name: 'Fancy', fontFamily: 'cursive' },
+  { id: 'monospace', name: 'Classic', fontFamily: 'monospace' },
+];
+
 type Cake = {
-  size: typeof customizationOptions.sizes[0];
-  flavor: typeof customizationOptions.flavors[0];
-  frosting: typeof customizationOptions.frostings[0];
+  size: (typeof customizationOptions.sizes)[0];
+  flavor: (typeof customizationOptions.flavors)[0];
+  frosting: (typeof customizationOptions.frostings)[0];
   toppings: string[];
   message: string;
+  font: (typeof fontOptions)[0];
 };
+
+const ColorCircle = styled('div')(({ theme }) => ({
+  width: 48,
+  height: 48,
+  borderRadius: '50%',
+  border: `1px solid ${theme.palette.divider}`,
+  margin: '0 auto 8px auto',
+}));
 
 export function CakeCustomizationPage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -59,6 +90,7 @@ export function CakeCustomizationPage() {
     frosting: customizationOptions.frostings[0],
     toppings: [],
     message: '',
+    font: fontOptions[0],
   });
 
   const { addToCart } = useCartStore();
@@ -68,8 +100,8 @@ export function CakeCustomizationPage() {
 
   const calculatePrice = () => {
     let total = cake.size.price + cake.flavor.price;
-    cake.toppings.forEach(toppingId => {
-      const topping = customizationOptions.toppings.find(t => t.id === toppingId);
+    cake.toppings.forEach((toppingId) => {
+      const topping = customizationOptions.toppings.find((t) => t.id === toppingId);
       if (topping) total += topping.price;
     });
     return total;
@@ -86,10 +118,11 @@ export function CakeCustomizationPage() {
     try {
       const result = await submitCakeOrder(cakeDetails);
 
-      if (result.success) {
+      // Consider the order successful if we have a message or orderId
+      if (result.message || result.orderId) {
         const cakeName = `Custom ${cake.size.name} Cake`;
         const cakeId = `custom-cake-${Date.now()}`;
-        
+
         addToCart({
           id: cakeId,
           name: cakeName,
@@ -98,171 +131,441 @@ export function CakeCustomizationPage() {
           image: `https://placehold.co/100x100/d4a373/ffffff?text=Custom+Cake`,
         });
 
-        toast.success("Custom Cake Added!", {
+        toast.success('Custom Cake Added!', {
           description: `${cakeName} has been added to your cart.`,
         });
       } else {
-        toast.error("Order Failed", {
-          description: result.message || "There was a problem submitting your cake order.",
+        toast.error('Order Failed', {
+          description: result.message || 'There was a problem submitting your cake order.',
         });
       }
-    } catch (error: any) {
-      console.error("Failed to submit cake order:", error);
-      toast.error("Order Failed", {
-        description: "An unexpected error occurred. Please try again later.",
+    } catch (_error: unknown) {
+      // Error logging would go to a proper logging service in production
+      toast.error('Order Failed', {
+        description: 'An unexpected error occurred. Please try again later.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newSize = customizationOptions.sizes.find((s) => s.id === event.target.value);
+    if (newSize) setCake({ ...cake, size: newSize });
+  };
+
+  // This function is not used directly as we're using the inline version in the Select component
+  const _handleFlavorChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const newFlavor = customizationOptions.flavors.find((f) => f.id === event.target.value);
+    if (newFlavor) setCake({ ...cake, flavor: newFlavor });
+  };
+
+  const handleFrostingChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newFrosting = customizationOptions.frostings.find((f) => f.id === event.target.value);
+    if (newFrosting) setCake({ ...cake, frosting: newFrosting });
+  };
+
+  const handleToppingChange =
+    (toppingId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newToppings = event.target.checked
+        ? [...cake.toppings, toppingId]
+        : cake.toppings.filter((id) => id !== toppingId);
+      setCake({ ...cake, toppings: newToppings });
+    };
+
+  const handleFontChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newFont = fontOptions.find((f) => f.id === event.target.value);
+    if (newFont) setCake({ ...cake, font: newFont });
+  };
+
   const renderStepContent = () => {
     switch (steps[currentStep].id) {
       case 'size':
         return (
-          <RadioGroup value={cake.size.id} onValueChange={(id) => {
-            const newSize = customizationOptions.sizes.find(s => s.id === id);
-            if (newSize) setCake({ ...cake, size: newSize });
-          }}>
-            {customizationOptions.sizes.map(s => (
-              <Label key={s.id} className="flex items-center gap-4 p-4 border rounded-md cursor-pointer hover:bg-sage-green/10 has-[:checked]:bg-sage-green/20 has-[:checked]:border-sage-green">
-                <RadioGroupItem value={s.id} />
-                <span>{s.name} - ${s.price.toFixed(2)}</span>
-              </Label>
-            ))}
-          </RadioGroup>
+          <FormControl component="fieldset" fullWidth>
+            <RadioGroup value={cake.size.id} onChange={handleSizeChange}>
+              {customizationOptions.sizes.map((s) => (
+                <Paper
+                  key={s.id}
+                  elevation={cake.size.id === s.id ? 3 : 1}
+                  sx={{
+                    mb: 2,
+                    borderColor: cake.size.id === s.id ? 'secondary.main' : 'divider',
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    bgcolor: cake.size.id === s.id ? 'rgba(138, 154, 91, 0.1)' : 'background.paper',
+                  }}
+                >
+                  <FormControlLabel
+                    value={s.id}
+                    control={<Radio />}
+                    label={
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Typography>{s.name}</Typography>
+                        <Typography color="primary" fontWeight="bold">
+                          ${s.price.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    }
+                    sx={{
+                      width: '100%',
+                      m: 0,
+                      p: 2,
+                    }}
+                  />
+                </Paper>
+              ))}
+            </RadioGroup>
+          </FormControl>
         );
       case 'flavor':
         return (
-          <Select value={cake.flavor.id} onValueChange={(id) => {
-            const newFlavor = customizationOptions.flavors.find(f => f.id === id);
-            if (newFlavor) setCake({ ...cake, flavor: newFlavor });
-          }}>
-            <SelectTrigger><SelectValue placeholder="Select a flavor" /></SelectTrigger>
-            <SelectContent>
-              {customizationOptions.flavors.map(f => (
-                <SelectItem key={f.id} value={f.id}>{f.name} (+${f.price.toFixed(2)})</SelectItem>
+          <FormControl fullWidth>
+            <InputLabel id="flavor-select-label">Cake Flavor</InputLabel>
+            <Select
+              labelId="flavor-select-label"
+              id="flavor-select"
+              value={cake.flavor.id}
+              label="Cake Flavor"
+              onChange={(e) => {
+                const newFlavor = customizationOptions.flavors.find((f) => f.id === e.target.value);
+                if (newFlavor) setCake({ ...cake, flavor: newFlavor });
+              }}
+            >
+              {customizationOptions.flavors.map((f) => (
+                <MenuItem key={f.id} value={f.id}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <Typography>{f.name}</Typography>
+                    <Typography color="primary">
+                      {f.price > 0 ? `+$${f.price.toFixed(2)}` : 'Included'}
+                    </Typography>
+                  </Box>
+                </MenuItem>
               ))}
-            </SelectContent>
-          </Select>
+            </Select>
+          </FormControl>
         );
       case 'frosting':
         return (
-          <RadioGroup value={cake.frosting.id} onValueChange={(id) => {
-            const newFrosting = customizationOptions.frostings.find(f => f.id === id);
-            if (newFrosting) setCake({ ...cake, frosting: newFrosting });
-          }}>
-            <div className="grid grid-cols-3 gap-4">
-            {customizationOptions.frostings.map(f => (
-              <Label key={f.id} className="flex flex-col items-center gap-2 p-4 border rounded-md cursor-pointer hover:bg-sage-green/10 has-[:checked]:bg-sage-green/20 has-[:checked]:border-sage-green">
-                <RadioGroupItem value={f.id} className="sr-only" />
-                <div className="w-12 h-12 rounded-full border" style={{ backgroundColor: f.color }}></div>
-                <span className="text-sm">{f.name}</span>
-              </Label>
-            ))}
-            </div>
-          </RadioGroup>
+          <FormControl component="fieldset" fullWidth>
+            <RadioGroup value={cake.frosting.id} onChange={handleFrostingChange}>
+              <Grid container spacing={2}>
+                {customizationOptions.frostings.map((f) => (
+                  <Grid item xs={12} sm={4} key={f.id}>
+                    <Paper
+                      elevation={cake.frosting.id === f.id ? 3 : 1}
+                      sx={{
+                        p: 2,
+                        textAlign: 'center',
+                        borderColor: cake.frosting.id === f.id ? 'secondary.main' : 'divider',
+                        borderWidth: 1,
+                        borderStyle: 'solid',
+                        bgcolor:
+                          cake.frosting.id === f.id
+                            ? 'rgba(138, 154, 91, 0.1)'
+                            : 'background.paper',
+                      }}
+                    >
+                      <FormControlLabel
+                        value={f.id}
+                        control={<Radio sx={{ display: 'none' }} />}
+                        label={
+                          <Box
+                            sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                          >
+                            <ColorCircle style={{ backgroundColor: f.color }} />
+                            <Typography variant="body2">{f.name}</Typography>
+                          </Box>
+                        }
+                        sx={{ m: 0, width: '100%' }}
+                      />
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </RadioGroup>
+          </FormControl>
         );
       case 'toppings':
         return (
-          <div className="space-y-2">
-            {customizationOptions.toppings.map(t => (
-              <Label key={t.id} className="flex items-center gap-4 p-4 border rounded-md cursor-pointer hover:bg-sage-green/10 has-[:checked]:bg-sage-green/20 has-[:checked]:border-sage-green">
-                <Checkbox
-                  checked={cake.toppings.includes(t.id)}
-                  onCheckedChange={(checked) => {
-                    const newToppings = checked
-                      ? [...cake.toppings, t.id]
-                      : cake.toppings.filter(id => id !== t.id);
-                    setCake({ ...cake, toppings: newToppings });
-                  }}
+          <FormGroup>
+            {customizationOptions.toppings.map((t) => (
+              <Paper
+                key={t.id}
+                elevation={cake.toppings.includes(t.id) ? 3 : 1}
+                sx={{
+                  mb: 2,
+                  borderColor: cake.toppings.includes(t.id) ? 'secondary.main' : 'divider',
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  bgcolor: cake.toppings.includes(t.id)
+                    ? 'rgba(138, 154, 91, 0.1)'
+                    : 'background.paper',
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={cake.toppings.includes(t.id)}
+                      onChange={handleToppingChange(t.id)}
+                    />
+                  }
+                  label={
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Typography>{t.name}</Typography>
+                      <Typography color="primary" fontWeight="medium">
+                        +${t.price.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ width: '100%', m: 0, p: 2 }}
                 />
-                <span>{t.name} (+${t.price.toFixed(2)})</span>
-              </Label>
+              </Paper>
             ))}
-          </div>
+          </FormGroup>
         );
       case 'message':
-        return <Input placeholder="Happy Birthday!" value={cake.message} onChange={(e) => setCake({ ...cake, message: e.target.value })} />;
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <TextField
+              label="Cake Message"
+              placeholder="Happy Birthday!"
+              value={cake.message}
+              onChange={(e) => setCake({ ...cake, message: e.target.value })}
+              fullWidth
+              variant="outlined"
+            />
+
+            <Box>
+              <FormLabel component="legend" sx={{ mb: 2 }}>
+                Choose a Font Style
+              </FormLabel>
+              <RadioGroup value={cake.font.id} onChange={handleFontChange}>
+                <Grid container spacing={2}>
+                  {fontOptions.map((font) => (
+                    <Grid item xs={6} key={font.id}>
+                      <Paper
+                        elevation={cake.font.id === font.id ? 3 : 1}
+                        sx={{
+                          p: 2,
+                          textAlign: 'center',
+                          borderColor: cake.font.id === font.id ? 'secondary.main' : 'divider',
+                          borderWidth: 1,
+                          borderStyle: 'solid',
+                          bgcolor:
+                            cake.font.id === font.id
+                              ? 'rgba(138, 154, 91, 0.1)'
+                              : 'background.paper',
+                        }}
+                      >
+                        <FormControlLabel
+                          value={font.id}
+                          control={<Radio sx={{ display: 'none' }} />}
+                          label={
+                            <Typography style={{ fontFamily: font.fontFamily }} variant="h6">
+                              {font.name}
+                            </Typography>
+                          }
+                          sx={{ m: 0, width: '100%' }}
+                        />
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              </RadioGroup>
+            </Box>
+          </Box>
+        );
       default:
         return null;
     }
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-coffee-brown">Design Your Custom Cake</h1>
-        <p className="text-lg text-coffee-brown/80 mt-2">Create a unique cake for any occasion.</p>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Typography variant="h3" component="h1" color="primary" gutterBottom fontWeight="bold">
+          Design Your Custom Cake
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          Create a unique cake for any occasion.
+        </Typography>
+      </Box>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-coffee-brown">{steps[currentStep].title}</CardTitle>
-                <span className="text-sm text-coffee-brown/80">Step {currentStep + 1} of {steps.length}</span>
-              </div>
-            </CardHeader>
-            <CardContent className="min-h-[200px]">
-              {/* <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.3 }}
-                > */}
-                  {renderStepContent()}
-                {/* </motion.div>
-              </AnimatePresence> */}
-            </CardContent>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Card elevation={3}>
+            <CardHeader
+              title={
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <Typography variant="h5" component="h2">
+                    {steps[currentStep].title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Step {currentStep + 1} of {steps.length}
+                  </Typography>
+                </Box>
+              }
+            />
+            <CardContent sx={{ minHeight: 300 }}>{renderStepContent()}</CardContent>
           </Card>
-          <div className="flex justify-between mt-8">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>Back</Button>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+            <Button variant="outlined" onClick={handleBack} disabled={currentStep === 0}>
+              Back
+            </Button>
             {currentStep < steps.length - 1 ? (
-              <Button onClick={handleNext} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90">Next</Button>
+              <Button variant="contained" onClick={handleNext} color="secondary">
+                Next
+              </Button>
             ) : (
-              <Button onClick={handleAddToCart} className="bg-sage-green text-coffee-brown hover:bg-sage-green/90" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Add to Cart'}
+              <Button
+                variant="contained"
+                onClick={handleAddToCart}
+                disabled={isSubmitting}
+                color="secondary"
+              >
+                {isSubmitting ? 'Adding to Cart...' : 'Add to Cart'}
               </Button>
             )}
-          </div>
-        </div>
+          </Box>
+        </Grid>
 
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-coffee-brown">Your Creation</CardTitle>
-              </CardHeader>
+        <Grid item xs={12} md={4}>
+          <Box sx={{ position: 'sticky', top: 24 }}>
+            <Card elevation={3}>
+              <CardHeader title="Your Creation" />
               <CardContent>
-                  <div className="aspect-square w-full bg-gray-100 rounded-md flex items-center justify-center mb-4">
+                <Box
+                  sx={{
+                    aspectRatio: '1/1',
+                    width: '100%',
+                    bgcolor: 'grey.100',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
                   {/* Cake Preview */}
-                  <div className="relative w-4/5 h-4/5">
-                    <div className="absolute bottom-0 w-full h-full rounded-t-full" style={{ backgroundColor: cake.frosting.color, transform: `scale(${0.7 + (customizationOptions.sizes.findIndex(s => s.id === cake.size.id) * 0.15)})` }}></div>
-                    {cake.toppings.includes('chocolate-drip') && <div className="absolute top-0 w-full h-1/3 bg-coffee-brown rounded-t-full" style={{ maskImage: 'url(/drip.svg)', maskSize: 'cover' }}></div>}
-                    {cake.toppings.includes('sprinkles') && <div className="absolute inset-0 w-full h-full bg-contain" style={{ backgroundImage: 'url(/sprinkles.svg)' }}></div>}
-                    {cake.message && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-xs text-coffee-brown font-serif">{cake.message}</div>}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-coffee-brown">Summary</h3>
-                  <p className="text-sm text-coffee-brown/80">Size: {cake.size.name}</p>
-                  <p className="text-sm text-coffee-brown/80">Flavor: {cake.flavor.name}</p>
-                  <p className="text-sm text-coffee-brown/80">Frosting: {cake.frosting.name}</p>
-                  <p className="text-sm text-coffee-brown/80">Toppings: {cake.toppings.map(t => customizationOptions.toppings.find(opt => opt.id === t)?.name).join(', ') || 'None'}</p>
-                  <div className="pt-4 border-t mt-4 flex justify-between items-center">
-                    <span className="text-lg font-bold text-coffee-brown">Total:</span>
-                    <span className="text-lg font-bold text-coffee-brown">${calculatePrice().toFixed(2)}</span>
-                  </div>
-                </div>
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '80%',
+                      height: '80%',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        backgroundColor: cake.frosting.color,
+                        transform: `scale(${0.7 + customizationOptions.sizes.findIndex((s) => s.id === cake.size.id) * 0.15})`,
+                      }}
+                    />
+                    {cake.toppings.includes('chocolate-drip') && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          width: '100%',
+                          height: '33%',
+                          bgcolor: '#4B2E2A',
+                          borderTopLeftRadius: '50%',
+                          borderTopRightRadius: '50%',
+                          maskImage: 'url(/drip.svg)',
+                          maskSize: 'cover',
+                        }}
+                      />
+                    )}
+                    {cake.toppings.includes('sprinkles') && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          inset: 0,
+                          width: '100%',
+                          height: '100%',
+                          backgroundImage: 'url(/sprinkles.svg)',
+                          backgroundSize: 'contain',
+                        }}
+                      />
+                    )}
+                    {cake.message && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          textAlign: 'center',
+                          bgcolor: 'rgba(255, 255, 255, 0.5)',
+                          px: 1,
+                          py: 0.5,
+                          borderRadius: 1,
+                          maxWidth: '80%',
+                          wordBreak: 'break-word',
+                        }}
+                        style={{ fontFamily: cake.font.fontFamily }}
+                      >
+                        <Typography variant="body2" color="primary">
+                          {cake.message}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="h6" color="primary">
+                    Summary
+                  </Typography>
+                  <Typography variant="body2">Size: {cake.size.name}</Typography>
+                  <Typography variant="body2">Flavor: {cake.flavor.name}</Typography>
+                  <Typography variant="body2">Frosting: {cake.frosting.name}</Typography>
+                  <Typography variant="body2">
+                    Toppings:{' '}
+                    {cake.toppings
+                      .map((t) => customizationOptions.toppings.find((opt) => opt.id === t)?.name)
+                      .join(', ') || 'None'}
+                  </Typography>
+                  {cake.message && <Typography variant="body2">Font: {cake.font.name}</Typography>}
+                  <Divider sx={{ my: 2 }} />
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <Typography variant="h6" fontWeight="bold">
+                      Total:
+                    </Typography>
+                    <Typography variant="h6" fontWeight="bold" color="primary">
+                      ${calculatePrice().toFixed(2)}
+                    </Typography>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Box>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

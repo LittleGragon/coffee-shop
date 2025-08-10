@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 interface User {
   id: string;
@@ -33,12 +33,12 @@ export const useAuthState = () => {
     // Load auth state from localStorage on mount
     const savedToken = localStorage.getItem('auth_token');
     const savedUser = localStorage.getItem('auth_user');
-    
+
     if (savedToken && savedUser) {
       try {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
-      } catch (error) {
+      } catch (_error) {
         // Clear invalid data
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
@@ -65,6 +65,6 @@ export const useAuthState = () => {
     token,
     login,
     logout,
-    isAuthenticated: !!user && !!token
+    isAuthenticated: !!user && !!token,
   };
 };
