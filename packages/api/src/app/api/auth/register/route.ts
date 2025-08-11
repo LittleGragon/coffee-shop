@@ -30,7 +30,7 @@ export async function, POST(request:, NextRequest) {
       [email]
     );
 
-    if (existingUser.rows.length >, 0) {
+    if (existingUser.rows.length  > , 0) {
       throw new Error('User, already exists, with this, email');
     }
 

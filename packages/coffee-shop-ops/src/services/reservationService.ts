@@ -24,7 +24,7 @@ export class ReservationService {
         params.push(options.date);
       }
       
-      if (conditions.length >, 0) {
+      if (conditions.length  > , 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }

@@ -64,7 +64,7 @@ export async function DELETE(request:, NextRequest) {
     
     // Check if any menu items are using this category
     const menuItems = await menuService.getAllItems({ category: name });
-    if (menuItems.length >, 0) {
+    if (menuItems.length  > , 0) {
       return NextResponse.json(
         { 
           error: 'Cannot delete category that is being used by menu items',

@@ -1,4 +1,8 @@
+import React from 'react';
 import { act, renderHook } from '@testing-library/react';
+
+// Create a wrapper to provide React context for hooks
+const wrapper = ({ children }) => <React.Fragment>{children}</React.Fragment>;
 import { useCartStore } from '../../stores/cart-store';
 
 // Mock menu item for testing
@@ -31,7 +35,7 @@ describe('Cart Store', () => {
   });
 
   it('should initialize with empty cart', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     expect(result.current.items).toEqual([]);
     expect(result.current.totalPrice()).toBe(0);
@@ -39,7 +43,7 @@ describe('Cart Store', () => {
   });
 
   it('should add item to cart', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -55,7 +59,7 @@ describe('Cart Store', () => {
   });
 
   it('should increase quantity when adding same item', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -69,7 +73,7 @@ describe('Cart Store', () => {
   });
 
   it('should add multiple different items', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -82,7 +86,7 @@ describe('Cart Store', () => {
   });
 
   it('should remove item from cart', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -96,7 +100,7 @@ describe('Cart Store', () => {
   });
 
   it('should update item quantity', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -109,7 +113,7 @@ describe('Cart Store', () => {
   });
 
   it('should remove item when quantity is set to 0', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -121,7 +125,7 @@ describe('Cart Store', () => {
   });
 
   it('should clear entire cart', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -135,7 +139,7 @@ describe('Cart Store', () => {
   });
 
   it('should calculate total correctly with multiple items and quantities', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem); // 25 * 1 = 25
@@ -149,7 +153,7 @@ describe('Cart Store', () => {
   });
 
   it('should decrement item quantity', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem);
@@ -163,7 +167,7 @@ describe('Cart Store', () => {
   });
 
   it('should remove item when decremented below 1', () => {
-    const { result } = renderHook(() => useCartStore());
+    const { result } = renderHook(() => useCartStore(), { wrapper });
 
     act(() => {
       result.current.addToCart(mockMenuItem); // Quantity is 1

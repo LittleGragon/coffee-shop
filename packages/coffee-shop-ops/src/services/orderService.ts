@@ -29,7 +29,7 @@ export class OrderService {
         params.push(options.userId);
       }
       
-      if (conditions.length >, 0) {
+      if (conditions.length  > , 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }

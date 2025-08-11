@@ -24,7 +24,7 @@ export class MenuService {
         params.push(options.isAvailable);
       }
       
-      if (conditions.length >, 0) {
+      if (conditions.length  > , 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }

@@ -24,7 +24,7 @@ export class InventoryService {
         conditions.push(`current_stock <= minimum_stock`);
       }
       
-      if (conditions.length >, 0) {
+      if (conditions.length  > , 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }

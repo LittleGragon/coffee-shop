@@ -88,3 +88,9 @@ beforeEach(() => {
   localStorageMock.removeItem.mockClear();
   localStorageMock.clear.mockClear();
 });
+
+// Mock Vite environment variables for tests
+window.__VITE_ENV = {
+  VITE_USE_MOCK_DATA: "true",
+  VITE_API_BASE_URL: "/api",
+};

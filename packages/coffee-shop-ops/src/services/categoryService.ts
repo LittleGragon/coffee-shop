@@ -120,7 +120,7 @@ export class CategoryService {
       [id]
     );
 
-    if (menuItemsCount[0].count >, 0) {
+    if (menuItemsCount[0].count  > , 0) {
       throw new Error('Cannot delete category that is being used by menu items');
     }
 
@@ -144,7 +144,7 @@ export class CategoryService {
       [id]
     );
 
-    if (menuItemsCount[0].count >, 0) {
+    if (menuItemsCount[0].count  > , 0) {
       throw new Error('Cannot delete category that is being used by menu items');
     }
 
