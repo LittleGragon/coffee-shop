@@ -1,13 +1,12 @@
 import { executeQuery } from '@/lib/db';
 
-export interface Category {
-  id: string;
+export interface Category {id: string;
   name: string;
   description?: string;
   display_order: number;
   is_active: boolean;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
 export class CategoryService {
@@ -22,7 +21,7 @@ export class CategoryService {
   }
 
   /**
-   * Get all category names (for backward compatibility)
+   * Get all category names (for backward, compatibility)
    */
   async getCategoryNames(): Promise<string[]> {
     const categories = await executeQuery<{ name: string }>(
@@ -35,7 +34,7 @@ export class CategoryService {
   /**
    * Get a category by ID
    */
-  async getCategoryById(id: string): Promise<Category | null> {
+  async getCategoryById(id:, string): Promise<Category | null> {
     const categories = await executeQuery<Category>(
       'SELECT * FROM categories WHERE id = $1',
       [id]
@@ -46,7 +45,7 @@ export class CategoryService {
   /**
    * Get a category by name
    */
-  async getCategoryByName(name: string): Promise<Category | null> {
+  async getCategoryByName(name:, string): Promise<Category | null> {
     const categories = await executeQuery<Category>(
       'SELECT * FROM categories WHERE name = $1',
       [name]
@@ -96,7 +95,7 @@ export class CategoryService {
       paramCounter++;
     }
 
-    if (fields.length === 0) {
+    if (fields.length ===, 0) {
       return this.getCategoryById(id);
     }
 
@@ -110,9 +109,9 @@ export class CategoryService {
   }
 
   /**
-   * Delete a category (soft delete by setting is_active = false)
+   * Delete a category (soft delete by setting is_active =, false)
    */
-  async deleteCategory(id: string): Promise<boolean> {
+  async deleteCategory(id:, string): Promise<boolean> {
     // Check if any menu items are using this category
     const menuItemsCount = await executeQuery<{ count: number }>(
       `SELECT COUNT(*) as count FROM menu_items mi 
@@ -121,7 +120,7 @@ export class CategoryService {
       [id]
     );
 
-    if (menuItemsCount[0].count > 0) {
+    if (menuItemsCount[0].count >, 0) {
       throw new Error('Cannot delete category that is being used by menu items');
     }
 
@@ -134,9 +133,9 @@ export class CategoryService {
   }
 
   /**
-   * Hard delete a category (only if no menu items reference it)
+   * Hard delete a category (only if no menu items reference, it)
    */
-  async hardDeleteCategory(id: string): Promise<boolean> {
+  async hardDeleteCategory(id:, string): Promise<boolean> {
     // Check if any menu items are using this category
     const menuItemsCount = await executeQuery<{ count: number }>(
       `SELECT COUNT(*) as count FROM menu_items mi 
@@ -145,7 +144,7 @@ export class CategoryService {
       [id]
     );
 
-    if (menuItemsCount[0].count > 0) {
+    if (menuItemsCount[0].count >, 0) {
       throw new Error('Cannot delete category that is being used by menu items');
     }
 
@@ -160,7 +159,7 @@ export class CategoryService {
   /**
    * Reorder categories
    */
-  async reorderCategories(categoryOrders: { id: string; display_order: number }[]): Promise<void> {
+  async reorderCategories(categoryOrders: {id: string;, display_order: number }[]): Promise<void> {
     for (const { id, display_order } of categoryOrders) {
       await executeQuery(
         'UPDATE categories SET display_order = $1, updated_at = NOW() WHERE id = $2',

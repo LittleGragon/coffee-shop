@@ -17,17 +17,15 @@ export async function checkDatabaseConnection() {
   }
 }
 
-export interface WishlistItem {
-  id: string;
+export interface WishlistItem {id: string;
   menu_item_id: string;
   user_id?: string;
   guest_id?: string;
-  created_at: Date;
+ , created_at: Date;
 }
 
-export interface WishlistCount {
-  menu_item_id: string;
-  count: number;
+export interface WishlistCount {menu_item_id: string;
+ , count: number;
 }
 
 export const wishlistService = {
@@ -136,7 +134,7 @@ export const wishlistService = {
   },
 
   // Get top wishlist items with menu item details
-  async getTopWishlistItems(limit: number = 10): Promise<any[]> {
+  async getTopWishlistItems(limit: number =, 10): Promise<any[]> {
     try {
       const result = await executeQuery(
         `SELECT m.*, COUNT(w.id) as wishlist_count

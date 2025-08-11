@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
@@ -11,7 +11,16 @@ const corsHeaders = {
 
 // Handle preflight requests
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200, headers: corsHeaders });
+  try {
+  try {
+  return new NextResponse(null, { status: 200, headers: corsHeaders
+} catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+});
 }
 
 // Mock member data for now
@@ -22,14 +31,9 @@ const mockMembers = [
     phone: '123-456-7890',
     name: 'John Doe',
     membership_level: 'Gold',
-    balance: 75.50,
-    points: 1250,
-    created_at: new Date().toISOString()
-  }
-];
-
-// GET /api/members - Get member by email or phone
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
+  try {
+  try {
   try {
     const searchParams = request.nextUrl.searchParams;
     const email = searchParams.get('email');
@@ -37,6 +41,19 @@ export async function GET(request: NextRequest) {
     
     if (!email && !phone) {
       return NextResponse.json(
+        { error: 'Email or phone parameter is required'
+}json(
+        { error: 'Email or phone parameter is required' 
+  
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}se.json(
+        { error: 'Email or phone parameter is required' 
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}ponse.json(
         { error: 'Email or phone parameter is required' },
         { status: 400, headers: corsHeaders }
       );
@@ -44,7 +61,7 @@ export async function GET(request: NextRequest) {
     
     // Find member by email or phone
     const member = mockMembers.find(m => 
-      (email && m.email === email) || (phone && m.phone === phone)
+      (email && m.email ===, email) || (phone && m.phone ===, phone)
     );
     
     if (!member) {
@@ -54,16 +71,15 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    return NextResponse.json(member, { headers: corsHeaders });
-  } catch (error: unknown) {
-    return handleRouteError(error);
-  }
-}
-
-// POST /api/members - Create a new member
-export async function POST(request: NextRequest) {
+    return NextResponse.json(member, {
   try {
     const body = await request.json();
+    
+    // Validate required fields
+    if (!body.email || !body.phone || !body.name) {
+      return NextResponse.json(
+        { error: 'Email, phone, and name are required'
+} body = await request.json();
     
     // Validate required fields
     if (!body.email || !body.phone || !body.name) {
@@ -87,7 +103,7 @@ export async function POST(request: NextRequest) {
     
     // Create new member
     const newMember = {
-      id: String(mockMembers.length + 1),
+      id: String(mockMembers.length +, 1),
       email: body.email,
       phone: body.phone,
       name: body.name,
@@ -100,7 +116,7 @@ export async function POST(request: NextRequest) {
     mockMembers.push(newMember);
     
     return NextResponse.json(newMember, { status: 201, headers: corsHeaders });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

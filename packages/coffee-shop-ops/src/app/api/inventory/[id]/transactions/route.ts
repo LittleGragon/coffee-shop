@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import inventoryService from '@/services/inventoryService';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../../error';
@@ -6,8 +6,7 @@ import { handleRouteError } from '../../../error';
 // GET /api/inventory/[id]/transactions - Get all transactions for an inventory item
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  {
   try {
     const id = params.id;
     
@@ -15,14 +14,15 @@ export async function GET(
     const inventoryItem = await inventoryService.getItemById(id);
     if (!inventoryItem) {
       return NextResponse.json(
-        { error: `Inventory item with ID ${id} not found` },
+        { error: `Inventory item with ID ${id
+} not found` },
         { status: 404 }
       );
     }
     
     const transactions = await inventoryService.getItemTransactions(id);
     return NextResponse.json(transactions);
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }
@@ -30,8 +30,7 @@ export async function GET(
 // POST /api/inventory/[id]/transactions - Record a new transaction for an inventory item
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  {
   try {
     const id = params.id;
     const body = await request.json();
@@ -40,24 +39,22 @@ export async function POST(
     const inventoryItem = await inventoryService.getItemById(id);
     if (!inventoryItem) {
       return NextResponse.json(
-        { error: `Inventory item with ID ${id} not found` },
+        { error: `Inventory item with ID ${id
+}Inventory item with ID ${id} not found` },
         { status: 404 }
       );
     }
     
     // Validate required fields
     if (!body.type || body.quantity === undefined || !body.created_by) {
-      return NextResponse.json(
-        { error: 'Type, quantity, and created_by are required fields' },
-        { status: 400 }
-      );
+      throw new Error('Type, quantity, and created_by are required fields');
     }
     
     // Validate transaction type
     const validTypes = ['restock', 'usage', 'waste', 'adjustment'];
     if (!validTypes.includes(body.type)) {
       return NextResponse.json(
-        { error: `Invalid transaction type. Must be one of: ${validTypes.join(', ')}` },
+        {error: `Invalid transaction type. Must be one, of: ${validTypes.join(', ')}` },
         { status: 400 }
       );
     }
@@ -70,7 +67,7 @@ export async function POST(
     
     const newTransaction = await inventoryService.recordTransaction(transaction);
     return NextResponse.json(newTransaction, { status: 201 });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

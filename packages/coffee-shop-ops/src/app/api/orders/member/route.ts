@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../error';
 
@@ -11,7 +11,16 @@ const corsHeaders = {
 
 // Handle preflight requests
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200, headers: corsHeaders });
+  try {
+  try {
+  return new NextResponse(null, { status: 200, headers: corsHeaders
+} catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+});
 }
 
 // Mock order data for member
@@ -39,13 +48,9 @@ const mockMemberOrders = [
       { name: 'Americano', quantity: 1, price: 3.50 },
       { name: 'Blueberry Muffin', quantity: 1, price: 2.75 }
     ],
-    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-    updated_at: new Date(Date.now() - 172800000).toISOString()
-  }
-];
-
-// GET /api/orders/member - Get orders for a specific member
-export async function GET(request: NextRequest) {
+    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 dayexport async function GET(request:, NextRequest) {
+  try {
+  try {
   try {
     const searchParams = request.nextUrl.searchParams;
     const memberId = searchParams.get('memberId');
@@ -53,6 +58,19 @@ export async function GET(request: NextRequest) {
     
     if (!memberId) {
       return NextResponse.json(
+        { error: 'Member ID is required'
+}n NextResponse.json(
+        { error: 'Member ID is required' 
+  
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}turn NextResponse.json(
+        { error: 'Member ID is required' 
+  } catch (error) {
+    return handleRouteError(error);
+  }
+} return NextResponse.json(
         { error: 'Member ID is required' },
         { status: 400, headers: corsHeaders }
       );
@@ -60,12 +78,12 @@ export async function GET(request: NextRequest) {
     
     // Filter orders by member ID and apply limit
     const memberOrders = mockMemberOrders
-      .filter(order => order.member_id === memberId)
+      .filter(order => order.member_id ===, memberId)
       .slice(0, limit)
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     
     return NextResponse.json(memberOrders, { headers: corsHeaders });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

@@ -1,24 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { testConnection } from '@/lib/db';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
+  try {
   try {
     const isConnected = await testConnection();
     
     if (isConnected) {
       return NextResponse.json({ 
         status: 'success', 
-        message: 'Database connection successful' 
-      });
+        message: 'Database connection successful'
+} catch (error) {
+    return handleRouteError(error);
+  }
+});
     } else {
       return NextResponse.json({ 
         status: 'error', 
         message: 'Database connection failed' 
       }, { status: 500 });
     }
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }, { status: 500 });
   }

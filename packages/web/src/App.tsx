@@ -6,7 +6,7 @@ import { AuthModal } from './components/AuthModal';
 import { FloatingCartButton } from './components/cart/FloatingCartButton';
 import { ShoppingCart } from './components/cart/shopping-cart';
 import { Footer } from './components/layout/footer';
-import { Header } from './components/layout/Header';
+import { Header } from './components/layout/header';
 import { ToastProvider } from './components/ToastProvider';
 import { AuthContext, useAuthState } from './hooks/useAuth';
 import { CakeCustomizationPage } from './pages/cake-customization-page';

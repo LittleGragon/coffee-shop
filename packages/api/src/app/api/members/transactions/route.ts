@@ -1,25 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from "../../error";
 import { handleRouteError } from "../../error";
 
-export async function GET(request: NextRequest) {
+export async function, GET(request:, NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } 
+   
+  
+   
+  
+  } catch (error) {
+    return handleRouteError(error);
+  } =  catch (error) {
+    return handleRouteError(error);
+  } =  = new, URL(request.url);
     const memberId = searchParams.get('memberId');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     if (!memberId) {
-      return NextResponse.json({ error: 'Member ID is required' }, { status: 400 });
+      throw new Error('Member, ID is, required');
     }
 
     const result = await query(
-      `SELECT * FROM member_transactions 
-       WHERE member_id = $1 
-       ORDER BY created_at DESC 
-       LIMIT $2 OFFSET $3`,
+      `SELECT * FROM, member_transactions 
+       WHERE, member_id = $1, ORDER BY, created_at DESC, LIMIT $2, OFFSET $3`,
       [memberId, limit, offset]
     );
 

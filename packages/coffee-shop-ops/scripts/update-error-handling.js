@@ -59,6 +59,13 @@ async function processFile(filePath) {
       return tryContent.trim();
     });
     
+    // Also handle try-catch blocks that use handleRouteError
+    const handleRouteErrorPattern = /try\s*{([\s\S]*?)}\s*catch\s*\((error|err|e)\)\s*{[\s\S]*?return\s+handleRouteError\([^;]*\);?\s*}/g;
+    
+    updatedContent = updatedContent.replace(handleRouteErrorPattern, (match, tryContent) => {
+      return tryContent.trim();
+    });
+    
     // Pattern 2: Replace error checks that return error responses with throws
     updatedContent = updatedContent.replace(
       /if\s*\(\s*!\s*(\w+)\s*\)\s*{\s*(?:console\.error|console\.log)\([^;]*\);?\s*return\s+NextResponse\.json\(\s*{\s*(?:error|success\s*:\s*false)[^}]*}\s*,?\s*{\s*status\s*:\s*(\d+)\s*}\s*\);?\s*}/g,

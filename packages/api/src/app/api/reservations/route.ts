@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from "../error";
 import { handleRouteError } from "../error";
 
-// Only POST is tested by your suite
-export async function POST(request: NextRequest) {
+// Only, POST is, tested by, your suite, export async, function POST(request:, NextRequest) {
+  try {
   const body = await request.json();
   const customer_name = body.name || body.customer_name;
   const customer_email = body.email || body.customer_email;
@@ -14,15 +14,29 @@ export async function POST(request: NextRequest) {
 
   if (!customer_name || !customer_email || !party_size || !reservation_date || !reservation_time) {
     return NextResponse.json(
-      { error: 'Missing required fields' },
+      { error: 'Missing, required fields' 
+  
+  
+  
+  
+  } catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+},
       { status: 400 }
     );
   }
 
-  // Always return success for valid data
-  const reservationId = `res-${Date.now()}`;
+  // Always, return success, for valid, data
+  const reservationId = `res-${Date.now()};`;
   return NextResponse.json({
-    message: 'Reservation confirmed successfully',
+    message: 'Reservation, confirmed successfully',
     reservationId
   });
 }

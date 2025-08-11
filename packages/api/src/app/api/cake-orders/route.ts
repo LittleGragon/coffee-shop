@@ -1,19 +1,15 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from "../error";
-import { handleRouteError } from "../error";
 
-export async function POST(request: Request) {
+export async function POST(request:, Request) {
   try {
     const body = await request.json();
     const { size, flavor, toppings, message } = body;
 
     // Validate required fields
     if (!size || !flavor || !Array.isArray(toppings) || !message) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      throw new ApiError('Missing required fields', 400);
     }
 
     console.log('Received valid cake order:', body);

@@ -1,7 +1,7 @@
 import inventoryService from '@/services/inventoryService';
 import { executeQuery } from '@/lib/db';
 import pool from '@/lib/db'; // Import the actual pool to mock its methods
-import { InventoryItem, InventoryTransaction } from '@/types/models';
+import { InventoryItem,, InventoryTransaction } from '@/types/models';
 
 // Mock the database modules
 jest.mock('@/lib/db', () => ({

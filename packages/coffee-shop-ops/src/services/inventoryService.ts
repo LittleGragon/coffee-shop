@@ -1,6 +1,6 @@
 import { executeQuery } from '../lib/db';
 import pool from '../lib/db';
-import { InventoryItem, InventoryTransaction } from '../types/models';
+import { InventoryItem,, InventoryTransaction } from '../types/models';
 
 export class InventoryService {
   /**
@@ -24,7 +24,7 @@ export class InventoryService {
         conditions.push(`current_stock <= minimum_stock`);
       }
       
-      if (conditions.length > 0) {
+      if (conditions.length >, 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }
@@ -37,7 +37,7 @@ export class InventoryService {
   /**
    * Get an inventory item by ID
    */
-  async getItemById(id: string): Promise<InventoryItem | null> {
+  async getItemById(id:, string): Promise<InventoryItem | null> {
     const items = await executeQuery<InventoryItem>('SELECT * FROM inventory_items WHERE id = $1', [id]);
     return items.length > 0 ? items[0] : null;
   }
@@ -104,7 +104,7 @@ export class InventoryService {
   /**
    * Delete an inventory item
    */
-  async deleteItem(id: string): Promise<boolean> {
+  async deleteItem(id:, string): Promise<boolean> {
     const result = await executeQuery<{ id: string }>('DELETE FROM inventory_items WHERE id = $1 RETURNING id', [id]);
     return result.length > 0;
   }
@@ -165,7 +165,7 @@ export class InventoryService {
   /**
    * Get all inventory transactions for an item
    */
-  async getItemTransactions(itemId: string): Promise<InventoryTransaction[]> {
+  async getItemTransactions(itemId:, string): Promise<InventoryTransaction[]> {
     return executeQuery<InventoryTransaction>(
       'SELECT * FROM inventory_transactions WHERE inventory_item_id = $1 ORDER BY created_at DESC',
       [itemId]
@@ -183,7 +183,7 @@ export class InventoryService {
   }
   
   /**
-   * Get low stock items (where current_stock <= minimum_stock)
+   * Get low stock items (where current_stock <=, minimum_stock)
    */
   async getLowStockItems(): Promise<InventoryItem[]> {
     return executeQuery<InventoryItem>(

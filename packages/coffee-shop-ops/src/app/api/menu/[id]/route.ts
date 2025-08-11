@@ -1,150 +1,108 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../error';
 
-// Support for form-based DELETE requests
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const formData = await request.formData();
-  const method = formData.get('_method');
-  
-  if (method === 'DELETE') {
-    return handleDelete(params);
-  }
-  
-  return NextResponse.json(
-    { error: 'Invalid method override' },
-    { status: 400 }
-  );
-}
-
-async function handleDelete(params: { id: string }) {
-  try {
-    const id = params.id;
-    if (!id) {
-      console.error('Missing ID parameter');
-      return NextResponse.json(
-        { error: 'Missing ID parameter' },
-        { status: 400 }
-      );
-    }
-    console.log(`Attempting to delete menu item with ID: ${id}`);
-    
-    const success = await menuService.deleteItem(id);
-    
-    if (!success) {
-      console.log(`Menu item with ID ${id} not found`);
-      return NextResponse.json(
-        { error: `Menu item with ID ${id} not found` },
-        { status: 404 }
-      );
-    }
-    
-    console.log(`Successfully deleted menu item with ID: ${id}`);
-    return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error: unknown) {
-    return handleRouteError(error);
-  }
-}
-
-// GET /api/menu/[id] - Get a specific menu item
+// GET endpoint to retrieve a menu item by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: {params: {, id: string } }
 ) {
   try {
     const id = params.id;
     if (!id) {
-      console.error('Missing ID parameter');
-      return NextResponse.json(
-        { error: 'Missing ID parameter' },
-        { status: 400 }
-      );
+      throw new ApiError('Missing ID parameter', 400);
     }
+    
     console.log(`Fetching menu item with ID: ${id}`);
     
     const menuItem = await menuService.getItemById(id);
     
     if (!menuItem) {
-      console.log(`Menu item with ID ${id} not found`);
-      return NextResponse.json(
-        { error: `Menu item with ID ${id} not found` },
-        { status: 404 }
-      );
+      throw new ApiError(`Menu item with ID ${id} not found`, 404);
     }
     
-    return NextResponse.json(menuItem);
-  } catch (error: unknown) {
+    return NextResponse.json({
+      success: true,
+      data: menuItem
+    });
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }
 
-// PUT /api/menu/[id] - Update a menu item
+// PUT endpoint to update a menu item
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: {params: {, id: string } }
 ) {
   try {
     const id = params.id;
     if (!id) {
-      console.error('Missing ID parameter');
-      return NextResponse.json(
-        { error: 'Missing ID parameter' },
-        { status: 400 }
-      );
-    }
-    console.log(`Updating menu item with ID: ${id}`);
-    
-    const updates = await request.json();
-    const updatedItem = await menuService.updateItem(id, updates);
-    
-    if (!updatedItem) {
-      console.log(`Menu item with ID ${id} not found for update`);
-      return NextResponse.json(
-        { error: `Menu item with ID ${id} not found` },
-        { status: 404 }
-      );
+      throw new ApiError('Missing ID parameter', 400);
     }
     
-    console.log(`Successfully updated menu item with ID: ${id}`);
-    return NextResponse.json(updatedItem);
-  } catch (error: unknown) {
+    const body = await request.json();
+    const updatedItem = await menuService.updateItem(id, body);
+    
+    return NextResponse.json({
+      success: true,
+      data: updatedItem
+    });
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }
 
-// DELETE /api/menu/[id] - Delete a menu item
+// DELETE endpoint to remove a menu item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: {params: {, id: string } }
 ) {
   try {
     const id = params.id;
     if (!id) {
-      console.error('Missing ID parameter');
-      return NextResponse.json(
-        { error: 'Missing ID parameter' },
-        { status: 400 }
-      );
+      throw new ApiError('Missing ID parameter', 400);
     }
-    console.log(`Attempting to delete menu item with ID: ${id}`);
     
-    const success = await menuService.deleteItem(id);
-    
-    if (!success) {
-      console.log(`Menu item with ID ${id} not found`);
-      return NextResponse.json(
-        { error: `Menu item with ID ${id} not found` },
-        { status: 404 }
-      );
-    }
+    await menuService.deleteItem(id);
     
     console.log(`Successfully deleted menu item with ID: ${id}`);
-    return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error: unknown) {
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Menu item deleted successfully' 
+    });
+  } catch (error:, unknown) {
+    return handleRouteError(error);
+  }
+}
+
+// Support for form-based DELETE requests
+export async function POST(
+  request: NextRequest,
+  { params }: {params: {, id: string } }
+) {
+  try {
+    const formData = await request.formData();
+    const method = formData.get('_method');
+    
+    if (method === 'DELETE') {
+      const id = params.id;
+      if (!id) {
+        throw new ApiError('Missing ID parameter', 400);
+      }
+      
+      await menuService.deleteItem(id);
+      
+      console.log(`Successfully deleted menu item with ID: ${id}`);
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Menu item deleted successfully' 
+      });
+    }
+    
+    throw new ApiError('Invalid method override', 400);
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

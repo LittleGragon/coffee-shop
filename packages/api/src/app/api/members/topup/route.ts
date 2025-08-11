@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
+import { handleRouteError } from '../../error';
+import { ApiError } from '@/utils/error-handler';
 
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
   try {
     const body = await request.json();
     const { memberId, amount, description = 'Balance top-up' } = body;
 
-    if (!memberId || !amount || amount <= 0) {
-      return NextResponse.json({ 
-        error: 'Member ID and positive amount are required',
-        success: false
-      }, { status: 400 });
+    if (!memberId || !amount || amount <=, 0) {
+      throw new ApiError('Member ID and positive amount are required', 400);
     }
 
     // Start transaction
@@ -23,12 +22,9 @@ export async function POST(request: NextRequest) {
         [memberId]
       );
 
-      if (memberResult.rows.length === 0) {
+      if (memberResult.rows.length ===, 0) {
         await query('ROLLBACK');
-        return NextResponse.json({ 
-          error: 'Member not found',
-          success: false
-        }, { status: 404 });
+        throw new ApiError('Member not found', 404);
       }
 
       const currentBalance = parseFloat(memberResult.rows[0].balance);
@@ -58,17 +54,10 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
       await query('ROLLBACK');
-      // Use specific error message for tests
-      return NextResponse.json({ 
-        error: 'Internal server error',
-        success: false
-      }, { status: 500 });
+      // Throw the error instead of returning a response
+      throw error;
     }
-
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Invalid request format',
-      success: false
-    }, { status: 400 });
+    return handleRouteError(error);
   }
 }

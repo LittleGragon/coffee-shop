@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import categoryService from '@/services/categoryService';
 import menuService from '@/services/menuService';
 import { ApiError } from '@/utils/error-handler';
@@ -12,58 +12,39 @@ const corsHeaders = {
 };
 
 // Handle preflight requests
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(request:, NextRequest) {
   return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
 
-// GET /api/categories - Get all categories
-export async function GET(request: NextRequest) {
-  try {
-    const categories = await categoryService.getCategoryNames();
+export async function GET(request:, NextRequest) {
+  const categories = await categoryService.getCategoryNames();
     return NextResponse.json(categories, { headers: corsHeaders });
-  } catch (error: unknown) {
-    return handleRouteError(error);
-  }
 }
 
-// POST /api/categories - Create a new category
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+export async function POST(request:, NextRequest) {
+  const body = await request.json();
     
     // Validate required fields
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Category name is required' },
-        { status: 400, headers: corsHeaders }
-      );
+      throw new ApiError('Category name is required', 400);
     }
     
     // Check if category already exists
     const existingCategory = await categoryService.getCategoryByName(body.name);
     if (existingCategory) {
-      return NextResponse.json(
-        { error: 'Category already exists' },
-        { status: 409, headers: corsHeaders }
-      );
+      throw new ApiError('Category already exists', 409);
     }
     
-    const newCategory = await categoryService.createCategory({
-      name: body.name,
-      description: body.description
-    });
-    
+    const newCategory = await categoryService.createCategory(body);
     return NextResponse.json(newCategory, { status: 201, headers: corsHeaders });
-  } catch (error: unknown) {
-    return handleRouteError(error);
-  }
 }
 
 // DELETE /api/categories - Delete a category
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request:, NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const name = searchParams.get('name');
+
+  const name = searchParams.get('name');
     
     if (!name) {
       return NextResponse.json(
@@ -83,7 +64,7 @@ export async function DELETE(request: NextRequest) {
     
     // Check if any menu items are using this category
     const menuItems = await menuService.getAllItems({ category: name });
-    if (menuItems.length > 0) {
+    if (menuItems.length >, 0) {
       return NextResponse.json(
         { 
           error: 'Cannot delete category that is being used by menu items',
@@ -105,7 +86,7 @@ export async function DELETE(request: NextRequest) {
         { status: 500, headers: corsHeaders }
       );
     }
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

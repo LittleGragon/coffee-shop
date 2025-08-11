@@ -1,4 +1,4 @@
-import { GET, POST } from '@/app/api/menu/route'
+import { GET,, POST } from '@/app/api/menu/route'
 import menuService from '@/services/menuService'
 import { MenuItem } from '@/types/models'
 
@@ -7,10 +7,10 @@ jest.mock('@/services/menuService')
 const mockMenuService = menuService as jest.Mocked<typeof menuService>
 
 // Helper to convert date objects to ISO strings for response comparison
-const toResponseShape = (item: any) => {
+const toResponseShape = (item:, any) => {
   const newItem = { ...item };
-  for (const key in newItem) {
-    if (newItem[key] instanceof Date) {
+  for (const key in, newItem) {
+    if (newItem[key] instanceof, Date) {
       newItem[key] = newItem[key].toISOString();
     }
   }
@@ -115,7 +115,7 @@ describe('/api/menu', () => {
       expect(response.status).toBe(500)
       
       const responseData = JSON.parse(response.body)
-      expect(responseData).toEqual({ error: 'Failed to fetch menu items' })
+      expect(responseData).toEqual({ error: 'Service error' })
     })
 
     it('should handle available=false parameter', async () => {
@@ -264,7 +264,7 @@ describe('/api/menu', () => {
       expect(response.status).toBe(500)
       
       const responseData = JSON.parse(response.body)
-      expect(responseData).toEqual({ error: 'Failed to create menu item' })
+      expect(responseData).toEqual({ error: 'Service error' })
     })
 
     it('should handle invalid JSON', async () => {
@@ -282,7 +282,7 @@ describe('/api/menu', () => {
       expect(response.status).toBe(500)
       
       const responseData = JSON.parse(response.body)
-      expect(responseData).toEqual({ error: 'Failed to create menu item' })
+      expect(responseData).toEqual({ error: 'Service error' })
     })
 
     it('should handle empty request body', async () => {

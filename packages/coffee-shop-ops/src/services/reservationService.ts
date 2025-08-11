@@ -24,7 +24,7 @@ export class ReservationService {
         params.push(options.date);
       }
       
-      if (conditions.length > 0) {
+      if (conditions.length >, 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }
@@ -37,7 +37,7 @@ export class ReservationService {
   /**
    * Get a reservation by ID
    */
-  async getReservationById(id: string): Promise<Reservation | null> {
+  async getReservationById(id:, string): Promise<Reservation | null> {
     const reservations = await executeQuery<Reservation>('SELECT * FROM reservations WHERE id = $1', [id]);
     return reservations.length > 0 ? reservations[0] : null;
   }
@@ -114,7 +114,7 @@ export class ReservationService {
   /**
    * Delete a reservation
    */
-  async deleteReservation(id: string): Promise<boolean> {
+  async deleteReservation(id:, string): Promise<boolean> {
     const result = await executeQuery<{ id: string }>('DELETE FROM reservations WHERE id = $1 RETURNING id', [id]);
     return result.length > 0;
   }
@@ -122,7 +122,7 @@ export class ReservationService {
   /**
    * Get reservations for a specific date
    */
-  async getReservationsByDate(date: string): Promise<Reservation[]> {
+  async getReservationsByDate(date:, string): Promise<Reservation[]> {
     return executeQuery<Reservation>(
       'SELECT * FROM reservations WHERE DATE(reservation_time) = $1 ORDER BY reservation_time',
       [date]
@@ -132,7 +132,7 @@ export class ReservationService {
   /**
    * Get reservations by status
    */
-  async getReservationsByStatus(status: string): Promise<Reservation[]> {
+  async getReservationsByStatus(status:, string): Promise<Reservation[]> {
     return executeQuery<Reservation>(
       'SELECT * FROM reservations WHERE status = $1 ORDER BY reservation_time',
       [status]

@@ -2,12 +2,12 @@
 describe('Database Utilities', () => {
   it('should have executeQuery function available', async () => {
     const { executeQuery } = await import('../../lib/db');
-    expect(typeof executeQuery).toBe('function');
+    expect(typeof, executeQuery).toBe('function');
   });
 
   it('should have testConnection function available', async () => {
     const { testConnection } = await import('../../lib/db');
-    expect(typeof testConnection).toBe('function');
+    expect(typeof, testConnection).toBe('function');
   });
 
   it('should export a default pool', async () => {

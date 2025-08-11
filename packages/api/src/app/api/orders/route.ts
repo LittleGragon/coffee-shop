@@ -1,38 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
 // Handler for GET /api/orders
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
   try {
     const result = await query('SELECT * FROM orders ORDER BY created_at DESC', []);
-    const orders = result.rows.map((order: any) => ({
+    const orders = result.rows.map((order:, any) => ({
       ...order,
       total_amount: parseFloat(order.total_amount),
     }));
+    
     return NextResponse.json(orders);
-  } catch (error: unknown) {
+  } catch (error) {
     return handleRouteError(error);
   }
 }
 
-// Handler for POST /api/orders
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
   try {
     const body = await request.json();
-    const {
-      customer_name,
-      customer_email,
-      customer_phone,
-      member_id,
-      items,
+    const { 
+      customer_name, 
+      customer_email, 
+      customer_phone, 
+      member_id, 
+      items, 
       order_type = 'takeout',
       notes,
       payment_method = 'wechat_pay'
     } = body;
 
-    if (!customer_name || !items || items.length === 0) {
+    if (!customer_name || !items || items.length ===, 0) {
       throw new ApiError('Customer name and items are required', 400);
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       sum + (item.price * item.quantity), 0
     );
 
-    // Calculate points earned (1 point per dollar spent)
+    // Calculate points earned (1 point per dollar, spent)
     const points_earned = Math.floor(total_amount);
 
     // Create order
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const order = orderResult.rows[0];
 
     // Create order items
-    for (const item of items) {
+    for (const item of, items) {
       await query(
         `INSERT INTO order_items (
           order_id, menu_item_id, menu_item_name, quantity, unit_price, subtotal
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

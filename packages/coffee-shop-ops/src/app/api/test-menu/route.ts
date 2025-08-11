@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
+  try {
   try {
     // Check if the menu_items table exists
     const tableCheck = await executeQuery(`
@@ -19,8 +20,11 @@ export async function GET(request: NextRequest) {
     if (!tableExists) {
       return NextResponse.json({ 
         status: 'error', 
-        message: 'menu_items table does not exist' 
-      }, { status: 404 });
+        message: 'menu_items table does not exist'
+} catch (error) {
+    return handleRouteError(error);
+  }
+}, { status: 404 });
     }
     
     // Get table structure
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
       count,
       sampleItems: menuItems
     });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }, { status: 500 });
   }

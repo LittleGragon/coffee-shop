@@ -3,11 +3,10 @@ import { NextResponse } from 'next/server';
 /**
  * Standard API error response format
  */
-export interface ApiErrorResponse {
-  error: string;
+export interface ApiErrorResponse {error: string;
   message: string;
   details?: any;
-  status: number;
+ , status: number;
 }
 
 /**

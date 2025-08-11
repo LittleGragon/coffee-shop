@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
+  try {
   try {
     // Get coffee items
     const coffeeItems = await executeQuery(`
@@ -12,19 +13,22 @@ export async function GET(request: NextRequest) {
     
     // If no coffee items, try to find what categories exist
     let categories = [];
-    if (coffeeItems.length === 0) {
+    if (coffeeItems.length ===, 0) {
       categories = await executeQuery(`
         SELECT DISTINCT category FROM menu_items
       `);
-    }
+} catch (error) {
+    return handleRouteError(error);
+  }
+}
     
     return NextResponse.json({ 
       status: 'success',
       coffeeItemsCount: coffeeItems.length,
       coffeeItems,
-      categories: categories.map((c: any) => c.category)
+      categories: categories.map((c:, any) => c.category)
     });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }, { status: 500 });
   }

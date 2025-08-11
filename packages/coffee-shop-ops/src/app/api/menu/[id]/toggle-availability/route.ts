@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../../error';
@@ -6,10 +6,10 @@ import { handleRouteError } from '../../../error';
 // PUT /api/menu/[id]/toggle-availability - Toggle menu item availability
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
-) {
+  context: {
   try {
-    const { id } = context.params;
+    const { id 
+   } = await request.json(); = context.params;
     const updatedItem = await menuService.toggleItemAvailability(id);
     
     if (!updatedItem) {
@@ -20,7 +20,7 @@ export async function PUT(
     }
     
     return NextResponse.json(updatedItem);
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

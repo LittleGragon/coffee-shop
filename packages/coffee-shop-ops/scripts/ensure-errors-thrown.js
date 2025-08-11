@@ -1,10 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * This script ensures that all API routes properly throw errors instead of just returning them.
- * It scans all API route files and updates the error handling pattern if needed.
- */
-
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
@@ -15,101 +8,75 @@ const writeFile = promisify(fs.writeFile);
 // Directory containing API routes
 const API_DIR = path.join(__dirname, '../src/app/api');
 
-// Function to recursively get all files in a directory
-async function getAllFiles(dir) {
-  const dirents = fs.readdirSync(dir, { withFileTypes: true });
-  const files = await Promise.all(dirents.map((dirent) => {
-    const res = path.resolve(dir, dirent.name);
-    return dirent.isDirectory() ? getAllFiles(res) : res;
-  }));
-  return Array.prototype.concat(...files);
-}
+// Function to process a file
+async function processFile(filePath) {
+  // Skip test files and error.ts
+  if (filePath.includes('__tests__') || filePath.includes('error.ts')) {
+    return;
+  }
 
-// Function to update error handling in a file
-async function updateErrorHandling(filePath) {
   try {
-    // Skip the error.ts file itself
-    if (filePath.endsWith('error.ts')) {
-      return false;
-    }
-
-    // Only process TypeScript files
-    if (!filePath.endsWith('.ts')) {
-      return false;
-    }
-
+    // Read the file content
     const content = await readFile(filePath, 'utf8');
     
-    // Check if this is a route file (contains export async function)
-    if (!content.includes('export async function')) {
-      return false;
+    // Check if this is a route file
+    if (!content.includes('export async function') || !content.includes('NextResponse')) {
+      return;
     }
 
     console.log(`Processing: ${filePath}`);
     
-    let updated = false;
-    let newContent = content;
-
-    // Pattern 1: Direct return of error without throwing
-    // Example: if (error) { return handleRouteError(error); }
-    const directReturnPattern = /if\s*\([^)]+\)\s*{\s*return\s+handleRouteError\([^)]+\);\s*}/g;
-    if (directReturnPattern.test(newContent)) {
-      newContent = newContent.replace(directReturnPattern, (match) => {
-        const errorVar = match.match(/handleRouteError\(([^)]+)\)/)[1];
-        return `if (${errorVar}) { throw ${errorVar}; }`;
-      });
-      updated = true;
-    }
-
-    // Pattern 2: Catch block that returns handleRouteError
-    // Example: catch (error) { return handleRouteError(error); }
-    const catchReturnPattern = /catch\s*\(([^)]+)\)\s*{\s*return\s+handleRouteError\([^)]+\);\s*}/g;
+    // Replace try-catch blocks that return error responses
+    let updatedContent = content;
     
-    // We don't want to change this pattern as it's the correct way to handle errors in API routes
-    // The error should be caught at the route level and formatted with handleRouteError
+    // Pattern: try { ... } catch (error) { ... return NextResponse.json(...error...) }
+    const tryCatchPattern = /try\s*{[\s\S]*?}\s*catch\s*\((error|err|e)\)\s*{[\s\S]*?console\.error\([^;]*\);?\s*return\s+NextResponse\.json\(\s*{[\s\S]*?}\s*,?\s*{[\s\S]*?}\s*\);?\s*}/g;
     
-    // Pattern 3: Error handling without throwing
-    // Example: if (!name) { const error = new ApiError('Name is required', 400); return handleRouteError(error); }
-    const errorWithoutThrowPattern = /new ApiError\([^)]+\);\s*return\s+handleRouteError/g;
-    if (errorWithoutThrowPattern.test(newContent)) {
-      newContent = newContent.replace(errorWithoutThrowPattern, (match) => {
-        return match.replace('return handleRouteError', 'throw');
-      });
-      updated = true;
-    }
-
-    // If we made changes, write the file
-    if (updated) {
-      await writeFile(filePath, newContent, 'utf8');
+    updatedContent = updatedContent.replace(tryCatchPattern, (match) => {
+      // Extract the try block content
+      const tryContent = match.match(/try\s*{([\s\S]*?)}\s*catch/)[1];
+      
+      // Return only the try block content without the try keyword and braces
+      return tryContent.trim();
+    });
+    
+    // If changes were made, write the updated content back to the file
+    if (content !== updatedContent) {
+      await writeFile(filePath, updatedContent, 'utf8');
       console.log(`Updated: ${filePath}`);
-      return true;
+    } else {
+      console.log(`No changes needed for: ${filePath}`);
     }
-    
-    return false;
   } catch (error) {
     console.error(`Error processing ${filePath}:`, error);
-    return false;
+  }
+}
+
+// Function to recursively process all files in a directory
+async function processDirectory(dirPath) {
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    
+    if (entry.isDirectory()) {
+      await processDirectory(fullPath);
+    } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) {
+      await processFile(fullPath);
+    }
   }
 }
 
 // Main function
 async function main() {
   try {
-    const files = await getAllFiles(API_DIR);
-    let updatedCount = 0;
-    
-    for (const file of files) {
-      const updated = await updateErrorHandling(file);
-      if (updated) {
-        updatedCount++;
-      }
-    }
-    
-    console.log(`\nCompleted! Updated ${updatedCount} files.`);
+    console.log('Starting to update API routes to throw errors...');
+    await processDirectory(API_DIR);
+    console.log('Finished updating API routes.');
   } catch (error) {
     console.error('Error:', error);
-    process.exit(1);
   }
 }
 
+// Run the script
 main();

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '@/lib/db';
@@ -7,15 +7,12 @@ import { handleRouteError } from '../../error';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
   try {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
+      throw new ApiError('Email and password are required', 400);
     }
 
     // Find user by email
@@ -24,7 +21,7 @@ export async function POST(request: NextRequest) {
       [email]
     );
 
-    if (result.rows.length === 0) {
+    if (result.rows.length ===, 0) {
       throw new ApiError('Invalid email or password', 401);
     }
 

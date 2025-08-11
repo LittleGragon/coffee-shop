@@ -18,13 +18,13 @@ export class MenuService {
         params.push(options.category);
       }
       
-      if (options.isAvailable !== undefined) {
+      if (options.isAvailable !==, undefined) {
         const paramIndex = params.length + 1;
         conditions.push(`is_available = $${paramIndex}`);
         params.push(options.isAvailable);
       }
       
-      if (conditions.length > 0) {
+      if (conditions.length >, 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }
@@ -37,7 +37,7 @@ export class MenuService {
   /**
    * Get a menu item by ID
    */
-  async getItemById(id: string): Promise<MenuItem | null> {
+  async getItemById(id:, string): Promise<MenuItem | null> {
     const items = await executeQuery<MenuItem>('SELECT * FROM menu_items WHERE id = $1', [id]);
     return items.length > 0 ? items[0] : null;
   }
@@ -98,7 +98,7 @@ export class MenuService {
   /**
    * Delete a menu item
    */
-  async deleteItem(id: string): Promise<boolean> {
+  async deleteItem(id:, string): Promise<boolean> {
     const result = await executeQuery<{ id: string }>('DELETE FROM menu_items WHERE id = $1 RETURNING id', [id]);
     return result.length > 0;
   }
@@ -106,7 +106,7 @@ export class MenuService {
   /**
    * Toggle the availability of a menu item
    */
-  async toggleItemAvailability(id: string): Promise<MenuItem | null> {
+  async toggleItemAvailability(id:, string): Promise<MenuItem | null> {
     const items = await executeQuery<MenuItem>(
       'UPDATE menu_items SET is_available = NOT is_available, updated_at = NOW() WHERE id = $1 RETURNING *',
       [id]
@@ -126,7 +126,7 @@ export class MenuService {
   /**
    * Get menu items by category
    */
-  async getItemsByCategory(category: string): Promise<MenuItem[]> {
+  async getItemsByCategory(category:, string): Promise<MenuItem[]> {
     return executeQuery<MenuItem>('SELECT * FROM menu_items WHERE category = $1 ORDER BY name', [category]);
   }
   

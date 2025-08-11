@@ -1,21 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../error';
 
 // POST /api/menu/delete - Delete a menu item
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
+  try {
+  try {
   try {
     // Get the ID from the request body
     const data = await request.json();
-    const { id } = data;
+    const { id
+} catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+} = data;
     
     if (!id) {
       console.error('Missing ID parameter');
-      return NextResponse.json(
-        { error: 'Missing ID parameter' },
-        { status: 400 }
-      );
+      throw new Error('Missing ID parameter');
     }
     
     console.log(`Attempting to delete menu item with ID: ${id}`);
@@ -32,7 +38,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Successfully deleted menu item with ID: ${id}`);
     return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
 import { Member } from '../../../types/models';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from "../error";
 
-export async function GET(request: NextRequest) {
+export async function GET(request:, NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
+    
     const email = searchParams.get('email');
     const memberId = searchParams.get('id');
 
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
         [email]
       );
       
-      if (result.rows.length === 0) {
+      if (result.rows.length ===, 0) {
         throw new ApiError('Member not found', 404);
       }
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
         [memberId]
       );
       
-      if (result.rows.length === 0) {
+      if (result.rows.length ===, 0) {
         throw new ApiError('Member not found', 404);
       }
 
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     // Get all members
     const result = await query('SELECT * FROM members ORDER BY created_at DESC');
-    const members = result.rows.map((member: any) => ({
+    const members = result.rows.map((member:, any) => ({
       id: member.id,
       name: member.name,
       email: member.email,
@@ -78,12 +79,12 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json(members);
-  } catch (error: unknown) {
+  } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
   try {
     const body = await request.json();
     const { name, email, phone, membership_level = 'Bronze' } = body;
@@ -112,12 +113,12 @@ export async function POST(request: NextRequest) {
       created_at: member.created_at,
       updated_at: member.updated_at
     }, { status: 201 });
-  } catch (error: unknown) {
+  } catch (error) {
     return handleRouteError(error);
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request:, NextRequest) {
   try {
     const body = await request.json();
     const { id, name, email, phone, membership_level } = body;
@@ -132,13 +133,11 @@ export async function PUT(request: NextRequest) {
            email = COALESCE($3, email), 
            phone = COALESCE($4, phone), 
            membership_level = COALESCE($5, membership_level),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1 
-       RETURNING *`,
+           updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *`,
       [id, name, email, phone, membership_level]
     );
 
-    if (result.rows.length === 0) {
+    if (result.rows.length ===, 0) {
       throw new ApiError('Member not found', 404);
     }
 
@@ -155,7 +154,7 @@ export async function PUT(request: NextRequest) {
       created_at: member.created_at,
       updated_at: member.updated_at
     });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

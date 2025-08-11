@@ -1,5 +1,4 @@
-export interface MenuItem {
-  id: string;
+export interface MenuItem {id: string;
   name: string;
   price: number;
   category: string;
@@ -7,11 +6,10 @@ export interface MenuItem {
   image_url?: string;
   is_available: boolean;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
-export interface InventoryItem {
-  id: string;
+export interface InventoryItem {id: string;
   name: string;
   sku: string;
   category: string;
@@ -22,11 +20,10 @@ export interface InventoryItem {
   supplier?: string;
   description?: string;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
-export interface Order {
-  id: string;
+export interface Order {id: string;
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;
@@ -36,22 +33,20 @@ export interface Order {
   order_type: 'dine-in' | 'takeout' | 'delivery';
   notes?: string;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
-export interface OrderItem {
-  id: string;
+export interface OrderItem {id: string;
   order_id: string;
   menu_item_id: string;
   menu_item_name: string;
   quantity: number;
   unit_price: number;
-  subtotal: number;
+ , subtotal: number;
   customizations?: string;
 }
 
-export interface Reservation {
-  id: string;
+export interface Reservation {id: string;
   customer_name: string;
   customer_email?: string;
   customer_phone: string;
@@ -61,11 +56,10 @@ export interface Reservation {
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
   notes?: string;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
-export interface Member {
-  id: string;
+export interface Member {id: string;
   name: string;
   email: string;
   phone?: string;
@@ -74,17 +68,16 @@ export interface Member {
   balance: number;
   member_since: Date;
   created_at: Date;
-  updated_at: Date;
+ , updated_at: Date;
 }
 
-export interface MemberTransaction {
-  id: string;
+export interface MemberTransaction {id: string;
   member_id: string;
   transaction_type: 'topup' | 'purchase' | 'refund';
   amount: number;
   description: string;
   balance_after: number;
-  created_at: Date;
+ , created_at: Date;
 }
 
 export interface MemberOrder extends Order {

@@ -1,29 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { v4, as, uuidv4 } from 'uuid';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../error';
 
 // POST /api/upload - Upload an image
-export async function POST(request: NextRequest) {
+export async function POST(request:, NextRequest) {
+  try {
+  try {
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File;
     
     if (!image) {
       return NextResponse.json(
-        { error: 'No image provided' },
+        { error: 'No image provided'
+} catch (error) {
+    return handleRouteError(error);
+  }
+} catch (error) {
+    return handleRouteError(error);
+  }
+},
         { status: 400 }
       );
     }
     
     // Validate file type
     if (!image.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'File must be an image' },
-        { status: 400 }
-      );
+      throw new Error('File must be an image');
     }
     
     // Get file extension
@@ -53,7 +59,7 @@ export async function POST(request: NextRequest) {
       url: imageUrl,
       fileName: fileName
     });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

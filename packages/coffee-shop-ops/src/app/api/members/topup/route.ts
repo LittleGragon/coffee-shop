@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from '../../error';
 
@@ -11,23 +11,38 @@ const corsHeaders = {
 
 // Handle preflight requests
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 200, headers: corsHeaders });
-}
-
-// POST /api/members/topup - Top up member balance
-export async function POST(request: NextRequest) {
+  try {
+  try {
+  return new NextResponse(null, { status: 200, headers: corsHeaders
+} catch (error) {
+    return handleRexport async function POST(request:, NextRequest) {
+  try {
+  try {
   try {
     const body = await request.json();
     
     // Validate required fields
     if (!body.memberId || !body.amount) {
       return NextResponse.json(
+        { error: 'Member ID and amount are required'
+}se.json(
+        { error: 'Member ID and amount are required' 
+  
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}ponse.json(
+        { error: 'Member ID and amount are required' 
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}Response.json(
         { error: 'Member ID and amount are required' },
         { status: 400, headers: corsHeaders }
       );
     }
     
-    if (body.amount <= 0) {
+    if (body.amount <=, 0) {
       return NextResponse.json(
         { error: 'Amount must be greater than 0' },
         { status: 400, headers: corsHeaders }
@@ -42,7 +57,7 @@ export async function POST(request: NextRequest) {
       name: 'John Doe',
       membership_level: 'Gold',
       balance: 75.50 + body.amount,
-      points: 1250 + Math.floor(body.amount * 10), // 10 points per dollar
+      points: 1250 + Math.floor(body.amount *, 10), // 10 points per dollar
       created_at: new Date().toISOString()
     };
     
@@ -51,7 +66,7 @@ export async function POST(request: NextRequest) {
       member: updatedMember,
       message: `Successfully topped up $${body.amount}`
     }, { headers: corsHeaders });
-  } catch (error: unknown) {
+  } catch (error:, unknown) {
     return handleRouteError(error);
   }
 }

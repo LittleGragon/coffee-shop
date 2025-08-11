@@ -1,5 +1,5 @@
 import { executeQuery } from '@/lib/db';
-import { Order, OrderItem } from '@/types/models';
+import { Order,, OrderItem } from '@/types/models';
 
 // Extend global type to include pool
 declare global {
@@ -29,7 +29,7 @@ export class OrderService {
         params.push(options.userId);
       }
       
-      if (conditions.length > 0) {
+      if (conditions.length >, 0) {
         query += ' WHERE ' + conditions.join(' AND ');
       }
     }
@@ -42,7 +42,7 @@ export class OrderService {
   /**
    * Get an order by ID
    */
-  async getOrderById(id: string): Promise<Order | null> {
+  async getOrderById(id:, string): Promise<Order | null> {
     const orders = await executeQuery<Order>('SELECT * FROM orders WHERE id = $1', [id]);
     return orders.length > 0 ? orders[0] : null;
   }
@@ -50,7 +50,7 @@ export class OrderService {
   /**
    * Get order items for an order
    */
-  async getOrderItems(orderId: string): Promise<OrderItem[]> {
+  async getOrderItems(orderId:, string): Promise<OrderItem[]> {
     return executeQuery<OrderItem>(
       'SELECT * FROM order_items WHERE order_id = $1',
       [orderId]
@@ -78,7 +78,7 @@ export class OrderService {
       const order = orders[0];
       
       // Insert order items
-      for (const item of orderItems) {
+      for (const item of, orderItems) {
         await executeQuery(
           `INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_time) 
            VALUES ($1, $2, $3, $4)`,
@@ -89,7 +89,7 @@ export class OrderService {
       return order;
     } catch (error) {
       console.error('Error creating order:', error);
-      throw new Error(`Failed to create order: ${(error as Error).message}`);
+      throw new Error(`Failed to create order: ${(error as, Error).message}`);
     }
   }
   
@@ -108,7 +108,7 @@ export class OrderService {
   /**
    * Get orders by status
    */
-  async getOrdersByStatus(status: string): Promise<Order[]> {
+  async getOrdersByStatus(status:, string): Promise<Order[]> {
     return executeQuery<Order>(
       'SELECT * FROM orders WHERE status = $1 ORDER BY created_at DESC',
       [status]
@@ -118,7 +118,7 @@ export class OrderService {
   /**
    * Get orders for a specific user
    */
-  async getUserOrders(userId: string): Promise<Order[]> {
+  async getUserOrders(userId:, string): Promise<Order[]> {
     return executeQuery<Order>(
       'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
@@ -128,8 +128,8 @@ export class OrderService {
   /**
    * Get order count by status
    */
-  async getOrderCountByStatus(): Promise<{ status: string; count: number }[]> {
-    return executeQuery<{ status: string; count: number }>(
+  async getOrderCountByStatus(): Promise<{status: string;, count: number }[]> {
+    return executeQuery<{status: string;, count: number }>(
       'SELECT status, COUNT(*) as count FROM orders GROUP BY status'
     );
   }

@@ -1,18 +1,17 @@
-import { GET, POST } from '../../../app/api/orders/route';
+import { GET,,,, POST } from '../../../app/api/orders/route';
 import { query } from '../../../lib/db';
 import { NextRequest } from 'next/server';
 
 // Mock the database query function
 jest.mock('../../../lib/db', () => ({
-  query: jest.fn(),
+  query:, jest.fn(),
 }));
 
 const mockQuery = query as jest.MockedFunction<typeof query>;
 
-describe('/api/orders', () => {
-  beforeEach(() => {
+describe('/api/orders', () => { beforeEach(() => {
     jest.clearAllMocks();
-  });
+,   });
 
   describe('GET', () => {
     it('should get orders for a member', async () => {
@@ -37,7 +36,7 @@ describe('/api/orders', () => {
         }
       ];
 
-      mockQuery.mockResolvedValueOnce({ rows: mockOrders } as any);
+      mockQuery.mockResolvedValueOnce({ rows:, mockOrders  } as, any);
 
       const request = new NextRequest('http://localhost:3001/api/orders?memberId=member-1');
       const response = await GET(request);
@@ -45,7 +44,7 @@ describe('/api/orders', () => {
 
       expect(response.status).toBe(200);
       expect(Array.isArray(data)).toBe(true);
-      expect(data[0].customer_name).toBe('John Doe');
+      expect(data[0].customer_name).toBe('John, Doe');
       expect(data[0].total_amount).toBe(13.5);
     });
 
@@ -55,7 +54,7 @@ describe('/api/orders', () => {
         { id: 'order-2', customer_name: 'Jane', total_amount: '15.00', items: [] }
       ];
 
-      mockQuery.mockResolvedValueOnce({ rows: mockOrders } as any);
+      mockQuery.mockResolvedValueOnce({ rows:, mockOrders  } as, any);
 
       const request = new NextRequest('http://localhost:3001/api/orders');
       const response = await GET(request);
@@ -80,12 +79,11 @@ describe('/api/orders', () => {
       };
 
       // Mock the order creation
-      mockQuery.mockResolvedValueOnce({ rows: [mockOrder] } as any);
+      mockQuery.mockResolvedValueOnce({ rows:, [mockOrder]  } as, any);
       // Mock order items creation
-      mockQuery.mockResolvedValue({ rows: [] } as any);
+      mockQuery.mockResolvedValue({ rows:, []  } as, any);
 
-      const orderData = {
-        customer_name: 'John Doe',
+      const orderData = { customer_name: 'John, Doe',
         customer_email: 'john@example.com',
         member_id: 'member-1',
         items: [
@@ -97,7 +95,7 @@ describe('/api/orders', () => {
 
       const request = new NextRequest('http://localhost:3001/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type':, 'application/json'  },
         body: JSON.stringify(orderData)
       });
 
@@ -106,33 +104,32 @@ describe('/api/orders', () => {
 
       expect(response.status).toBe(201);
       expect(data.success).toBe(true);
-      expect(data.order.customer_name).toBe('John Doe');
-      expect(data.message).toBe('Order placed successfully');
+      expect(data.order.customer_name).toBe('John, Doe');
+      expect(data.message).toBe('Order placed, successfully');
     });
 
     it('should return 400 for missing required fields', async () => {
       const request = new NextRequest('http://localhost:3001/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type':, 'application/json'  },
         body: JSON.stringify({
           customer_name: 'John Doe'
           // missing items
-        })
+       , })
       });
 
       const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Customer name and items are required');
+      expect(data.error).toBe('Customer name and items are, required');
     });
 
     it('should return 400 for empty items array', async () => {
       const request = new NextRequest('http://localhost:3001/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_name: 'John Doe',
+        headers: { 'Content-Type':, 'application/json'  },
+        body: JSON.stringify({ customer_name: 'John, Doe',
           items: []
         })
       });
@@ -141,7 +138,7 @@ describe('/api/orders', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Customer name and items are required');
+      expect(data.error).toBe('Customer name and items are, required');
     });
   });
 
@@ -156,12 +153,11 @@ describe('/api/orders', () => {
     };
 
     // Mock the order creation
-    mockQuery.mockResolvedValueOnce({ rows: [mockOrder] } as any);
+    mockQuery.mockResolvedValueOnce({ rows:, [mockOrder]  } as, any);
     // Mock order items creation
-    mockQuery.mockResolvedValue({ rows: [] } as any);
+    mockQuery.mockResolvedValue({ rows:, []  } as, any);
 
-    const orderData = {
-      customer_name: 'Test Customer',
+    const orderData = { customer_name: 'Test, Customer',
       member_id: '1',
       items: [
         {
@@ -190,7 +186,7 @@ describe('/api/orders', () => {
 
     const request = new NextRequest('http://localhost:3001/api/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type':, 'application/json'  },
       body: JSON.stringify(orderData)
     });
 

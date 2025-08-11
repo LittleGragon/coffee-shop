@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest,, NextResponse } from 'next/server';
 
-export function corsMiddleware(request: NextRequest) {
+export function corsMiddleware(request:, NextRequest) {
   // Handle CORS
   const response = NextResponse.next();
   
