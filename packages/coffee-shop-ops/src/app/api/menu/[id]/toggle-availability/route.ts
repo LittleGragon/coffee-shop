@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../../error';
 
 // PUT /api/menu/[id]/toggle-availability - Toggle menu item availability
 export async function PUT(
@@ -18,11 +20,7 @@ export async function PUT(
     }
     
     return NextResponse.json(updatedItem);
-  } catch (error) {
-    // console.error(`Error toggling menu item availability:`, error);
-    return NextResponse.json(
-      { error: 'Failed to toggle menu item availability' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

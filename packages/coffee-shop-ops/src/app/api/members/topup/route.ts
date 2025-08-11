@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // CORS headers
 const corsHeaders = {
@@ -49,11 +51,7 @@ export async function POST(request: NextRequest) {
       member: updatedMember,
       message: `Successfully topped up $${body.amount}`
     }, { headers: corsHeaders });
-  } catch (error) {
-    console.error('Error topping up member:', error);
-    return NextResponse.json(
-      { error: 'Failed to top up member balance' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

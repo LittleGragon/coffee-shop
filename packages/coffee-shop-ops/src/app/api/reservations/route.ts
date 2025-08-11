@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import reservationService from '@/services/reservationService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // GET /api/reservations - Get all reservations
 export async function GET(request: NextRequest) {
@@ -11,12 +13,8 @@ export async function GET(request: NextRequest) {
     
     const reservations = await reservationService.getAllReservations({ status, date });
     return NextResponse.json(reservations);
-  } catch (error) {
-    // console.error('Error fetching reservations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch reservations' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -58,11 +56,7 @@ export async function POST(request: NextRequest) {
     });
     
     return NextResponse.json(newReservation, { status: 201 });
-  } catch (error) {
-    // console.error('Error creating reservation:', error);
-    return NextResponse.json(
-      { error: 'Failed to create reservation' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

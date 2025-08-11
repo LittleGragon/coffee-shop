@@ -35,7 +35,7 @@ export async function testConnection(): Promise<boolean> {
     await client.query('SELECT NOW()');
     return true;
   } catch (error) {
-    // console.error('Database connection error:', error);
+    console.error('Database connection error:', error);
     return false;
   } finally {
     if (client) {

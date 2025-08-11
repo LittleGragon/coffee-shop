@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import inventoryService from '@/services/inventoryService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../../error';
 
 // GET /api/inventory/[id]/transactions - Get all transactions for an inventory item
 export async function GET(
@@ -20,12 +22,8 @@ export async function GET(
     
     const transactions = await inventoryService.getItemTransactions(id);
     return NextResponse.json(transactions);
-  } catch (error) {
-    // console.error(`Error fetching transactions for inventory item ${params.id}:`, error);
-    return NextResponse.json(
-      { error: 'Failed to fetch inventory transactions' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -72,11 +70,7 @@ export async function POST(
     
     const newTransaction = await inventoryService.recordTransaction(transaction);
     return NextResponse.json(newTransaction, { status: 201 });
-  } catch (error) {
-    // console.error(`Error recording transaction for inventory item ${params.id}:`, error);
-    return NextResponse.json(
-      { error: 'Failed to record inventory transaction' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

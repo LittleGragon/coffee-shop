@@ -1,5 +1,6 @@
 import { GET } from '../route';
 import { NextRequest, NextResponse } from 'next/server';
+import { handleRouteError } from "../../error";
 
 // Mock NextResponse.redirect
 jest.mock('next/server', () => {

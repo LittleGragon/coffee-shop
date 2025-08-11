@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // CORS headers
 const corsHeaders = {
@@ -63,11 +65,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     
     return NextResponse.json(memberOrders, { headers: corsHeaders });
-  } catch (error) {
-    console.error('Error fetching member orders:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch member orders' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

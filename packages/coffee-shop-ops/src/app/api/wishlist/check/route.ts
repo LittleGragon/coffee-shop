@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { wishlistService, checkDatabaseConnection } from '@/services/wishlistService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // GET /api/wishlist/check - Check if an item is in a user's wishlist
 export async function GET(request: NextRequest) {
@@ -39,10 +41,9 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ isInWishlist });
-  } catch (error) {
-    console.error('Error checking wishlist status:', error);
-    return NextResponse.json(
-      { error: 'Failed to check wishlist status', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }

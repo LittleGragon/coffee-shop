@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,12 +45,8 @@ export async function GET(request: NextRequest) {
       count,
       sampleItems: menuItems
     });
-  } catch (error) {
-    console.error('Error testing menu items:', error);
-    return NextResponse.json({ 
-      status: 'error', 
-      message: 'Error testing menu items',
-      error: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  }, { status: 500 });
   }
 }

@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../../error";
+import { handleRouteError } from "../../error";
 
 // This is a mock balance. In a real app, this would be in a database.
 let currentBalance = 50.75;
@@ -24,9 +27,6 @@ export async function POST(request: Request) {
       newBalance: currentBalance,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request body' },
-      { status: 400 }
-    );
+    return handleRouteError(error);
   }
 }

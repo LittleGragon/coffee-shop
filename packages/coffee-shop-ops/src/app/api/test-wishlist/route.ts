@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkDatabaseConnection } from '@/services/wishlistService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,10 +14,9 @@ export async function GET(request: NextRequest) {
       databaseConnected: isConnected,
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
-    console.error('Error in test-wishlist endpoint:', error);
-    return NextResponse.json(
-      { error: 'Test endpoint failed', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }

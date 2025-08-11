@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import orderService from '@/services/orderService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // CORS headers
 const corsHeaders = {
@@ -23,12 +25,8 @@ export async function GET(request: NextRequest) {
     
     const orders = await orderService.getAllOrders({ status, userId });
     return NextResponse.json(orders, { headers: corsHeaders });
-  } catch (error) {
-    // console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch orders' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -65,11 +63,7 @@ export async function POST(request: NextRequest) {
     
     const newOrder = await orderService.createOrder(body.orderData, body.orderItems);
     return NextResponse.json(newOrder, { status: 201, headers: corsHeaders });
-  } catch (error) {
-    // console.error('Error creating order:', error);
-    return NextResponse.json(
-      { error: 'Failed to create order' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

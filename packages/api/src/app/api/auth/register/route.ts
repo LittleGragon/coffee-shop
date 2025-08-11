@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '@/lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../../error";
+import { handleRouteError } from "../../error";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -62,10 +65,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleRouteError(error);
   }
 }

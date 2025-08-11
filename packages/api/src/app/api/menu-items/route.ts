@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../error";
+import { handleRouteError } from "../error";
 
 // This is a compatibility route that redirects to /api/menu
 export async function GET(request: NextRequest) {

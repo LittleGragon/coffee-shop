@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
 import { Member } from '../../../types/models';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,10 +18,10 @@ export async function GET(request: NextRequest) {
       );
       
       if (result.rows.length === 0) {
-        return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+        throw new ApiError('Member not found', 404);
       }
 
-      const member = result.rows[0];
+      const member: any = result.rows[0];
       return NextResponse.json({
         id: member.id,
         name: member.name,
@@ -42,10 +44,10 @@ export async function GET(request: NextRequest) {
       );
       
       if (result.rows.length === 0) {
-        return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+        throw new ApiError('Member not found', 404);
       }
 
-      const member = result.rows[0];
+      const member: any = result.rows[0];
       return NextResponse.json({
         id: member.id,
         name: member.name,
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     // Get all members
     const result = await query('SELECT * FROM members ORDER BY created_at DESC');
-    const members = result.rows.map(member => ({
+    const members = result.rows.map((member: any) => ({
       id: member.id,
       name: member.name,
       email: member.email,
@@ -76,9 +78,8 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json(members);
-  } catch (error) {
-    // console.error('Error fetching members:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     const { name, email, phone, membership_level = 'Bronze' } = body;
 
     if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+      throw new ApiError('Name and email are required', 400);
     }
 
     const result = await query(
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
       [name, email, phone, membership_level]
     );
 
-    const member = result.rows[0];
+    const member: any = result.rows[0];
     return NextResponse.json({
       id: member.id,
       name: member.name,
@@ -111,12 +112,8 @@ export async function POST(request: NextRequest) {
       created_at: member.created_at,
       updated_at: member.updated_at
     }, { status: 201 });
-  } catch (error) {
-    // console.error('Error creating member:', error);
-    if (error.code === '23505') { // Unique constraint violation
-      return NextResponse.json({ error: 'Email already exists' }, { status: 409 });
-    }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -126,7 +123,7 @@ export async function PUT(request: NextRequest) {
     const { id, name, email, phone, membership_level } = body;
 
     if (!id) {
-      return NextResponse.json({ error: 'Member ID is required' }, { status: 400 });
+      throw new ApiError('Member ID is required', 400);
     }
 
     const result = await query(
@@ -142,10 +139,10 @@ export async function PUT(request: NextRequest) {
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+      throw new ApiError('Member not found', 404);
     }
 
-    const member = result.rows[0];
+    const member: any = result.rows[0];
     return NextResponse.json({
       id: member.id,
       name: member.name,
@@ -158,8 +155,7 @@ export async function PUT(request: NextRequest) {
       created_at: member.created_at,
       updated_at: member.updated_at
     });
-  } catch (error) {
-    // console.error('Error updating member:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

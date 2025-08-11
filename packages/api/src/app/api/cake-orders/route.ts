@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../error";
+import { handleRouteError } from "../error";
 
 export async function POST(request: Request) {
   try {
@@ -23,9 +26,6 @@ export async function POST(request: Request) {
       orderId: orderId,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid request body' },
-      { status: 400 }
-    );
+    return handleRouteError(error);
   }
 }

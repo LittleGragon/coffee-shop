@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import orderService from '@/services/orderService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // GET /api/orders/[id] - Get a specific order
 export async function GET(
@@ -24,12 +26,8 @@ export async function GET(
       order,
       items: orderItems
     });
-  } catch (error) {
-    // console.error(`Error fetching order ${params.id}:`, error);
-    return NextResponse.json(
-      { error: 'Failed to fetch order' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -68,11 +66,7 @@ export async function PATCH(
     }
     
     return NextResponse.json(updatedOrder);
-  } catch (error) {
-    // console.error(`Error updating order ${params.id}:`, error);
-    return NextResponse.json(
-      { error: 'Failed to update order' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

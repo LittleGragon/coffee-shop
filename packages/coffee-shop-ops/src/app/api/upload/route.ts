@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // POST /api/upload - Upload an image
 export async function POST(request: NextRequest) {
@@ -51,11 +53,7 @@ export async function POST(request: NextRequest) {
       url: imageUrl,
       fileName: fileName
     });
-  } catch (error) {
-    // console.error('Error uploading image:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload image' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

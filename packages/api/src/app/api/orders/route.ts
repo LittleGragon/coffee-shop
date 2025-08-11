@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // Handler for GET /api/orders
 export async function GET(request: NextRequest) {
@@ -10,12 +12,8 @@ export async function GET(request: NextRequest) {
       total_amount: parseFloat(order.total_amount),
     }));
     return NextResponse.json(orders);
-  } catch (error) {
-    console.error('Error fetching orders:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch orders' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -35,10 +33,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!customer_name || !items || items.length === 0) {
-      return NextResponse.json(
-        { error: 'Customer name and items are required' },
-        { status: 400 }
-      );
+      throw new ApiError('Customer name and items are required', 400);
     }
 
     // Calculate total amount
@@ -100,11 +95,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error('Error creating order:', error);
-    return NextResponse.json(
-      { error: 'Failed to create order', details: error.message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

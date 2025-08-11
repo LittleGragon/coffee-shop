@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { wishlistService, checkDatabaseConnection } from '@/services/wishlistService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // GET /api/wishlist/user - Get wishlist items for a user
 export async function GET(request: NextRequest) {
@@ -30,10 +32,9 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json(wishlistItems);
-  } catch (error) {
-    console.error('Error fetching user wishlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user wishlist', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }

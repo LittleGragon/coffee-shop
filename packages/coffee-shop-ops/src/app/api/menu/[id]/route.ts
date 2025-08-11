@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // Support for form-based DELETE requests
 export async function POST(
@@ -43,12 +45,8 @@ async function handleDelete(params: { id: string }) {
     
     console.log(`Successfully deleted menu item with ID: ${id}`);
     return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error) {
-    console.error(`Error deleting menu item:`, error);
-    return NextResponse.json(
-      { error: 'Failed to delete menu item' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -79,12 +77,8 @@ export async function GET(
     }
     
     return NextResponse.json(menuItem);
-  } catch (error) {
-    console.error(`Error fetching menu item:`, error);
-    return NextResponse.json(
-      { error: 'Failed to fetch menu item' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -117,12 +111,8 @@ export async function PUT(
     
     console.log(`Successfully updated menu item with ID: ${id}`);
     return NextResponse.json(updatedItem);
-  } catch (error) {
-    console.error(`Error updating menu item:`, error);
-    return NextResponse.json(
-      { error: 'Failed to update menu item' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -154,11 +144,7 @@ export async function DELETE(
     
     console.log(`Successfully deleted menu item with ID: ${id}`);
     return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error) {
-    console.error(`Error deleting menu item:`, error);
-    return NextResponse.json(
-      { error: 'Failed to delete menu item' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

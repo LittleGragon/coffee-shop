@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { testConnection } from '@/lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,12 +18,8 @@ export async function GET(request: NextRequest) {
         message: 'Database connection failed' 
       }, { status: 500 });
     }
-  } catch (error) {
-    console.error('Error testing database connection:', error);
-    return NextResponse.json({ 
-      status: 'error', 
-      message: 'Error testing database connection',
-      error: error instanceof Error ? error.message : String(error)
-    }, { status: 500 });
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  }, { status: 500 });
   }
 }

@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../error";
+import { handleRouteError } from "../error";
 
 const MOCK_MEMBER_DATA = {
   name: 'Alex Doe',

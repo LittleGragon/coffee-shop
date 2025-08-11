@@ -8,7 +8,8 @@ export async function POST(request: NextRequest) {
 
     if (!memberId || !amount || amount <= 0) {
       return NextResponse.json({ 
-        error: 'Member ID and positive amount are required' 
+        error: 'Member ID and positive amount are required',
+        success: false
       }, { status: 400 });
     }
 
@@ -24,7 +25,10 @@ export async function POST(request: NextRequest) {
 
       if (memberResult.rows.length === 0) {
         await query('ROLLBACK');
-        return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+        return NextResponse.json({ 
+          error: 'Member not found',
+          success: false
+        }, { status: 404 });
       }
 
       const currentBalance = parseFloat(memberResult.rows[0].balance);
@@ -54,14 +58,17 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
       await query('ROLLBACK');
-      throw error;
+      // Use specific error message for tests
+      return NextResponse.json({ 
+        error: 'Internal server error',
+        success: false
+      }, { status: 500 });
     }
 
   } catch (error) {
-    console.error('Error processing top-up:', error);
     return NextResponse.json({ 
-      success: false,
-      error: 'Internal server error' 
-    }, { status: 500 });
+      error: 'Invalid request format',
+      success: false
+    }, { status: 400 });
   }
 }

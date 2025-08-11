@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../../error";
+import { handleRouteError } from "../../error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,7 +35,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transactions);
   } catch (error) {
-    // console.error('Error fetching member transactions:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return handleRouteError(error);
   }
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { wishlistService, checkDatabaseConnection } from '@/services/wishlistService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // GET /api/wishlist - Get wishlist counts for all menu items
 export async function GET(request: NextRequest) {
@@ -15,10 +17,9 @@ export async function GET(request: NextRequest) {
     
     const wishlistCounts = await wishlistService.getWishlistCounts();
     return NextResponse.json(wishlistCounts);
-  } catch (error) {
-    console.error('Error fetching wishlist counts:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch wishlist counts', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }
@@ -55,10 +56,9 @@ export async function POST(request: NextRequest) {
 
     const wishlistItem = await wishlistService.addToWishlist(menuItemId, userId, guestId);
     return NextResponse.json(wishlistItem, { status: 201 });
-  } catch (error) {
-    console.error('Error adding to wishlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to add item to wishlist', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }
@@ -109,10 +109,9 @@ export async function DELETE(request: NextRequest) {
         { status: 404 }
       );
     }
-  } catch (error) {
-    console.error('Error removing from wishlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to remove item from wishlist', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }

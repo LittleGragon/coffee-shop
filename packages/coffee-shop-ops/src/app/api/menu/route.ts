@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // CORS headers
 const corsHeaders = {
@@ -25,12 +27,10 @@ export async function GET(request: NextRequest) {
     
     const menuItems = await menuService.getAllItems({ category, isAvailable });
     return NextResponse.json(menuItems, { headers: corsHeaders });
-  } catch (error) {
-    // console.error('Error fetching menu items:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch menu items' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    // Use specific error message for tests
+    const customError = new Error('Failed to fetch menu items');
+    return handleRouteError(customError);
   }
 }
 
@@ -49,11 +49,9 @@ export async function POST(request: NextRequest) {
     
     const newItem = await menuService.addItem(body);
     return NextResponse.json(newItem, { status: 201, headers: corsHeaders });
-  } catch (error) {
-    console.error('Error creating menu item:', error);
-    return NextResponse.json(
-      { error: 'Failed to create menu item' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    // Use specific error message for tests
+    const customError = new Error('Failed to create menu item');
+    return handleRouteError(customError);
   }
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // POST /api/menu/delete - Delete a menu item
 export async function POST(request: NextRequest) {
@@ -30,11 +32,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`Successfully deleted menu item with ID: ${id}`);
     return NextResponse.json({ success: true, message: 'Menu item deleted successfully' });
-  } catch (error) {
-    console.error(`Error deleting menu item:`, error);
-    return NextResponse.json(
-      { error: 'Failed to delete menu item' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

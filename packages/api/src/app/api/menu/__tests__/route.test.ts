@@ -2,6 +2,7 @@ import { GET, POST } from '../route';
 import { NextRequest } from 'next/server';
 import menuService from 'coffee-shop-ops/services/menuService';
 import { MenuItem } from '@/types/models';
+import { handleRouteError } from "../../error";
 
 // Mock the menuService
 jest.mock('coffee-shop-ops/services/menuService', () => ({

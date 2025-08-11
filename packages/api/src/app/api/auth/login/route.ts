@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from '@/lib/db';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -23,10 +25,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
+      throw new ApiError('Invalid email or password', 401);
     }
 
     const user = result.rows[0];
@@ -35,10 +34,7 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
+      throw new ApiError('Invalid email or password', 401);
     }
 
     // Generate JWT token
@@ -60,10 +56,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleRouteError(error);
   }
 }

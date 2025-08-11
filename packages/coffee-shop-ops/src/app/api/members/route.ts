@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // CORS headers
 const corsHeaders = {
@@ -53,12 +55,8 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(member, { headers: corsHeaders });
-  } catch (error) {
-    console.error('Error fetching member:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch member' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -102,11 +100,7 @@ export async function POST(request: NextRequest) {
     mockMembers.push(newMember);
     
     return NextResponse.json(newMember, { status: 201, headers: corsHeaders });
-  } catch (error) {
-    console.error('Error creating member:', error);
-    return NextResponse.json(
-      { error: 'Failed to create member' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

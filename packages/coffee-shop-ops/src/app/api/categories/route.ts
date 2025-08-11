@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import categoryService from '@/services/categoryService';
 import menuService from '@/services/menuService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../error';
 
 // CORS headers
 const corsHeaders = {
@@ -19,12 +21,8 @@ export async function GET(request: NextRequest) {
   try {
     const categories = await categoryService.getCategoryNames();
     return NextResponse.json(categories, { headers: corsHeaders });
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch categories' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -56,12 +54,8 @@ export async function POST(request: NextRequest) {
     });
     
     return NextResponse.json(newCategory, { status: 201, headers: corsHeaders });
-  } catch (error) {
-    console.error('Error creating category:', error);
-    return NextResponse.json(
-      { error: 'Failed to create category' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }
 
@@ -111,11 +105,7 @@ export async function DELETE(request: NextRequest) {
         { status: 500, headers: corsHeaders }
       );
     }
-  } catch (error) {
-    console.error('Error deleting category:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to delete category' },
-      { status: 500, headers: corsHeaders }
-    );
+  } catch (error: unknown) {
+    return handleRouteError(error);
   }
 }

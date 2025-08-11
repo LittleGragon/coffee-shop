@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import inventoryService from 'coffee-shop-ops/services/inventoryService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from "../error";
+import { handleRouteError } from "../error";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,11 +13,7 @@ export async function GET(request: NextRequest) {
     const inventoryItems = await inventoryService.getAllItems({ category, lowStock });
     return NextResponse.json(inventoryItems);
   } catch (error) {
-    // console.error('Error fetching inventory items:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch inventory items' },
-      { status: 500 }
-    );
+    return handleRouteError(error);
   }
 }
 
@@ -34,10 +33,6 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    // console.error('Error creating inventory item:', error);
-    return NextResponse.json(
-      { error: 'Failed to create inventory item' },
-      { status: 500 }
-    );
+    return handleRouteError(error);
   }
 }

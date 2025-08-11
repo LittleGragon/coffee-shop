@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { wishlistService, checkDatabaseConnection } from '@/services/wishlistService';
+import { ApiError } from '@/utils/error-handler';
+import { handleRouteError } from '../../error';
 
 // GET /api/wishlist/top - Get top wishlist items with menu details
 export async function GET(request: NextRequest) {
@@ -19,10 +21,9 @@ export async function GET(request: NextRequest) {
     
     const topItems = await wishlistService.getTopWishlistItems(limit);
     return NextResponse.json(topItems);
-  } catch (error) {
-    console.error('Error fetching top wishlist items:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch top wishlist items', details: error instanceof Error ? error.message : String(error) },
+  } catch (error: unknown) {
+    return handleRouteError(error);
+  },
       { status: 500 }
     );
   }
