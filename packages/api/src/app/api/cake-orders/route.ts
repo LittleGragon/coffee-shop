@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError } from '@/utils/error-handler';
 import { handleRouteError } from "../error";
 
-export async function POST(request:, Request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { size, flavor, toppings, message } = body;

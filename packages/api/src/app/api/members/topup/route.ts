@@ -1,14 +1,14 @@
-import { NextRequest,, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
 import { handleRouteError } from '../../error';
 import { ApiError } from '@/utils/error-handler';
 
-export async function POST(request:, NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { memberId, amount, description = 'Balance top-up' } = body;
 
-    if (!memberId || !amount || amount <=, 0) {
+    if (!memberId || !amount || amount <= 0) {
       throw new ApiError('Member ID and positive amount are required', 400);
     }
 
@@ -22,7 +22,7 @@ export async function POST(request:, NextRequest) {
         [memberId]
       );
 
-      if (memberResult.rows.length ===, 0) {
+      if (memberResult.rows.length === 0) {
         await query('ROLLBACK');
         throw new ApiError('Member not found', 404);
       }
