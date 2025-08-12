@@ -57,26 +57,39 @@ export function CheckoutPage() {
         price_at_time: item.price,
       }));
 
-      // Prepare order data using the shared type
-      const orderData: CreateOrderRequest = {
-        user_id: null, // Anonymous order
-        total_amount: totalAmount,
-        status: 'pending',
-        order_type: 'takeout',
+      // Prepare order data for the API
+      const orderData = {
         customer_name: customerName,
+        order_type: 'takeout',
         notes: `Pickup time: ${pickupTime}`,
         payment_method: 'wechat_pay',
-        items: orderItems,
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
       };
 
-      // Place the order using the API client
-      const result = await apiClient.orders.create(orderData);
+      // Place the order using fetch directly since our API client doesn't match the backend expectations
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to place order');
+      }
+      
+      const result = await response.json();
 
       // Order successful
       setIsProcessing(false);
       setPaymentDialogOpen(false);
       toast.success('Your order has been placed successfully!', {
-        description: `Order #${result.id.substring(0, 8)} - Total: $${result.total_amount.toFixed(2)}`,
+        description: `Order #${result.order.id.substring(0, 8)} - Total: $${result.order.total_amount.toFixed(2)}`,
       });
       clearCart();
       navigate('/membership'); // Navigate to membership to see order history

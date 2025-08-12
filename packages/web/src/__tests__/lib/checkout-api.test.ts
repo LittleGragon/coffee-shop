@@ -58,7 +58,7 @@ describe('Checkout API', () => {
       // Verify
       expect(mockFetchMemberData).toHaveBeenCalled();
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/orders',
+        '/api/orders',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -147,7 +147,7 @@ describe('Checkout API', () => {
 
       // Verify total calculation: (4.50 * 3) + (2.50 * 2) + (3.00 * 1) = 21.50
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/orders',
+        '/api/orders',
         expect.objectContaining({
           body: expect.stringContaining('"total_amount":21.5'),
         })

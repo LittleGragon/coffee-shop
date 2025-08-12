@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
       allowedHosts: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'http://localhost:3001', // API server runs on port 3001
           changeOrigin: true,
         },
       },

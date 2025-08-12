@@ -62,7 +62,7 @@ export const MenuPage = () => {
       setError(null);
       try {
         // Fetch categories from database - use direct URL to bypass environment variables
-        const categoriesResponse = await fetch('http://localhost:3000/api/categories');
+        const categoriesResponse = await fetch('/api/categories');
         // Categories response status tracking removed
         interface CategoryData {
           id: string | number;
@@ -116,7 +116,7 @@ export const MenuPage = () => {
         setCategories(categoryNames);
 
         // Fetch all menu items directly
-        const menuResponse = await fetch('http://localhost:3000/api/menu');
+        const menuResponse = await fetch('/api/menu');
 
         interface RawMenuItem {
           id: string;
