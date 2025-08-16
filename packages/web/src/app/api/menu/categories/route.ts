@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { listMenuCategories } from '@/server/services/menu.service';
 
 export async function GET(_request: NextRequest) {
   try {
-    const rows = await query<{ category: string }>(
-      'SELECT DISTINCT category FROM public.menu_items ORDER BY category'
-    );
-    const categories = rows.map((r) => r.category);
+    const categories = await listMenuCategories();
     return NextResponse.json({ success: true, data: categories });
   } catch (error: any) {
     return NextResponse.json(
