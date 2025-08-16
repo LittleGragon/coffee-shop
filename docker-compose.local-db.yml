@@ -23,19 +23,17 @@ services:
   # Web Frontend Service (Development)
   web:
     build:
-      context: ./packages/web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: packages/web/Dockerfile.dev
     container_name: coffee-shop-web-dev
     ports:
-      - "5173:5173"
+      - "3002:3002"
     environment:
       - NODE_ENV=development
-      - VITE_API_BASE_URL=http://localhost:3001/api
+      - DATABASE_URL=postgres://littlegragon@host.docker.internal:5432/coffee_shop_buddy
     volumes:
-      - ./packages/web:/app
-      - /app/node_modules
-    depends_on:
-      - api
+      - ./packages/web:/app/packages/web
+      - /app/packages/web/node_modules
     networks:
       - coffee-shop-network
     restart: unless-stopped

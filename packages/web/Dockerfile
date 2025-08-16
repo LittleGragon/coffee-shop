@@ -1,42 +1,38 @@
-# Web Frontend Dockerfile
+# Web Frontend Dockerfile (Next.js + Prisma)
 FROM node:20-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
+# Install deps
+FROM base AS deps
+COPY package.json package-lock.json ./
 RUN npm ci
 
-# Rebuild the source code only when needed
+# Generate Prisma client (needs schema)
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Build Next.js
 FROM base AS builder
-WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Next.js build
+RUN npx next build
 
-# Build the application
-RUN npm run build
-
-# Production image, copy all the files and run the application
-FROM base AS runner
+# Production runtime
+FROM node:20-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV=production
 
-ENV NODE_ENV production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy the built application
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./package.json
+# Copy runtime artifacts
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 
-USER nextjs
+# Expose Next.js port
+ENV PORT=3002
+EXPOSE 3002
 
-EXPOSE 5173
-
-ENV PORT 5173
-
-CMD ["npm", "run", "preview"]
+# Start Next.js
+CMD ["npx", "next", "start", "-p", "3002"]

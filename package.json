@@ -20,7 +20,19 @@
     "test": "npm-run-all -p test:*",
     "test:api": "npm run test --workspace=api",
     "test:coffee-shop-ops": "npm run test --workspace=coffee-shop-ops",
-    "prepare": "husky"
+    "prepare": "husky",
+    "ops": "bash scripts/ops.sh",
+    "docker:up": "bash scripts/ops.sh docker up",
+    "docker:down": "bash scripts/ops.sh docker down",
+    "docker:build": "bash scripts/ops.sh docker build",
+    "docker:logs": "bash scripts/ops.sh docker logs",
+    "docker:dev:up": "bash scripts/ops.sh docker up --dev",
+    "docker:dev:down": "bash scripts/ops.sh docker down --dev",
+    "docker:localdb:up": "bash scripts/ops.sh docker up --local-db",
+    "docker:localdb:down": "bash scripts/ops.sh docker down --local-db",
+    "k8s:apply": "bash scripts/ops.sh k8s apply",
+    "k8s:delete": "bash scripts/ops.sh k8s delete",
+    "k8s:status": "bash scripts/ops.sh k8s status"
   },
   "devDependencies": {
     "glob": "^11.0.3",
