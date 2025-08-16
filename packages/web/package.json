@@ -7,7 +7,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite --force",
+    "dev": "next dev",
     "build": "vite build",
     "build:github_pages": "vite build --base=/coffee-shop-buddy",
     "preview": "vite preview",
@@ -29,10 +29,13 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@mui/x-date-pickers": "^8.10.0",
+    "coffee-shop-ops": "0.1.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^12.23.12",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "next": "15.4.5",
+    "pg": "^8.16.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-hook-form": "^7.54.1",
     "react-router-dom": "^7.7.1",
     "sonner": "^1.7.1",
@@ -51,8 +54,8 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^22",
-    "@types/react": "^18.3.1",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -70,5 +73,9 @@
     "postcss": "^8.5.6",
     "typescript": "^5",
     "vite": "^7.0.6"
+  },
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }

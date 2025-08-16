@@ -3,6 +3,9 @@
 -- Create database if it doesn't exist
 -- (This is handled by the POSTGRES_DB environment variable in Docker)
 
+-- Enable pgcrypto for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Create menu_items table
 CREATE TABLE IF NOT EXISTS menu_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -43,7 +43,7 @@ type MemberData = {
 
 type MembershipTab = 'profile' | 'balance' | 'history';
 
-export function MembershipPage() {
+export default function MembershipPage() {
   const [activeTab, setActiveTab] = useState<MembershipTab>('profile');
   const [memberData, setMemberData] = useState<MemberData | null>(null);
   const [loading, setLoading] = useState(true);

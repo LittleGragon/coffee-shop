@@ -19,24 +19,27 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 interface WishlistButtonProps {
-  product: Product;
+  itemId: string;
   size?: 'small' | 'medium' | 'large';
+  showCount?: boolean;
 }
 
-export function WishlistButton({ product, size = 'medium' }: WishlistButtonProps) {
+export function WishlistButton({ itemId, size = 'medium', showCount = false }: WishlistButtonProps) {
   const { addToWishlist, removeFromWishlist, items } = useWishlistStore();
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const isInWishlist = items.some((item) => item.id === product.id);
+  const isInWishlist = items.some((item) => item.id === itemId);
+  const product = items.find((item) => item.id === itemId);
 
   const handleToggleWishlist = () => {
-    if (isInWishlist) {
-      removeFromWishlist(product.id);
+    if (isInWishlist && product) {
+      removeFromWishlist(itemId);
       toast.info(`${product.name} removed from wishlist`);
     } else {
-      addToWishlist(product);
+      // For simplicity, we'll just add the ID if we don't have the full product
+      addToWishlist({ id: itemId, name: "Item" } as Product);
       setIsAnimating(true);
-      toast.success(`${product.name} added to wishlist`);
+      toast.success(`Item added to wishlist`);
       setTimeout(() => setIsAnimating(false), 500);
     }
   };

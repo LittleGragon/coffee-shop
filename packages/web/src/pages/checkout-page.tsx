@@ -20,15 +20,15 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useCartStore } from '@/stores/cart-store';
 import type { CreateOrderRequest } from '../../../shared/src/api-types';
 
-export function CheckoutPage() {
+export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isPaymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [customerName, setCustomerName] = useState('');
@@ -92,7 +92,7 @@ export function CheckoutPage() {
         description: `Order #${result.order.id.substring(0, 8)} - Total: $${result.order.total_amount.toFixed(2)}`,
       });
       clearCart();
-      navigate('/membership'); // Navigate to membership to see order history
+      router.push('/membership'); // Navigate to membership to see order history
     } catch (error) {
       setIsProcessing(false);
       // Order placement error handling
@@ -111,7 +111,7 @@ export function CheckoutPage() {
         <Typography variant="body1" paragraph sx={{ mb: 4 }}>
           Add some items to your cart before checking out.
         </Typography>
-        <Button variant="contained" color="primary" onClick={() => navigate('/menu')}>
+        <Button variant="contained" color="primary" onClick={() => router.push('/menu')}>
           Return to Menu
         </Button>
       </Container>
