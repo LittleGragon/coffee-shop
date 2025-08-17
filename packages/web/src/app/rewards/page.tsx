@@ -1,22 +1,48 @@
 "use client";
 
-type HistoryItem = {
-  name: string;
-  date: string;
-  pts: number;
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/src/lib/api-client";
+
+type RewardsGet = {
+  success: boolean;
+  balance: number;
+  history: { id: string; type: string; points: number; reason?: string | null; created_at: string }[];
+  redeemables: { id: string; name: string; points: number }[];
 };
 
-const history: HistoryItem[] = [
-  { name: "Americano", date: "24 June | 12:30", pts: 12 },
-  { name: "Latte", date: "22 June | 08:30", pts: 12 },
-  { name: "Raf", date: "16 June | 10:48", pts: 12 },
-  { name: "Flat White", date: "12 May | 11:25", pts: 12 },
-];
-
 export default function RewardsPage() {
-  const filled = 4;
-  const total = 8;
-  const points = 2750;
+  const [filled, setFilled] = useState<number>(4);
+  const [total] = useState<number>(8);
+  const [points, setPoints] = useState<number>(2750);
+  const [history, setHistory] = useState<{ name: string; date: string; pts: number }[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await apiFetch<RewardsGet>("/api/rewards");
+        if (!mounted || !res?.success) return;
+        // Points
+        setPoints(res.balance ?? 0);
+        // Loyalty stamps are not yet modeled; naive mapping: 1 stamp per 500 pts
+        const computedFilled = Math.max(0, Math.min(8, Math.floor((res.balance ?? 0) / 500)));
+        setFilled(computedFilled);
+
+        // Map history
+        const mapped = (res.history || []).map((h) => ({
+          name: h.reason ? h.reason : h.type === "earn" ? "Earned points" : "Redeemed",
+          date: new Date(h.created_at).toLocaleString(),
+          pts: h.points > 0 ? h.points : Math.abs(h.points),
+        }));
+        setHistory(mapped);
+      } catch {
+        // leave defaults for unauthenticated users
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <main className="screen" aria-label="Rewards">
@@ -59,7 +85,6 @@ export default function RewardsPage() {
                 aria-hidden="true"
                 className="stampImg"
                 onError={(e) => {
-                  // Fallback: draw simple cup if asset missing
                   (e.currentTarget as HTMLImageElement).style.display = "none";
                 }}
               />
@@ -75,14 +100,13 @@ export default function RewardsPage() {
             <div className="caption">My Points:</div>
             <div className="points">{points}</div>
           </div>
-          <button
-            type="button"
+          <a
             className="redeemBtn"
-            onClick={() => (window.location.href = "/menu")}
+            href="/rewards/redeem"
             aria-label="Redeem drinks"
           >
             Redeem drinks
-          </button>
+          </a>
         </div>
         <div className="decor">
           <img
@@ -107,6 +131,15 @@ export default function RewardsPage() {
               <div className="hPts">+ {h.pts} Pts</div>
             </li>
           ))}
+          {history.length === 0 && (
+            <li className="hRow">
+              <div className="hMeta">
+                <div className="hName">No history yet</div>
+                <div className="hDate">Make your first purchase</div>
+              </div>
+              <div className="hPts">+ 0 Pts</div>
+            </li>
+          )}
         </ul>
       </section>
 
@@ -128,7 +161,7 @@ export default function RewardsPage() {
           min-height: 100svh;
           background: #ffffff;
           padding: clamp(10px, 4vw, 16px);
-          padding-bottom: 98px; /* space for bottom nav */
+          padding-bottom: 98px;
           display: grid;
           grid-template-rows: auto auto auto 1fr;
           gap: 16px;
@@ -227,7 +260,8 @@ export default function RewardsPage() {
           color: #ffffff;
           font-weight: 600;
           font-size: 12px;
-          cursor: pointer;
+          display: inline-grid;
+          place-items: center;
         }
         .decor {
           position: absolute;

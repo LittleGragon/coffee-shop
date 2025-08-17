@@ -6,6 +6,55 @@ export async function GET() {
     // Ensure extension for UUID
     await query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
 
+    // Core auth/users (for real auth)
+    await query(`
+      CREATE TABLE IF NOT EXISTS public.users (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        balance DECIMAL(10, 2) DEFAULT 0.00,
+        member_since DATE DEFAULT CURRENT_DATE,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await query('CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email)');
+
+    // Orders + items
+    await query(`
+      CREATE TABLE IF NOT EXISTS public.orders (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID,
+        total_amount DECIMAL(10, 2) NOT NULL,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        order_type VARCHAR(50) NOT NULL DEFAULT 'dine-in',
+        customization JSONB,
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await query(`
+      CREATE TABLE IF NOT EXISTS public.order_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        menu_item_id UUID NOT NULL REFERENCES menu_items(id),
+        quantity INTEGER NOT NULL DEFAULT 1,
+        price_at_time DECIMAL(10, 2) NOT NULL
+      )
+    `);
+
+    // Rewards ledger
+    await query(`
+      CREATE TABLE IF NOT EXISTS public.reward_transactions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        points INTEGER NOT NULL,
+        type VARCHAR(20) NOT NULL,
+        reason TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
     // Create menu_items table if not exists
     await query(`
       CREATE TABLE IF NOT EXISTS public.menu_items (
@@ -16,8 +65,8 @@ export async function GET() {
         description TEXT,
         image_url TEXT,
         is_available BOOLEAN DEFAULT true,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
     `);
 

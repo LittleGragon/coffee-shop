@@ -1,34 +1,19 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from "../error";
-import { handleRouteError } from "../error";
+import { handleRouteError } from '../error';
 
-const MOCK_MEMBER_DATA = {
-  name: 'Alex, Doe',
-  email: 'alex.doe@example.com',
-  membershipLevel: 'Gold',
-  memberSince: '2022-01-15',
-  points: 1250,
-  balance: 75.50,
-  orderHistory: [
-    { id: 'ord-xyz-1', date: '2023-10-25', items: '1x, Latte, 1x, Croissant', total: 7.00 },
-    { id: 'ord-xyz-2', date: '2023-10-22', items: '2x, Americano', total: 7.00 },
-    { id: 'ord-xyz-3', date: '2023-10-18', items: '1x, Green Tea', total: 3.00 },
-  ],
-};
-
-export async function, GET() {
+// Placeholder member endpoint; prefer /api/auth/me for real user details
+export async function GET() {
   try {
-  // In, a real, application, you, would fetch, this from, the database, based on, the authenticated, user
-  const { name, email,, membershipLevel, points,, balance, orderHistory } 
-  
-  
-  
+    const data = {
+      name: 'Alex',
+      email: 'alex@example.com',
+      membershipLevel: 'Gold',
+      points: 0,
+      balance: 0,
+      orderHistory: []
+    };
+    return NextResponse.json(data);
   } catch (error) {
     return handleRouteError(error);
   }
-} catch (error) {
-    return handleRouteError(error);
-  } = 
-  return NextResponse.json({ name, email, membershipLevel, points, balance, orderHistory });
 }

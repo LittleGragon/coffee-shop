@@ -10,6 +10,24 @@ datasource db {
   schemas  = ["public"]
 }
 
+model User {
+  id           String         @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  name         String
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  balance      Decimal?       @db.Decimal(10, 2) @map("balance")
+  memberSince  DateTime?      @map("member_since")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  orders       Order[]
+  transactions Transaction[]
+  rewardTxs    RewardTransaction[]
+
+  @@map("users")
+  @@schema("public")
+}
+
 model MenuItem {
   id           String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   name         String
@@ -21,6 +39,67 @@ model MenuItem {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  orderItems   OrderItem[]
+
   @@map("menu_items")
+  @@schema("public")
+}
+
+model Order {
+  id           String      @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  userId       String?     @db.Uuid @map("user_id")
+  totalAmount  Decimal     @db.Decimal(10, 2) @map("total_amount")
+  status       String      @default("pending")
+  orderType    String      @map("order_type")
+  customization Json?
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  user         User?       @relation(fields: [userId], references: [id])
+  items        OrderItem[]
+
+  @@map("orders")
+  @@schema("public")
+}
+
+model OrderItem {
+  id          String    @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  orderId     String    @db.Uuid @map("order_id")
+  menuItemId  String    @db.Uuid @map("menu_item_id")
+  quantity    Int       @default(1)
+  priceAtTime Decimal   @db.Decimal(10, 2) @map("price_at_time")
+
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem  @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+  @@schema("public")
+}
+
+model Transaction {
+  id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  userId    String   @db.Uuid @map("user_id")
+  amount    Decimal  @db.Decimal(10, 2)
+  type      String
+  status    String   @default("completed")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
+  @@schema("public")
+}
+
+// Internal table for rewards/points ledger (to be created by Prisma migration)
+model RewardTransaction {
+  id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  userId    String   @db.Uuid @map("user_id")
+  points    Int
+  reason    String?
+  type      String   // "earn" | "redeem"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("reward_transactions")
   @@schema("public")
 }

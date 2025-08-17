@@ -4,14 +4,50 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./page.module.css";
+import { apiPost } from "@/lib/api-client";
 
 export default function SignInPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Hook up to /api/auth/login if needed. For now, UI only.
+    if (loading) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const form = e.currentTarget as HTMLFormElement;
+      const data = new FormData(form);
+      const email = String(data.get("email") || "");
+      const password = String(data.get("password") || "");
+      if (!email || !password) {
+        throw new Error("Email and password are required");
+      }
+
+      const res = await apiPost<{ success: boolean; user: any; token: string }>(
+        "/api/auth/login",
+        { email, password }
+      );
+
+      if (!res?.token) {
+        throw new Error("Invalid response from server");
+      }
+
+      // Persist token (and optionally user)
+      localStorage.setItem("token", res.token);
+      try {
+        localStorage.setItem("user", JSON.stringify(res.user));
+      } catch {}
+
+      // Navigate after successful sign-in
+      router.replace("/profile");
+    } catch (err: any) {
+      setError(err?.message || "Sign in failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -95,9 +131,24 @@ export default function SignInPage() {
           <div className={styles.forgot}>
             <Link href="/auth/forgot-password">Forgot Password?</Link>
           </div>
+          {error ? (
+            <p
+              role="alert"
+              style={{ color: "#e11d48", textAlign: "center", marginTop: 8, fontSize: 14 }}
+            >
+              {error}
+            </p>
+          ) : null}
 
           {/* Submit floating action button */}
-          <button type="submit" className={styles.fab} aria-label="Sign in">
+          <button
+            type="submit"
+            className={styles.fab}
+            aria-label="Sign in"
+            disabled={loading}
+            aria-disabled={loading}
+            aria-busy={loading}
+          >
             <img src="/figma/2_3041/6.svg" alt="" width={32} height={32} />
           </button>
         </form>

@@ -8,10 +8,37 @@ import styles from "./page.module.css";
 export default function SignUpPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Wire to /api/auth/register if needed. UI only per design task.
+    const form = e.currentTarget as HTMLFormElement;
+    const fd = new FormData(form);
+    const name = String(fd.get("name") || "");
+    const email = String(fd.get("email") || "");
+    const password = String(fd.get("password") || "");
+    const phone = String(fd.get("phone") || "");
+    if (!name || !email || !password) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, phone })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || "Registration failed");
+      }
+      if (data?.token) {
+        try { localStorage.setItem("token", data.token); } catch {}
+      }
+      router.push("/auth/verification");
+    } catch (err: any) {
+      alert(err?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -31,7 +58,7 @@ export default function SignUpPage() {
         <h1 className={styles.title}>Sign up</h1>
         <p className={styles.subtitle}>Create an account here</p>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit} aria-busy={loading}>
           {/* Name */}
           <label className={styles.fieldRow}>
             <img
@@ -144,7 +171,7 @@ export default function SignUpPage() {
           </p>
 
           {/* Submit floating action button */}
-          <button type="submit" className={styles.fab} aria-label="Create account">
+          <button type="submit" className={styles.fab} aria-label="Create account" disabled={loading}>
             <img src="/figma/2_2917/6.svg" alt="" width={32} height={32} />
           </button>
         </form>

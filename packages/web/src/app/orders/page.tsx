@@ -1,6 +1,18 @@
 "use client";
 
-type OrderItem = {
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/src/lib/api-client";
+
+type ApiOrder = {
+  id: string;
+  total_amount: number;
+  status: string;
+  order_type: string;
+  created_at: string;
+  item_count: number;
+};
+
+type UiOrderItem = {
   id: string;
   name: string;
   date: string; // e.g., "24 June | 12:30 | by 18:10"
@@ -8,7 +20,7 @@ type OrderItem = {
   price: string; // "BYN 3.00"
 };
 
-const ongoing: OrderItem[] = [
+const fallback: UiOrderItem[] = [
   {
     id: "americano",
     name: "Americano",
@@ -34,6 +46,37 @@ const ongoing: OrderItem[] = [
 
 export default function OrdersPage() {
   const activeTab: "ongoing" | "history" = "ongoing";
+  const [items, setItems] = useState<UiOrderItem[]>(fallback);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await apiFetch<{ success: true; orders: ApiOrder[] }>("/api/orders");
+        const ui = (res.orders || []).map<UiOrderItem>((o) => {
+          const d = new Date(o.created_at);
+          const dateStr = `${d.toLocaleDateString(undefined, {
+            month: "long",
+            day: "2-digit",
+          })} | ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+          // Name is not returned by API yet (requires join); use generic label
+          return {
+            id: o.id,
+            name: "Order",
+            date: dateStr,
+            location: "Bradford BD1 1PR",
+            price: `BYN ${o.total_amount.toFixed(2)}`,
+          };
+        });
+        if (mounted && ui.length) setItems(ui);
+      } catch {
+        // ignore; keep fallback for unauthenticated users
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <main className="screen" aria-label="My Order">
@@ -77,7 +120,7 @@ export default function OrdersPage() {
 
       {/* List */}
       <section className="list" aria-label="On going orders">
-        {ongoing.map((o) => (
+        {items.map((o) => (
           <article key={o.id} className="card">
             <div className="left">
               <div className="date">{o.date}</div>

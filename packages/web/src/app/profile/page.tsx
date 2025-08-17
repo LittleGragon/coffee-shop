@@ -1,6 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { apiGet } from "@/lib/api-client";
+
+type MeResponse = {
+  success: boolean;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    created_at: string;
+  };
+};
+
 export default function ProfilePage() {
+  const [name, setName] = useState<string>("Alex");
+  const [email, setEmail] = useState<string>("adosmenesk@pm.me");
+  // phone and store address are static in current design; can be wired later
+  const phone = "+375 33 664–57–36";
+  const storeAddress = "Bradford BD1 1PR";
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await apiGet<MeResponse>("/api/auth/me");
+        if (mounted && res?.success && res?.user) {
+          setName(res.user.name || "User");
+          setEmail(res.user.email || email);
+        }
+      } catch {
+        // ignore; leave defaults for unauthenticated users
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <main className="screen" aria-label="Profile">
       {/* Header */}
@@ -36,7 +73,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Name</span>
-              <span className="value strong">Alex</span>
+              <span className="value strong">{name}</span>
             </span>
             <button
               className="edit"
@@ -60,7 +97,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Phone number</span>
-              <span className="value strong">+375 33 664–57–36</span>
+              <span className="value strong">{phone}</span>
             </span>
             <button className="edit" aria-label="Edit phone" title="Edit" type="button">
               <img src="/figma/2_1550/7.svg" alt="" aria-hidden="true" />
@@ -79,7 +116,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Email</span>
-              <span className="value strong">adosmenesk@pm.me</span>
+              <span className="value strong">{email}</span>
             </span>
             <button className="edit" aria-label="Edit email" title="Edit" type="button">
               <img src="/figma/2_1550/9.svg" alt="" aria-hidden="true" />
@@ -98,7 +135,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Magic Coffee store address</span>
-              <span className="value strong">Bradford BD1 1PR</span>
+              <span className="value strong">{storeAddress}</span>
             </span>
             <button className="edit" aria-label="Edit store address" title="Edit" type="button">
               <img src="/figma/2_1550/11.svg" alt="" aria-hidden="true" />

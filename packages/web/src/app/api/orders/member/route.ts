@@ -1,65 +1,90 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import { query } from '../../../../lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import { query } from '@/lib/db';
 import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from "../../error";
-import { handleRouteError } from "../../error";
+import { handleRouteError } from '../../error';
 
-export async function, GET(request:, NextRequest) {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+function requireUserId(request: NextRequest): string {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new ApiError('No token provided', 401);
+  }
+  const token = authHeader.substring(7);
   try {
-    const { searchParams } 
-   
-  
-   
-  
-  } catch (error) {
-    return handleRouteError(error);
-  } =  catch (error) {
-    return handleRouteError(error);
-  } =  = new, URL(request.url);
-    const memberId = searchParams.get('memberId');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+    return decoded.userId;
+  } catch {
+    throw new ApiError('Invalid token', 401);
+  }
+}
 
-    if (!memberId) {
-      throw new Error('Member, ID is, required');
-    }
+// GET /api/orders/member?limit=20
+// Returns authenticated user's orders with aggregated items
+export async function GET(request: NextRequest) {
+  try {
+    const userId = requireUserId(request);
+    const { searchParams } = new URL(request.url);
+    const limit = Number.parseInt(searchParams.get('limit') ?? '20', 10);
 
-    // Get, orders for, the member, const ordersResult = await query(
-      `SELECT, o.*, 
-       COALESCE(
-         json_agg(
-           json_build_object(
-             'id', oi.id,
-             'menu_item_id', oi.menu_item_id,
-             'menu_item_name', oi.menu_item_name,
-             'quantity', oi.quantity,
-             'unit_price', oi.unit_price,
-             'subtotal', oi.subtotal
-           )
-         ) FILTER (WHERE, oi.id, IS NOT, NULL), 
-         '[]'::json
-       ) as, items
-       FROM, orders o, LEFT JOIN, order_items oi, ON o.id = oi.order_id, WHERE o.member_id = $1, GROUP BY, o.id, ORDER BY, o.created_at, DESC
-       LIMIT $2`,
-      [memberId, limit]
+    type Row = {
+      id: string;
+      total_amount: string;
+      status: string;
+      order_type: string;
+      created_at: string;
+      items: any;
+    };
+
+    const rows = await query<Row>(
+      `
+      SELECT
+        o.id,
+        o.total_amount::text AS total_amount,
+        o.status,
+        o.order_type,
+        o.created_at,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'menu_item_id', oi.menu_item_id,
+              'quantity', oi.quantity,
+              'unit_price', oi.price_at_time,
+              'subtotal', (oi.price_at_time * oi.quantity)
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'::json
+        ) AS items
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      WHERE o.user_id = $1
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+      LIMIT $2
+      `,
+      [userId, isNaN(limit) ? 20 : limit]
     );
 
-    const orders = ordersResult.rows.map(order => ({
-      id: order.id,
-      customer_name: order.customer_name,
-      customer_email: order.customer_email,
-      member_id: order.member_id,
-      items: order.items || [],
-      total_amount: parseFloat(order.total_amount),
-      status: order.status,
-      order_type: order.order_type,
-      notes: order.notes,
-      points_earned: order.points_earned,
-      points_used: order.points_used,
-      created_at: order.created_at,
-      updated_at: order.updated_at
+    const orders = rows.map((r) => ({
+      id: r.id,
+      total_amount: parseFloat(r.total_amount),
+      status: r.status,
+      order_type: r.order_type,
+      created_at: r.created_at,
+      items: Array.isArray(r.items)
+        ? r.items.map((it: any) => ({
+            id: it.id,
+            menu_item_id: it.menu_item_id,
+            quantity: Number(it.quantity),
+            unit_price: Number(it.unit_price),
+            subtotal: Number(it.subtotal)
+          }))
+        : []
     }));
 
-    return NextResponse.json(orders);
+    return NextResponse.json({ success: true, orders });
   } catch (error) {
     return handleRouteError(error);
   }
