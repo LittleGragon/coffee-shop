@@ -1,0 +1,118 @@
+.screen {
+  --ink: #181D2D;
+  --muted: #AAAAAA;
+  --primary: #324A59;
+  --line: #C1C7D0;
+  --bg: #ffffff;
+
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--ink);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: clamp(16px, 4vw, 32px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.content {
+  max-width: 420px;
+  width: 100%;
+  margin: 0 auto;
+  padding-top: clamp(16px, 6vh, 40px);
+}
+
+.title {
+  font-size: clamp(22px, 3.8vw, 28px);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: clamp(12px, 3.2vw, 14px);
+}
+
+/* OTP form */
+.form {
+  margin-top: clamp(24px, 6vh, 40px);
+  display: grid;
+  gap: 24px;
+}
+
+.otp {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(56px, 1fr));
+  gap: clamp(12px, 4vw, 16px);
+  max-width: 320px;
+}
+
+.otpInput {
+  height: clamp(52px, 7.2vh, 60px);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background: #f6f8fb;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.otpInput:focus {
+  border-color: var(--line);
+  box-shadow: 0 0 0 2px rgba(50, 74, 89, 0.1);
+}
+
+.resend {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Floating action button bottom-right */
+.fab {
+  position: fixed;
+  right: clamp(16px, 6vw, 40px);
+  bottom: clamp(24px, 10vh, 80px);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: grid;
+  place-items: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(50, 74, 89, 0.25);
+}
+
+/* Desktop center column */
+@media (min-width: 768px) {
+  .screen {
+    grid-template-columns: 1fr minmax(360px, 480px) 1fr;
+  }
+  .content {
+    grid-column: 2;
+  }
+  .fab {
+    grid-column: 2;
+  }
+}

@@ -1,0 +1,126 @@
+.screen {
+  min-height: 100svh;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9ff 40%, #ffffff 100%);
+  padding: 12px 16px 96px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 10px;
+}
+
+/* Header */
+.header {
+  display: grid;
+  grid-template-columns: 24px 1fr 24px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.back, .cart {
+  width: 24px;
+  height: 24px;
+}
+.title {
+  text-align: center;
+  color: #001833;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+/* Section title */
+.sectionTitle {
+  margin-top: 10px;
+  color: #001833;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* List */
+.list {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+/* Card */
+.card {
+  display: grid;
+  grid-template-columns: 64px 1fr 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 12px 26px 50px rgba(90, 108, 234, 0.07);
+  cursor: pointer;
+  transition: box-shadow .2s ease, transform .06s ease;
+}
+.card:active { transform: scale(0.995); }
+.selected { box-shadow: 0 0 0 2px #dfe8ff, 12px 26px 50px rgba(90, 108, 234, 0.07); }
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.meta { display: grid; gap: 2px; }
+.name {
+  color: #09051C;
+  font-size: 15px;
+  font-weight: 500;
+}
+.role {
+  color: #3B3B3B;
+  opacity: .3;
+  font-size: 14px;
+  letter-spacing: .5px;
+}
+
+.nameMuted { color: #D8D8D8; }
+.statusDot {
+  width: 18px;
+  height: 18px;
+  justify-self: end;
+}
+
+/* Bottom nav */
+.bottomNavWrap {
+  position: fixed;
+  left: 26px;
+  right: 26px;
+  bottom: 20px;
+  z-index: 5;
+}
+.bottomNav {
+  height: 64px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 50px rgba(0, 0, 0, 0.12);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+}
+.navIcon {
+  width: 24px;
+  height: 24px;
+  opacity: .35;
+}
+.navIconActive { opacity: 1; }
+
+/* Tablet centering */
+@media (min-width: 768px) {
+  .screen {
+    grid-template-columns: 1fr minmax(360px, 430px) 1fr;
+  }
+  .header, .sectionTitle, .list {
+    grid-column: 2;
+  }
+  .bottomNavWrap {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(430px, 92vw);
+  }
+}

@@ -1,0 +1,16 @@
+.screen{min-height:100svh;background:#fff;display:grid;grid-template-rows:auto auto 1fr;gap:10px;padding:12px 16px 96px}
+.header{display:grid;grid-template-columns:24px 1fr 24px;align-items:center;gap:10px;margin-top:6px}
+.icon{width:24px;height:24px}
+.title{text-align:center;color:#001833;font-weight:500;font-size:16px}
+.section{color:#001833;font-size:16px;font-weight:500;margin-top:8px}
+.list{margin-top:6px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 0 0 0 rgba(0,0,0,0)}
+.row{display:grid;grid-template-columns:1fr 16px;align-items:center;gap:8px;height:44px;padding:0 16px;background:#fff}
+.row+.divider{height:1px;background:#C6C6C8;opacity:.7;margin:0 16px}
+.label{font-size:17px;color:#000}
+.active{color:#0A84FF}
+.chevron{width:16px;height:16px;justify-self:end}
+.bottom{position:fixed;left:26px;right:26px;bottom:20px}
+.nav{height:64px;background:#fff;border-radius:20px;box-shadow:0 4px 50px rgba(0,0,0,.12);display:grid;grid-template-columns:repeat(3,1fr);align-items:center;justify-items:center}
+.navIcon{width:24px;height:24px;opacity:.35}
+.activeNav{opacity:1}
+@media(min-width:768px){.screen{grid-template-columns:1fr minmax(360px,430px) 1fr}.header,.section,.list{grid-column:2}.bottom{left:50%;right:auto;transform:translateX(-50%);width:min(430px,92vw)}}

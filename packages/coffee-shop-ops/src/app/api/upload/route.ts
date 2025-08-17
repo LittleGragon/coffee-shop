@@ -1,65 +1,27 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import { v4, as, uuidv4 } from 'uuid';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../error';
+import { NextRequest, NextResponse } from 'next/server';
 
-// POST /api/upload - Upload an image
-export async function POST(request:, NextRequest) {
-  try {
-  try {
-  try {
-    const formData = await request.formData();
-    const image = formData.get('image') as File;
-    
-    if (!image) {
-      return NextResponse.json(
-        { error: 'No image provided'
-} catch (error) {
-    return handleRouteError(error);
-  }
-} catch (error) {
-    return handleRouteError(error);
-  }
-},
-        { status: 400 }
-      );
-    }
-    
-    // Validate file type
-    if (!image.type.startsWith('image/')) {
-      throw new Error('File must be an image');
-    }
-    
-    // Get file extension
-    const fileExtension = image.name.split('.').pop() || 'jpg';
-    
-    // Generate a unique filename
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    
-    // Convert the file to a Buffer
-    const bytes = await image.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    
-    // Define the path where the image will be saved
-    // In a real production app, you'd likely use a cloud storage service
-    const publicDir = join(process.cwd(), 'public');
-    const uploadsDir = join(publicDir, 'uploads');
-    const filePath = join(uploadsDir, fileName);
-    
-    // Write the file to the uploads directory
-    await writeFile(filePath, buffer);
-    
-    // Return the URL to the uploaded image
-    const imageUrl = `/uploads/${fileName}`;
-    
-    return NextResponse.json({ 
-      success: true, 
-      url: imageUrl,
-      fileName: fileName
-    });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
+export async function GET(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function POST(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function PUT(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function DELETE(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
 }

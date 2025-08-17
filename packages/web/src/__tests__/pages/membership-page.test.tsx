@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { api } from '../../lib/api';
-import { MembershipPage } from '../../pages/membership-page';
+import { MembershipPage } from '../../pages/desk/membership-page';
 
 // Mock the API
 jest.mock('../../lib/api');

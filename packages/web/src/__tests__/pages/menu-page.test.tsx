@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { api } from '../../lib/api';
-import { MenuPage } from '../../pages/menu-page';
+import { MenuPage } from '../../pages/desk/menu-page';
 import { useCartStore } from '../../stores/cart-store';
 
 // Mock the API

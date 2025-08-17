@@ -1,60 +1,27 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import orderService from '@/services/orderService';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../../error';
+import { NextRequest, NextResponse } from 'next/server';
 
-// GET /api/orders/[id] - Get a specific order
-export async function GET(
-  request: NextRequest,
-  { params }: {params: {, id: string } }
-): Promise<NextResponse> {
-  try {
-    const id = params.id;
-    const order = await orderService.getOrderById(id);
-    
-    if (!order) {
-      throw new ApiError(`Order with ID ${id} not found`, 404);
-    }
-    
-    // Get order items
-    const orderItems = await orderService.getOrderItems(id);
-    
-    return NextResponse.json({
-      order,
-      items: orderItems
-    });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
 
-// PATCH /api/orders/[id] - Update order status
-export async function PATCH(
-  request: NextRequest,
-  { params }: {params: {, id: string } }
-): Promise<NextResponse> {
-  try {
-    const id = params.id;
-    const { status } = await request.json();
-    
-    if (!status) {
-      throw new ApiError('Status is required', 400);
-    }
-    
-    // Validate status
-    const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      throw new ApiError(`Invalid status. Must be one of: ${validStatuses.join(', ')}`, 400);
-    }
-    
-    const updatedOrder = await orderService.updateOrderStatus(id, status);
-    
-    if (!updatedOrder) {
-      throw new ApiError(`Order with ID ${id} not found`, 404);
-    }
-    
-    return NextResponse.json(updatedOrder);
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  }
+export async function GET(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function POST(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function PUT(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function DELETE(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
 }

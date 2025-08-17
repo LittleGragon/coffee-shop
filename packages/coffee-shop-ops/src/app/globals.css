@@ -22,5 +22,149 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Prevent MUI SvgIcon from stretching if any global svg rules exist */
+svg.MuiSvgIcon-root {
+  width: 1em !important;
+  height: 1em !important;
+}
+
+/* Header icon sizing aligns with MUI SvgIcon (1em relative to font size) */
+header .MuiSvgIcon-root {
+  width: 1em !important;
+  height: 1em !important;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+header .MuiToolbar-root a + a {
+  margin-left: 16px;
+}
+
+/* Header UI enhancements: constrain container, add nav "pill" styles and active/hover states */
+header .MuiToolbar-root .MuiContainer-root {
+  display: flex;
+  align-items: center;
+}
+
+/* style only navigation links, skip the brand link (first link inside container) */
+header .MuiToolbar-root .MuiContainer-root a.MuiLink-root:not(:first-child) {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9375rem; /* 15px */
+}
+
+/* active link */
+header .MuiToolbar-root .MuiContainer-root a.MuiLink-root[aria-current="page"] {
+  background-color: var(--mui-palette-primary-dark) !important;
+  color: var(--mui-palette-primary-contrastText) !important;
+}
+
+/* hover state */
+header .MuiToolbar-root .MuiContainer-root a.MuiLink-root:not(:first-child):hover {
+  background-color: var(--mui-palette-primary-main) !important;
+  color: var(--mui-palette-primary-contrastText) !important;
+}
+
+/* subtle bottom border on AppBar */
+header.MuiAppBar-root {
+  border-bottom: 1px solid var(--mui-palette-divider);
+}
+
+/* Layout fallbacks to ensure styling without Emotion runtime */
+.home-container {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+@media (min-width: 600px) {
+  .home-container { padding-left: 24px; padding-right: 24px; }
+}
+@media (min-width: 1200px) {
+  .home-container { max-width: 1200px; margin-left: auto; margin-right: auto; }
+}
+
+.home-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) {
+  .home-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 900px) {
+  .home-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.home-card {
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.home-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Header layout fallbacks */
+header .MuiToolbar-root {
+  display: flex;
+  align-items: center;
+}
+header .MuiToolbar-root .MuiTypography-root {
+  flex: 1 1 auto;
+}
+
+/* Card content center fallback */
+.home-card .MuiCardContent-root {
+  text-align: center;
+  padding: 32px;
+}
+
+/* Card row fallback: icon + text layout */
+.home-card .card-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: center;
+  row-gap: 8px;
+  text-align: center;
+}
+@media (min-width: 600px) {
+  .home-card .card-row {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  .home-card .card-row .MuiSvgIcon-root {
+    margin-bottom: 0;
+  }
+}
+.home-card .card-text .MuiTypography-h6 {
+  margin-bottom: 4px;
+}
+
+/* Container vertical spacing fallback */
+.home-container {
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+/* Hero section fallback (first Box inside container) */
+.home-container .MuiBox-root:first-of-type {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.home-container .MuiBox-root:first-of-type .MuiTypography-h3 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 0.35em;
+}
+.home-container .MuiBox-root:first-of-type .MuiTypography-subtitle1 {
+  color: #666666;
+  font-size: 1rem;
+  line-height: 1.5;
 }

@@ -24,7 +24,7 @@ import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useCartStore } from '@/stores/cart-store';
-import type { CreateOrderRequest } from '../../../shared/src/api-types';
+import type { CreateOrderRequest } from '../../../../shared/src/api-types';
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();

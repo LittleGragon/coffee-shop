@@ -1,35 +1,27 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import { executeQuery } from '@/lib/db';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../error';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request:, NextRequest) {
-  try {
-  try {
-    // Get coffee items
-    const coffeeItems = await executeQuery(`
-      SELECT * FROM menu_items WHERE category = 'Coffee' AND is_available = true
-    `);
-    
-    // If no coffee items, try to find what categories exist
-    let categories = [];
-    if (coffeeItems.length ===, 0) {
-      categories = await executeQuery(`
-        SELECT DISTINCT category FROM menu_items
-      `);
-} catch (error) {
-    return handleRouteError(error);
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
-    
-    return NextResponse.json({ 
-      status: 'success',
-      coffeeItemsCount: coffeeItems.length,
-      coffeeItems,
-      categories: categories.map((c:, any) => c.category)
-    });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  }, { status: 500 });
-  }
+
+export async function GET(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function POST(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function PUT(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function DELETE(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
 }

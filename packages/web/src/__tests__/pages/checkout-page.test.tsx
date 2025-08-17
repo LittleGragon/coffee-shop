@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { api } from '../../lib/api';
-import { CheckoutPage } from '../../pages/checkout-page';
+import { CheckoutPage } from '../../pages/desk/checkout-page';
 import { useCartStore } from '../../stores/cart-store';
 
 // Mock the API

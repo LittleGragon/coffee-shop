@@ -1,4 +1,4 @@
-import { GET,, POST } from '@/app/api/menu/route'
+import { GET,  POST } from '@/app/api/menu/route'
 import menuService from '@/services/menuService'
 import { MenuItem } from '@/types/models'
 
@@ -7,10 +7,10 @@ jest.mock('@/services/menuService')
 const mockMenuService = menuService as jest.Mocked<typeof menuService>
 
 // Helper to convert date objects to ISO strings for response comparison
-const toResponseShape = (item:, any) => {
+const toResponseShape = (item: any) => {
   const newItem = { ...item };
-  for (const key in, newItem) {
-    if (newItem[key] instanceof, Date) {
+  for (const key in newItem) {
+    if (newItem[key] instanceof Date) {
       newItem[key] = newItem[key].toISOString();
     }
   }

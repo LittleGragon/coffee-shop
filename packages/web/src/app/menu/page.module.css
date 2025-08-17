@@ -1,0 +1,124 @@
+.screen {
+  min-height: 100svh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top header */
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: clamp(12px, 4.5vw, 20px) clamp(16px, 5.5vw, 24px);
+}
+.headerText {
+  display: grid;
+  gap: 2px;
+}
+.welcome {
+  color: #d8d8d8;
+  font-size: clamp(12px, 3.7vw, 14px);
+  font-weight: 500;
+}
+.name {
+  color: #001833;
+  font-size: clamp(16px, 5vw, 18px);
+  font-weight: 500;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.icon {
+  width: clamp(20px, 6vw, 24px);
+  height: auto;
+}
+
+/* Dark panel area */
+.panel {
+  background: #324a59;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  padding: clamp(16px, 5vw, 20px);
+  padding-bottom: clamp(16px, 5vw, 24px);
+  flex: 1 1 auto;
+}
+.sectionTitle {
+  color: #d8d8d8;
+  font-size: clamp(14px, 4.5vw, 16px);
+  font-weight: 500;
+  margin: 6px 0 12px;
+}
+
+/* Grid of products */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 4vw, 16px);
+}
+.card {
+  background: #f7f8fb;
+  border-radius: 15px;
+  min-height: 164px;
+  padding: 10px 10px 14px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+}
+.cardImg {
+  max-width: 76%;
+  max-height: 95px;
+  object-fit: contain;
+}
+.cardTitle {
+  margin-top: 6px;
+  color: #001833;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Bottom navigation bar */
+.navWrap {
+  margin-top: clamp(16px, 5vw, 24px);
+  display: grid;
+  place-items: center;
+}
+.navBar {
+  width: min(324px, 92%);
+  height: 64px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 50px rgba(0, 0, 0, 0.12);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+}
+.navIcon {
+  width: 26px;
+  height: 26px;
+  opacity: 0.55;
+}
+.navIconActive {
+  width: 26px;
+  height: 26px;
+  opacity: 1;
+}
+
+/* Tablet centering */
+@media (min-width: 768px) {
+  .panel {
+    margin-inline: auto;
+    width: min(430px, 92%);
+  }
+  .header {
+    width: min(430px, 92%);
+    margin-inline: auto;
+  }
+  .navWrap {
+    width: min(430px, 92%);
+    margin-inline: auto;
+  }
+}

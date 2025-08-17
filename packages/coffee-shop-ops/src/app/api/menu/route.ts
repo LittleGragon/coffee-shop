@@ -1,7 +1,6 @@
-import { NextRequest,, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import menuService from '@/services/menuService';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../error';
+import { ApiError, handleApiError } from '@/utils/error-handler';
 
 // CORS headers
 const corsHeaders = {
@@ -11,11 +10,11 @@ const corsHeaders = {
 };
 
 // Handle preflight requests
-export async function OPTIONS(request:, NextRequest) {
+export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
 
-export async function GET(request:, NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -26,12 +25,12 @@ export async function GET(request:, NextRequest) {
     
     const menuItems = await menuService.getAllItems({ category, isAvailable });
     return NextResponse.json(menuItems, { headers: corsHeaders });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
+  } catch (error) {
+    return handleApiError(error as any);
   }
 }
 
-export async function POST(request:, NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
@@ -42,7 +41,7 @@ export async function POST(request:, NextRequest) {
     
     const newItem = await menuService.addItem(body);
     return NextResponse.json(newItem, { status: 201, headers: corsHeaders });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
+  } catch (error) {
+    return handleApiError(error as any);
   }
 }

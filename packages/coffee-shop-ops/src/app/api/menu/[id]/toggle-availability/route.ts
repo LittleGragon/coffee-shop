@@ -1,26 +1,27 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import menuService from '@/services/menuService';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../../../error';
+import { NextRequest, NextResponse } from 'next/server';
 
-// PUT /api/menu/[id]/toggle-availability - Toggle menu item availability
-export async function PUT(
-  request: NextRequest,
-  context: {
-  try {
-    const { id 
-   } = await request.json(); = context.params;
-    const updatedItem = await menuService.toggleItemAvailability(id);
-    
-    if (!updatedItem) {
-      return NextResponse.json(
-        { error: `Menu item with ID ${id} not found` },
-        { status: 404 }
-      );
-    }
-    
-    return NextResponse.json(updatedItem);
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
+export async function GET(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function POST(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function PUT(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function DELETE(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
 }

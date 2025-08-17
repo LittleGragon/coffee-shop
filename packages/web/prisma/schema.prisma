@@ -14,7 +14,7 @@ model MenuItem {
   id           String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   name         String
   category     String?
-  price        Decizmal  @db.Decimal(10, 2)
+  price        Decimal  @db.Decimal(10, 2)
   description  String?
   imageUrl     String?  @map("image_url")
   isAvailable  Boolean  @default(true) @map("is_available")

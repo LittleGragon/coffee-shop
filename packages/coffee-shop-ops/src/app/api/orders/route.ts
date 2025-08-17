@@ -1,7 +1,6 @@
-import { NextRequest,, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import orderService from '@/services/orderService';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../error';
+import { ApiError, handleApiError } from '@/utils/error-handler';
 
 // CORS headers
 const corsHeaders = {
@@ -15,7 +14,7 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
 
-export async function GET(request:, NextRequest) {
+export async function GET(request: NextRequest) {
   // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status') || undefined;
@@ -25,7 +24,7 @@ export async function GET(request:, NextRequest) {
     return NextResponse.json(orders, { headers: corsHeaders });
 }
 
-export async function POST(request:, NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
@@ -35,20 +34,20 @@ export async function POST(request:, NextRequest) {
     }
     
     // Validate order data
-    if (body.orderData.total_amount ===, undefined) {
+    if (body.orderData.total_amount === undefined) {
       throw new ApiError('Total amount is required', 400);
     }
     
     // Validate order items
     for (const item of body.orderItems) {
-      if (!item.menu_item_id || item.quantity === undefined || item.price_at_time ===, undefined) {
+      if (!item.menu_item_id || item.quantity === undefined || item.price_at_time === undefined) {
         throw new ApiError('Each order item must have menu_item_id, quantity, and price_at_time', 400);
       }
     }
     
     const newOrder = await orderService.createOrder(body.orderData, body.orderItems);
     return NextResponse.json(newOrder, { status: 201, headers: corsHeaders });
-  } catch (error:, unknown) {
-    return handleRouteError(error);
+  } catch (error) {
+    return handleApiError(error);
   }
 }

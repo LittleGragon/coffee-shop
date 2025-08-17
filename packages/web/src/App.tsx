@@ -9,12 +9,12 @@ import { Footer } from './components/layout/footer';
 import { Header } from './components/layout/header';
 import { ToastProvider } from './components/ToastProvider';
 import { AuthContext, useAuthState } from './hooks/useAuth';
-import { CakeCustomizationPage } from './pages/cake-customization-page';
-import { CheckoutPage } from './pages/checkout-page';
-import { HomePage } from './pages/home-page';
-import { MembershipPage } from './pages/membership-page';
-import { MenuPage } from './pages/menu-page';
-import { ReservationPage } from './pages/reservation-page';
+import { CakeCustomizationPage } from './pages/desk/cake-customization-page';
+import { CheckoutPage } from './pages/desk/checkout-page';
+import { HomePage } from './pages/desk/home-page';
+import { MembershipPage } from './pages/desk/membership-page';
+import { MenuPage } from './pages/desk/menu-page';
+import { ReservationPage } from './pages/desk/reservation-page';
 import { useCartDrawerStore } from './stores/cart-drawer-store';
 
 function App() {

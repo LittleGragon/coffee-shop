@@ -1,27 +1,27 @@
-import { NextRequest,, NextResponse } from 'next/server';
-import { checkDatabaseConnection } from '@/services/wishlistService';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../error';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request:, NextRequest) {
-  try {
-  try {
-    // Check database connection
-    const isConnected = await checkDatabaseConnection();
-    
-    return NextResponse.json({
-      status: 'success',
-      message: 'Wishlist API test endpoint',
-      databaseConnected: isConnected,
-      timestamp: new Date().toISOString()
-} catch (error) {
-    return handleRouteError(error);
-  }
-});
-  } catch (error:, unknown) {
-    return handleRouteError(error);
-  },
-      { status: 500 }
-    );
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
+export async function GET(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function POST(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function PUT(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
+}
+
+export async function DELETE(_req: NextRequest, _ctx?: { params?: Record<string, string> }) {
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501, headers: corsHeaders });
 }

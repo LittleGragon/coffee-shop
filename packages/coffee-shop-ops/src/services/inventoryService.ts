@@ -31,7 +31,15 @@ export class InventoryService {
     
     query += ' ORDER BY category, name';
     
-    return executeQuery<InventoryItem>(query, params);
+    try {
+      return await executeQuery<InventoryItem>(query, params);
+    } catch (err: any) {
+      // Graceful fallback if the table isn't created yet
+      if (err?.code === '42P01' || /relation "inventory_items" does not exist/i.test(String(err?.message))) {
+        return [];
+      }
+      throw err;
+    }
   }
   
   /**

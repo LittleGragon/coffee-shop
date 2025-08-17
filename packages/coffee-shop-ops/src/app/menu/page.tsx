@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MenuItem } from '@/types/models';
-import { WishlistCount } from '@/services/wishlistService';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -72,6 +71,11 @@ interface CategoryStats {
   name: string;
   count: number;
   availableCount: number;
+}
+
+interface WishlistCount {
+  menu_item_id: string;
+  count: number;
 }
 
 export default function MenuPage() {

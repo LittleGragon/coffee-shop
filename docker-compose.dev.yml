@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database - using a different approach
   postgres:
@@ -60,6 +58,7 @@ services:
     volumes:
       - ./packages/web:/app/packages/web
       - /app/packages/web/node_modules
+    command: sh -lc "cd /app/packages/web && npm pkg delete dependencies.coffee-shop-ops || true && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules)\" ]; then npm install --include=dev --install-strategy=nested && npm i -D tailwindcss@^4.1.11 @tailwindcss/postcss@^4; fi && npx prisma generate || true && npx vite --host 0.0.0.0 --port 3002"
     networks:
       - coffee-shop-network
     restart: unless-stopped
@@ -83,6 +82,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    command: sh -lc "cd /app/packages/coffee-shop-ops && mkdir -p public/uploads && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules)\" ]; then npm install --include=dev; fi && npx next dev -H 0.0.0.0 -p 3000"
     networks:
       - coffee-shop-network
     restart: unless-stopped

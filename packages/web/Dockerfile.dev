@@ -9,7 +9,7 @@ RUN npm ci
 
 # Copy only web package manifest to install its deps if needed
 COPY packages/web/package.json ./packages/web/package.json
-RUN npm install --workspace=packages/web
+RUN npm install --workspace=packages/web --ignore-scripts
 
 # Copy source
 COPY packages/web ./packages/web
@@ -22,4 +22,4 @@ RUN npx prisma generate || true
 ENV PORT=3002
 EXPOSE 3002
 
-CMD ["npx", "next", "dev", "-p", "3002", "-H", "0.0.0.0"]
+CMD ["npx", "--yes", "next@15.4.5", "dev", "-p", "3002", "-H", "0.0.0.0"]

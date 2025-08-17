@@ -41,11 +41,12 @@ export default function InventoryPage() {
           throw new Error('Failed to fetch inventory items');
         }
         
-        const data = await response.json();
+        const data: InventoryItem[] = await response.json();
         setInventoryItems(data);
         
         // Extract unique categories
-        const uniqueCategories = [...new Set(data.map((item: InventoryItem) => item.category))];
+        const categoriesSet = new Set<string>(data.map((item) => String(item.category)));
+        const uniqueCategories = Array.from(categoriesSet);
         setCategories(uniqueCategories.sort());
         
         setError(null);

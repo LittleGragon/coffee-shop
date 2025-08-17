@@ -1,0 +1,80 @@
+.screen {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+/* Background image and overlays */
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(50, 74, 89, 0.86);
+  z-index: 1;
+}
+
+.overlaySoft {
+  position: absolute;
+  inset: 0;
+  background: rgba(29, 35, 53, 0.37);
+  z-index: 2;
+}
+
+/* Content */
+.content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: clamp(16px, 3vh, 24px);
+  padding: clamp(16px, 4vw, 24px);
+  text-align: center;
+  color: #fff;
+}
+
+.logo {
+  height: clamp(64px, 12vh, 112px);
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  animation: fadeInUp 600ms ease both;
+}
+
+.brand {
+  font-size: clamp(40px, 12vw, 64px);
+  line-height: 1;
+  font-weight: 500;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  animation: fadeIn 800ms ease both 100ms;
+}
+
+/* Simple fade animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Center column for larger screens to preserve mobile composition */
+@media (min-width: 768px) {
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr minmax(360px, 480px) 1fr;
+  }
+  .content {
+    grid-column: 2;
+  }
+}
