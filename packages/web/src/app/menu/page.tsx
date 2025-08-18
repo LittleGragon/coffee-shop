@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
 type Item = { name: string; img: string };
@@ -12,13 +15,22 @@ const items: Item[] = [
 ];
 
 export default function MenuPage() {
+  const [name] = useState<string>(() => {
+    if (typeof window === "undefined") return "User";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.name || "User";
+    } catch {
+      return "User";
+    }
+  });
   return (
     <main className={styles.screen} aria-label="Select your coffee">
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerText}>
           <div className={styles.welcome}>Welcome!</div>
-          <div className={styles.name}>Alex</div>
+          <div className={styles.name}>{name}</div>
         </div>
         <div className={styles.actions}>
           <a href="#" aria-label="Cart">

@@ -1,6 +1,17 @@
 "use client";
 
+import { useState } from "react";
+
 export default function OrderedPage() {
+  const [name] = useState<string>(() => {
+    if (typeof window === "undefined") return "User";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.name || "User";
+    } catch {
+      return "User";
+    }
+  });
   return (
     <main className="screen" aria-label="Order placed confirmation">
       {/* Top bar with back */}
@@ -31,7 +42,7 @@ export default function OrderedPage() {
           <img src="/figma/2_1623/9.svg" alt="" aria-hidden="true" className="heroAccent a5" />
         </div>
         <h1 className="title">Ordered</h1>
-        <p className="sub">Alex, your order has been successfully placed.</p>
+        <p className="sub">{name}, your order has been successfully placed.</p>
 
         <p className="details">
           The order will be ready today

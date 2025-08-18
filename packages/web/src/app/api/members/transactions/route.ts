@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../../error';
+import { ApiError, handleRouteError } from '@/lib/api-error';
 
 // GET /api/members/transactions?memberId=...&limit=50&offset=0
 export async function GET(request: NextRequest) {

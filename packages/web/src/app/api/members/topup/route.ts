@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '../../../../lib/db';
-import { handleRouteError } from '../../error';
-import { ApiError } from '@/utils/error-handler';
+import { ApiError, handleRouteError } from '@/lib/api-error';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,17 +16,17 @@ export async function POST(request: NextRequest) {
 
     try {
       // Get current member balance
-      const memberResult = await query(
+      const memberResult = await query<any>(
         'SELECT balance FROM members WHERE id = $1',
         [memberId]
       );
 
-      if (memberResult.rows.length === 0) {
+      if (!memberResult || memberResult.length === 0) {
         await query('ROLLBACK');
         throw new ApiError('Member not found', 404);
       }
 
-      const currentBalance = parseFloat(memberResult.rows[0].balance);
+      const currentBalance = parseFloat(memberResult[0].balance);
       const newBalance = currentBalance + amount;
 
       // Update member balance

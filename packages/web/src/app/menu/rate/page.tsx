@@ -4,6 +4,15 @@ import { useState } from "react";
 
 export default function RateModalPreview() {
   const [rating, setRating] = useState(4); // preselect 4/5
+  const [name] = useState<string>(() => {
+    if (typeof window === "undefined") return "User";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.name || "User";
+    } catch {
+      return "User";
+    }
+  });
 
   return (
     <main className="screen" aria-label="Select your coffee with rating modal">
@@ -11,7 +20,7 @@ export default function RateModalPreview() {
       <header className="topbar">
         <div className="welcome">
           <span className="muted">Welcome!</span>
-          <a href="/profile" className="name">Alex</a>
+          <a href="/profile" className="name">{name}</a>
         </div>
         <div className="topIcons">
           <a href="/cart" aria-label="Cart">

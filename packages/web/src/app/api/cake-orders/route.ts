@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from "../error";
+import { ApiError } from '@/lib/api-error';
+import { handleRouteError } from '@/lib/api-error';
 
 export async function POST(request: Request) {
   try {

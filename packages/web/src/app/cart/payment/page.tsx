@@ -7,6 +7,15 @@ type Method = "online" | "card";
 export default function PaymentPage() {
   const [method, setMethod] = useState<Method>("online");
   const total = 9.0; // matches prior screen subtotal
+  const [name] = useState<string>(() => {
+    if (typeof window === "undefined") return "User";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.name || "User";
+    } catch {
+      return "User";
+    }
+  });
 
   return (
     <main className="screen" aria-label="Order payment">
@@ -47,7 +56,7 @@ export default function PaymentPage() {
               />
             </div>
             <div className="storeMeta">
-              <div className="storeName">Alex</div>
+              <div className="storeName">{name}</div>
               <div className="storeAddr">Magic Coffee store</div>
               <div className="storeAddr">Bradford BD1 1PR</div>
             </div>

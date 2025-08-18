@@ -14,8 +14,24 @@ type MeResponse = {
 };
 
 export default function ProfilePage() {
-  const [name, setName] = useState<string>("Alex");
-  const [email, setEmail] = useState<string>("adosmenesk@pm.me");
+  const [name, setName] = useState<string>(() => {
+    if (typeof window === "undefined") return "User";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.name || "User";
+    } catch {
+      return "User";
+    }
+  });
+  const [email, setEmail] = useState<string>(() => {
+    if (typeof window === "undefined") return "user@example.com";
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      return u?.email || "user@example.com";
+    } catch {
+      return "user@example.com";
+    }
+  });
   // phone and store address are static in current design; can be wired later
   const phone = "+375 33 664–57–36";
   const storeAddress = "Bradford BD1 1PR";

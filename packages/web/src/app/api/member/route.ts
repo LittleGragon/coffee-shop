@@ -1,18 +1,56 @@
-import { NextResponse } from 'next/server';
-import { handleRouteError } from '../error';
+import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
+import { query } from '@/lib/db';
+import { ApiError, handleRouteError } from '@/lib/api-error';
 
-// Placeholder member endpoint; prefer /api/auth/me for real user details
-export async function GET() {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+type DbUser = {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+};
+
+// Real member endpoint backed by auth + DB
+export async function GET(request: NextRequest) {
   try {
-    const data = {
-      name: 'Alex',
-      email: 'alex@example.com',
+    const authHeader =
+      request.headers.get('authorization') ||
+      request.headers.get('Authorization') ||
+      '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+
+    if (!token) {
+      throw new ApiError('Authentication required', 401);
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+
+    if (!decoded?.userId) {
+      throw new ApiError('Invalid token', 401);
+    }
+
+    const users = await query<DbUser>(
+      'SELECT id, email, name, created_at FROM public.users WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (!users || users.length === 0) {
+      throw new ApiError('User not found', 404);
+    }
+
+    const user = users[0];
+
+    // Preserve legacy fields while providing real user data
+    return NextResponse.json({
+      name: user.name,
+      email: user.email,
       membershipLevel: 'Gold',
       points: 0,
       balance: 0,
       orderHistory: []
-    };
-    return NextResponse.json(data);
+    });
   } catch (error) {
     return handleRouteError(error);
   }

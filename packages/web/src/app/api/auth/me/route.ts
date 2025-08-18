@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { query } from '@/lib/db';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '@/lib/api-error';
+import { ApiError, handleRouteError } from '@/lib/api-error';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -15,22 +14,32 @@ type DbUser = {
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ApiError('No token provided', 401);
+    const authHeader =
+      request.headers.get('authorization') ||
+      request.headers.get('Authorization') ||
+      '';
+
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : '';
+
+    if (!token) {
+      throw new ApiError('Authentication required', 401);
     }
 
-    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      userId: string;
+      email?: string;
+      iat?: number;
+      exp?: number;
+    };
 
-    let decoded: { userId: string; email: string };
-    try {
-      decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
-    } catch {
+    if (!decoded?.userId) {
       throw new ApiError('Invalid token', 401);
     }
 
     const users = await query<DbUser>(
-      'SELECT id, email, name, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, created_at FROM public.users WHERE id = $1',
       [decoded.userId]
     );
 
@@ -42,12 +51,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        created_at: user.created_at
-      }
+      user
     });
   } catch (error) {
     return handleRouteError(error);

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { query } from '@/lib/db';
-import { ApiError } from '@/utils/error-handler';
-import { handleRouteError } from '../../error';
+import { ApiError } from '@/lib/api-error';
+import { handleRouteError } from '@/lib/api-error';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
