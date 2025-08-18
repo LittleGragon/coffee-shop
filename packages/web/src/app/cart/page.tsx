@@ -1,54 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCartStore } from "@/stores/cart-store";
 
-type Item = {
-  id: string;
-  name: string;
-  img: string;
-  options: string;
-  qty: number;
-  price: number; // BYN
-};
-
-const initialItems: Item[] = [
-  {
-    id: "americano",
-    name: "Americano",
-    img: "/figma/2_1839/7.png",
-    options: "single | iced | medium | full ice",
-    qty: 1,
-    price: 3.0,
-  },
-  {
-    id: "cappuccino",
-    name: "Cappuccino",
-    img: "/figma/2_1839/8.png",
-    options: "single | iced | medium | full ice",
-    qty: 1,
-    price: 3.0,
-  },
-  {
-    id: "flat-white",
-    name: "Flat White",
-    img: "/figma/2_1839/9.png",
-    options: "single | iced | medium | full ice",
-    qty: 1,
-    price: 3.0,
-  },
-];
 
 export default function CartPage() {
-  const [items, setItems] = useState<Item[]>(initialItems);
+  const items = useCartStore((s) => s.items);
+  const remove = useCartStore((s) => s.removeFromCart);
+  const router = useRouter();
 
   const total = useMemo(
-    () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
+    () => items.reduce((sum, i) => sum + i.price * i.quantity, 0),
     [items]
   );
-
-  const remove = (id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  };
 
   return (
     <main className="screen" aria-label="My order">
@@ -74,11 +39,11 @@ export default function CartPage() {
       <section className="list">
         {items.map((it, idx) => (
           <article key={it.id} className="card" aria-label={it.name}>
-            <img className="thumb" src={it.img} alt={it.name} />
+            <img className="thumb" src={it.image} alt={it.name} />
             <div className="meta">
               <div className="name">{it.name}</div>
-              <div className="opts">{it.options}</div>
-              <div className="qty">x {it.qty}</div>
+              <div className="opts">{it.category}</div>
+              <div className="qty">x {it.quantity}</div>
             </div>
             <div className="price">
               <div className="ccy">BYN</div>
@@ -115,7 +80,11 @@ export default function CartPage() {
           <div className="label">Total Price</div>
           <div className="total">BYN {total.toFixed(2)}</div>
         </div>
-        <button className="nextBtn" disabled={items.length === 0}>
+        <button
+          className="nextBtn"
+          disabled={items.length === 0}
+          onClick={() => router.push('/cart/payment')}
+        >
           <svg className="cartIcon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M6 6h15l-2 9H8L6 3H2"

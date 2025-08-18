@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/src/lib/api-client";
+import { apiGet } from "@/lib/api-client";
 
 type ApiOrder = {
   id: string;
@@ -52,7 +52,7 @@ export default function OrdersPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await apiFetch<{ success: true; orders: ApiOrder[] }>("/api/orders");
+        const res = await apiGet<{ success: true; orders: ApiOrder[] }>("/api/orders");
         const ui = (res.orders || []).map<UiOrderItem>((o) => {
           const d = new Date(o.created_at);
           const dateStr = `${d.toLocaleDateString(undefined, {

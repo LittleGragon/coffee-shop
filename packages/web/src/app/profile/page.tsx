@@ -14,36 +14,32 @@ type MeResponse = {
 };
 
 export default function ProfilePage() {
-  const [name, setName] = useState<string>(() => {
-    if (typeof window === "undefined") return "User";
-    try {
-      const u = JSON.parse(localStorage.getItem("user") || "{}");
-      return u?.name || "User";
-    } catch {
-      return "User";
-    }
-  });
-  const [email, setEmail] = useState<string>(() => {
-    if (typeof window === "undefined") return "user@example.com";
-    try {
-      const u = JSON.parse(localStorage.getItem("user") || "{}");
-      return u?.email || "user@example.com";
-    } catch {
-      return "user@example.com";
-    }
-  });
+  const [name, setName] = useState<string>("User");
+  const [email, setEmail] = useState<string>("user@example.com");
   // phone and store address are static in current design; can be wired later
   const phone = "+375 33 664–57–36";
   const storeAddress = "Bradford BD1 1PR";
 
   useEffect(() => {
     let mounted = true;
+
+    // Prefill from localStorage to avoid hydration mismatch
+    try {
+      const u = JSON.parse(localStorage.getItem("user") || "{}");
+      if (mounted) {
+        setName(u?.name || "User");
+        setEmail(u?.email || "user@example.com");
+      }
+    } catch {
+      // ignore
+    }
+
     (async () => {
       try {
         const res = await apiGet<MeResponse>("/api/auth/me");
         if (mounted && res?.success && res?.user) {
           setName(res.user.name || "User");
-          setEmail(res.user.email || email);
+          setEmail(res.user.email || "user@example.com");
         }
       } catch {
         // ignore; leave defaults for unauthenticated users
@@ -89,7 +85,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Name</span>
-              <span className="value strong">{name}</span>
+              <span className="value strong" suppressHydrationWarning>{name}</span>
             </span>
             <button
               className="edit"
@@ -132,7 +128,7 @@ export default function ProfilePage() {
             </span>
             <span className="meta">
               <span className="label">Email</span>
-              <span className="value strong">{email}</span>
+              <span className="value strong" suppressHydrationWarning>{email}</span>
             </span>
             <button className="edit" aria-label="Edit email" title="Edit" type="button">
               <img src="/figma/2_1550/9.svg" alt="" aria-hidden="true" />

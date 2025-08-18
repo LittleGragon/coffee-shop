@@ -2,6 +2,8 @@
 
 import styles from "./page.module.css";
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useCartStore } from "@/stores/cart-store";
 
 export default function CustomizePage() {
   // Coffee type slider (0 Arabica ... 100 Robusta)
@@ -15,6 +17,21 @@ export default function CustomizePage() {
 
   const toggleIce = (i: number) => setIce((prev) => ({ ...prev, [i]: !prev[i] }));
 
+  // Product context from query params
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const name = searchParams.get('name') || 'Coffee';
+  const image = searchParams.get('image') || '/figma/2_2651/9.png';
+  const category = searchParams.get('category') || 'Coffee';
+  const basePrice = parseFloat(searchParams.get('price') || '9');
+  const { addToCart } = useCartStore();
+
+  const handleAddToCart = () => {
+    const id = name.toLowerCase().replace(/\s+/g, '-');
+    addToCart({ id, name, category, price: basePrice, image });
+    router.push('/cart');
+  };
+
   return (
     <main className={styles.screen} aria-label="Coffee lover assemblage">
       {/* Header */}
@@ -24,17 +41,19 @@ export default function CustomizePage() {
         </a>
         <div className={styles.title}>Coffee lover assemblage</div>
         <div className={styles.headerRight}>
-          <img src="/figma/2_2460/5.svg" alt="Cart" />
+          <a href="/cart" aria-label="Cart">
+            <img src="/figma/2_2460/5.svg" alt="Cart" />
+          </a>
         </div>
       </div>
 
       {/* Body */}
       <section className={styles.block}>
         {/* Select a barista */}
-        <div className={styles.row}>
+        <a className={styles.row} href="/customize/barista" aria-label="Select a barista">
           <div className={styles.label}>Select a barista</div>
           <img className={styles.chevron} src="/figma/2_2460/14.svg" alt="" aria-hidden="true" />
-        </div>
+        </a>
         <div className={styles.divider} />
 
         {/* Coffee type slider */}
@@ -149,9 +168,9 @@ export default function CustomizePage() {
       {/* Footer total + next */}
       <div className={styles.totalRow}>
         <div className={styles.totalLabel}>Total Amount</div>
-        <div className={styles.totalAmount}>BYN 9.00</div>
+        <div className={styles.totalAmount}>BYN {basePrice.toFixed(2)}</div>
       </div>
-      <button type="button" className={styles.nextBtn}>Next</button>
+      <button type="button" className={styles.nextBtn} onClick={handleAddToCart}>Add to cart</button>
     </main>
   );
 }

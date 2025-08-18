@@ -49,7 +49,9 @@ export default function SelectBaristaPage() {
           <img className={styles.back} src="/figma/2_2196/4.svg" alt="" aria-hidden="true" />
         </Link>
         <div className={styles.title}>Coffee lover assemblage</div>
-        <img className={styles.cart} src="/figma/2_2196/5.svg" alt="Cart" />
+        <Link href="/cart" aria-label="Cart">
+          <img className={styles.cart} src="/figma/2_2196/5.svg" alt="Cart" />
+        </Link>
       </div>
 
       {/* Section title */}

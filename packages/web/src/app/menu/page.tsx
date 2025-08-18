@@ -1,7 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import styles from "./page.module.css";
+import NameClient from "./NameClient";
 
 type Item = { name: string; img: string };
 
@@ -15,22 +13,13 @@ const items: Item[] = [
 ];
 
 export default function MenuPage() {
-  const [name] = useState<string>(() => {
-    if (typeof window === "undefined") return "User";
-    try {
-      const u = JSON.parse(localStorage.getItem("user") || "{}");
-      return u?.name || "User";
-    } catch {
-      return "User";
-    }
-  });
   return (
     <main className={styles.screen} aria-label="Select your coffee">
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerText}>
           <div className={styles.welcome}>Welcome!</div>
-          <div className={styles.name}>{name}</div>
+          <NameClient />
         </div>
         <div className={styles.actions}>
           <a href="#" aria-label="Cart">
@@ -48,7 +37,12 @@ export default function MenuPage() {
 
         <div className={styles.grid}>
           {items.map((it) => (
-            <a key={it.name} href="#" className={styles.card} aria-label={it.name}>
+            <a
+              key={it.name}
+              href={`/customize?name=${encodeURIComponent(it.name)}&image=${encodeURIComponent(it.img)}&price=9&category=Coffee`}
+              className={styles.card}
+              aria-label={`Customize ${it.name}`}
+            >
               <img className={styles.cardImg} src={it.img} alt="" aria-hidden="true" />
               <div className={styles.cardTitle}>{it.name}</div>
             </a>
@@ -61,10 +55,10 @@ export default function MenuPage() {
             <a href="/menu" aria-current="page">
               <img className={styles.navIconActive} src="/figma/2_2651/5.svg" alt="Menu" />
             </a>
-            <a href="#">
+            <a href="/rewards">
               <img className={styles.navIcon} src="/figma/2_2651/6.svg" alt="Gifts" />
             </a>
-            <a href="#">
+            <a href="/orders">
               <img className={styles.navIcon} src="/figma/2_2651/7.svg" alt="Orders" />
             </a>
           </nav>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/src/lib/api-client";
+import { apiGet } from "@/lib/api-client";
 
 type RewardsGet = {
   success: boolean;
@@ -20,7 +20,7 @@ export default function RewardsPage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await apiFetch<RewardsGet>("/api/rewards");
+        const res = await apiGet<RewardsGet>("/api/rewards");
         if (!mounted || !res?.success) return;
         // Points
         setPoints(res.balance ?? 0);
