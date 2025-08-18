@@ -69,6 +69,7 @@ export default function SignInPage() {
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {/* Email */}
+          <p className={styles.caption}>Email address</p>
           <label className={styles.fieldRow}>
             <img
               className={styles.icon}
@@ -93,6 +94,7 @@ export default function SignInPage() {
           </label>
 
           {/* Password */}
+          <p className={styles.caption}>Password</p>
           <label className={styles.fieldRow}>
             <img
               className={styles.icon}
@@ -131,14 +133,13 @@ export default function SignInPage() {
           <div className={styles.forgot}>
             <Link href="/auth/forgot-password">Forgot Password?</Link>
           </div>
-          {error ? (
-            <p
-              role="alert"
-              style={{ color: "#e11d48", textAlign: "center", marginTop: 8, fontSize: 14 }}
-            >
-              {error}
-            </p>
-          ) : null}
+          <div className={styles.alertRow} aria-live="polite">
+            {error ? (
+              <p role="alert" className={styles.alertText}>
+                {error}
+              </p>
+            ) : null}
+          </div>
 
           {/* Submit floating action button */}
           <button
@@ -149,7 +150,8 @@ export default function SignInPage() {
             aria-disabled={loading}
             aria-busy={loading}
           >
-            <img src="/figma/2_3041/6.svg" alt="" width={32} height={32} />
+            <img className={styles.fabBase} src="/figma/2_3041/4.svg" alt="" width={56} height={56} />
+            <img className={styles.fabArrow} src="/figma/2_3041/6.svg" alt="" width={18} height={18} />
           </button>
         </form>
       </section>

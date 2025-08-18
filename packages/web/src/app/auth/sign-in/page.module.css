@@ -57,14 +57,25 @@
   gap: 18px;
 }
 
+.caption {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--line);
+}
+
 /* Field row mirrors the canvas: left icon, divider, input, right control */
 .fieldRow {
   display: grid;
-  grid-template-columns: 24px 1px 1fr auto;
+  grid-template-columns: 36px 1fr 36px;
   align-items: center;
-  gap: 12px;
-  padding: 6px 0 10px 0;
-  border-bottom: 1px solid var(--line);
+  height: 48px;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 0 8px;
+  background: #fff;
+  gap: 8px;
 }
 
 .icon {
@@ -74,9 +85,7 @@
 }
 
 .divider {
-  width: 1px;
-  height: 26px;
-  background: var(--line);
+  display: none;
 }
 
 .input {
@@ -85,6 +94,7 @@
   font-size: 14px;
   color: var(--ink);
   background: transparent;
+  height: 100%;
 }
 
 .input::placeholder {
@@ -115,20 +125,46 @@
   text-decoration: none;
 }
 
+.alertRow {
+  min-height: 22px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.alertText {
+  color: #e11d48;
+  font-size: 14px;
+  margin: 0;
+}
+
 /* Floating action button bottom-right */
 .fab {
   position: fixed;
   right: clamp(16px, 6vw, 40px);
   bottom: clamp(24px, 10vh, 80px);
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--primary);
-  display: grid;
-  place-items: center;
+  width: 56px;
+  height: 56px;
   border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(50, 74, 89, 0.25);
+  display: inline-grid;
+  place-items: center;
+}
+
+.fabBase {
+  width: 56px;
+  height: 56px;
+  display: block;
+}
+
+.fabArrow {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
 .bottomNote {
